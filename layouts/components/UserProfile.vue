@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import avatar1 from '@images/avatars/avatar-1.png'
+
+const { logout } = useSanctumAuth()
+const user = useSanctumUser()
 </script>
 
 <template>
@@ -48,7 +51,7 @@ import avatar1 from '@images/avatars/avatar-1.png'
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ user?.nombre || user?.usuario_dominio }}
             </VListItemTitle>
             <VListItemSubtitle>Admin</VListItemSubtitle>
           </VListItem>
@@ -111,7 +114,7 @@ import avatar1 from '@images/avatars/avatar-1.png'
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem @click="logout">
             <template #prepend>
               <VIcon
                 class="me-2"

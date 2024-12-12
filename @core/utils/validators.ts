@@ -21,6 +21,15 @@ export const emailValidator = (value: unknown) => {
   return re.test(String(value)) || 'The Email field must be a valid email'
 }
 
+// usuario domino validator al principio el gy
+export const usuarioValidator = (value: unknown) => {
+  // Verificar si está vacío
+  if (isEmpty(value))
+    return true
+  const re = /^(gy)/i
+  return re.test(String(value)) || 'usuario de domino invalido'
+}
+
 // 👉 Password Validator
 export const passwordValidator = (password: string) => {
   const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/

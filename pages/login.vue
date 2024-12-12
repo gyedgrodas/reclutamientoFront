@@ -10,16 +10,12 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
+const { login } = useSanctumAuth();
+
 definePageMeta({
   layout: 'blank',
   public: true,
 
-})
-
-const form = ref({
-  email: '',
-  password: '',
-  remember: false,
 })
 
 const isPasswordVisible = ref(false)
@@ -32,6 +28,31 @@ const authThemeImg = useGenerateImageVariant(
   true)
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
+const refVForm = ref()
+const msgError = ref('')
+
+const form = ref({
+  usuario_dominio: '',
+  password: '',
+})
+
+const errors = ref({
+  usuario_dominio: '',
+  password: '',
+})
+
+const onSubmit = async () => {
+  const { valid: isValid } = await refVForm.value?.validate()
+  if (isValid) {
+    try {
+      await login(form.value)
+    }
+    catch (error) {
+      msgError.value = error?.response._data.message
+    }
+  }
+}
 </script>
 
 <template>
@@ -91,18 +112,31 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
           <p class="mb-0">
             Please sign-in to your account and start the adventure
           </p>
+          <VAlert
+            color="error"
+            variant="tonal"
+            v-if="msgError"
+          >
+            <p class="text-sm mb-0">
+              <strong>{{msgError}}</strong>
+            </p>
+          </VAlert>
         </VCardText>
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm
+            ref="refVForm"
+            @submit.prevent="onSubmit">
             <VRow>
               <!-- email -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="form.email"
+                  v-model="form.usuario_dominio"
                   autofocus
                   label="Email or Username"
                   type="email"
                   placeholder="johndoe@email.com"
+                  :rules="[requiredValidator, usuarioValidator]"
+                  :error-messages="errors.usuario_dominio"
                 />
               </VCol>
 
@@ -112,6 +146,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
                   v-model="form.password"
                   label="Password"
                   placeholder="············"
+                  :rules="[requiredValidator]"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
