@@ -16,7 +16,37 @@ export default defineNuxtConfig({
       }],
     },
   },
-
+  sanctum: {
+    mode: 'token',
+    baseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+    userStateKey: 'sanctum.user.identity',
+    redirectIfAuthenticated: true,
+    redirectIfUnauthenticated: true,
+    endpoints: {
+      csrf: '/sanctum/csrf-cookie',
+      login: 'api/auth/login',
+      logout: 'api/auth/logout',
+      user: '/api/user',
+    },
+    csrf: {
+      cookie: 'XSRF-TOKEN',
+      header: 'X-XSRF-TOKEN',
+    },
+    client: {
+      retry: false,
+    },
+    redirect: {
+      keepRequestedRoute: false,
+      onLogin: '/',
+      onLogout: '/login',
+      onAuthOnly: '/login',
+      onGuestOnly: '/',
+    },
+    globalMiddleware: {
+      enabled: true,
+    },
+    logLevel: 3,
+  },
   devtools: {
     enabled: true,
   },
@@ -126,5 +156,5 @@ export default defineNuxtConfig({
     transpile: ['vuetify'],
   },
 
-  modules: ['@vueuse/nuxt', '@nuxtjs/i18n', '@nuxtjs/device', '@pinia/nuxt'],
+  modules: ['@vueuse/nuxt', '@nuxtjs/i18n', '@nuxtjs/device', '@pinia/nuxt', 'nuxt-auth-sanctum'],
 })
