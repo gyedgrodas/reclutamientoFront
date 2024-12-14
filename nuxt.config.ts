@@ -16,6 +16,9 @@ export default defineNuxtConfig({
       }],
     },
   },
+
+  // ssr: false,
+
   sanctum: {
     mode: 'token',
     baseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,

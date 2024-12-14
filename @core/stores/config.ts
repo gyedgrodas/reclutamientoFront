@@ -61,6 +61,7 @@ export const initConfigStore = () => {
   const userPreferredColorScheme = usePreferredColorScheme()
   const vuetifyTheme = useTheme()
   const configStore = useConfigStore()
+  const resolver = resolveVuetifyTheme(themeConfig.app.theme)
 
   watch(
     [() => configStore.theme, userPreferredColorScheme],
@@ -74,7 +75,7 @@ export const initConfigStore = () => {
 
   onMounted(() => {
     if (configStore.theme === 'system')
-      vuetifyTheme.global.name.value = userPreferredColorScheme.value
+      vuetifyTheme.global.name.value = resolver
   })
 }
 // !SECTION
