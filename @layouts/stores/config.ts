@@ -30,6 +30,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const appContentLayoutNav = ref(layoutConfig.app.contentLayoutNav)
 
   watch(appContentLayoutNav, val => {
+    console.log('Este watch se ejecuta cuando cambia el menu de navegacion (vertical, horizontal)')
     // If Navbar type is hidden while switching to horizontal nav => Reset it to sticky
     if (val === AppContentLayoutNav.Horizontal) {
       if (navbarType.value === NavbarType.Hidden)
@@ -78,6 +79,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const isAppRTL = ref(false)
 
   watch(isAppRTL, val => {
+    console.log('Este watch se ejecuta cuando cambia el valor de isAppRTL')
     _setDirAttr(val ? 'rtl' : 'ltr')
   })
 

@@ -12,6 +12,7 @@ export const useConfigStore = defineStore('config', () => {
   watch(
     userPreferredColorScheme,
     val => {
+      console.log('Este es el watch que se debe ejecutar cuando cambia el tema del sistema')
       if (val !== 'no-preference')
         cookieColorScheme.value = val
     },
@@ -66,6 +67,7 @@ export const initConfigStore = () => {
   watch(
     [() => configStore.theme, userPreferredColorScheme],
     () => {
+      console.log('Este es el watch que se debe ejecutar cuando cambia el tema')
       vuetifyTheme.global.name.value = configStore.theme === 'system'
         ? userPreferredColorScheme.value === 'dark'
           ? 'dark'

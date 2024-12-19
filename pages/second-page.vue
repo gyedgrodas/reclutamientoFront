@@ -33,12 +33,20 @@ import ltrSvg from '@images/customizer-icons/ltr-light.svg'
 import rtlSvg from '@images/customizer-icons/rtl-light.svg'
 import wideSvg from '@images/customizer-icons/wide-light.svg'
 
-const isNavDrawerOpen = ref(false)z
+const isNavDrawerOpen = ref(false)
 
 const configStore = useConfigStore()
 
 // 👉 Primary Color
 const vuetifyTheme = useTheme()
+
+const cliente = useClienteRequest()
+
+
+const obtenerUsers = async () => {
+  await cliente.get('api/users');
+}
+
 
 const colors: { main: string; darken: string }[] = [
   { main: staticPrimaryColor, darken: staticPrimaryDarkenColor },
@@ -156,7 +164,8 @@ watch(
 )
 
 // 👉 Content Width
-const contentWidth = computed(() => {
+const contentWidth = computed(() =>
+{
   return [
     {
       bgImage: compact,
