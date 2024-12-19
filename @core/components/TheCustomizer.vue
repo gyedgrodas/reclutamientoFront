@@ -400,7 +400,7 @@ import { Direction, Layout, Skins, Theme } from '@core/enums'
 import { useConfigStore } from '@core/stores/config'
 import horizontalLight from '@images/customizer-icons/horizontal-light.svg'
 import { AppContentLayoutNav, ContentWidth } from '@layouts/enums'
-import { cookieRef, namespaceConfig } from '@layouts/stores/config'
+import { cookieRef} from '@layouts/stores/config'
 import { themeConfig } from '@themeConfig'
 
 import borderSkin from '@images/customizer-icons/border-light.svg'
@@ -644,7 +644,7 @@ const resetCustomizer = async () => {
     configStore.appContentWidth = themeConfig.app.contentWidth
     configStore.isAppRTL = isActiveLangRTL.value
     configStore.isVerticalNavCollapsed = themeConfig.verticalNav.isVerticalNavCollapsed
-    useStorage<string | null>(namespaceConfig('initial-loader-color'), null).value = staticPrimaryColor
+    useStorage<string | null>('initial-loader-color', null).value = staticPrimaryColor
     currentLayout.value = themeConfig.app.contentLayoutNav
 
     cookieRef('lightThemePrimaryColor', null).value = null
@@ -712,7 +712,7 @@ const asignarPreferenciasACokkies = ():void => {
 
   cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary;
   cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryDarkenColor`, null).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'],
-  useStorage<string | null>(namespaceConfig('initial-loader-color'), null).value = color.main
+  useStorage<string | null>('initial-loader-color', null).value = color.main
 
 }
 

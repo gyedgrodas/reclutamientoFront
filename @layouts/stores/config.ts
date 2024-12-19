@@ -5,10 +5,10 @@ import { _setDirAttr } from '@layouts/utils'
 // ℹ️ We should not import themeConfig here but in urgency we are doing it for now
 import { layoutConfig } from '@themeConfig'
 
-export const namespaceConfig = (str: string) => `${layoutConfig.app.title}-${str}`
+// export const namespaceConfig = (str: string) => `${layoutConfig.app.title}-${str}`
 
 export const cookieRef = <T>(key: string, defaultValue: T) => {
-  return useCookie<T>(namespaceConfig(key), { default: () => defaultValue })
+  return useCookie<T>(key, { default: () => defaultValue })
 }
 
 export const useLayoutConfigStore = defineStore('layoutConfig', () => {
