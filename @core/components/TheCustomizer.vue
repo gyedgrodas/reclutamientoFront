@@ -1,5 +1,8 @@
 <template>
   <div class="d-lg-block d-none">
+
+
+
     <VBtn
       icon
       class="app-customizer-toggler rounded-s-lg rounded-0"
@@ -23,6 +26,7 @@
       :scrim="false"
       class="app-customizer"
     >
+
       <!-- 👉 Header -->
       <div class="customizer-heading d-flex align-center justify-space-between">
         <div>
@@ -37,10 +41,10 @@
         <div class="d-flex align-center gap-1">
 
           <VBtn
-            icon
+
             size="small"
             color="medium-emphasis"
-
+            @click="guardarPreferencias"
           >
             <VBtn
               icon="tabler-device-floppy"
@@ -56,7 +60,6 @@
               Guardar
             </VTooltip>
           </VBtn>
-
 
           <VBtn
             icon
@@ -238,7 +241,7 @@
               for="customizer-semi-dark"
               class="text-h6 text-high-emphasis"
             >
-              Semi Dark Menu
+              Menú semioscuro
             </VLabel>
 
             <div>
@@ -257,7 +260,7 @@
           <!-- 👉 Layouts -->
           <div class="d-flex flex-column gap-2">
             <h6 class="text-base font-weight-medium">
-              Layout
+              Diseño
             </h6>
 
             <CustomRadiosWithImage
@@ -448,7 +451,7 @@ const setPrimaryColor = useDebounceFn((color: { main: string; darken: string }) 
   // ℹ️ We need to store this color value in cookie so vuetify plugin can pick on next reload
   // cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value = color.main
   // cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryDarkenColor`, null).value = color.darken
-  // useStorage<string | null>(namespaceConfig('initial-loader-color'), null).value = color.main
+  // useStorage<string | null>('initial-loader-color'), null).value = color.main
 
 
 }, 100)
@@ -660,10 +663,28 @@ const resetCustomizer = async () => {
 
 const cliente = useClienteRequest();
 
-const guardarPreferencias = async () => {
+interface Preferencias {
+  theme: string;
+  skin: string;
+  isVerticalNavSemiDark: boolean;
+  appContentLayoutNav: string;
+  appContentWidth: string;
+  isAppRTL: boolean;
+  isVerticalNavCollapsed: boolean;
+  color_primario: string;
+  Color_oscuro_primario: string;
+}
+
+const metodoSimple = () => {
+  console.log('metodo simple')
+}
+
+const guardarPreferencias = async ():void => {
+  console.log('llega al metodo!')
 
   try {
-    const response = await cliente.post('api/guardar/preferencias', {
+
+    const data:Preferencias = {
       theme: configStore.theme,
       skin: configStore.skin,
       isVerticalNavSemiDark: configStore.isVerticalNavSemiDark,
@@ -671,17 +692,27 @@ const guardarPreferencias = async () => {
       appContentWidth: configStore.appContentWidth,
       isAppRTL: configStore.isAppRTL,
       isVerticalNavCollapsed: configStore.isVerticalNavCollapsed,
-      primaryColor: vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary,
-      primaryDarkenColor: vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'],
-    });
+      color_primario: vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary,
+      Color_oscuro_primario: vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'],
+    }
 
-    console.log(response.data);
+    const response = await cliente.post('api/guardar/preferencias', data);
+
+    asignarPreferenciasACokkies(data)
 
   } catch (error) {
 
     console.log(error);
 
   }
+
+}
+
+const asignarPreferenciasACokkies = ():void => {
+
+  cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary;
+  cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryDarkenColor`, null).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'],
+  useStorage<string | null>(namespaceConfig('initial-loader-color'), null).value = color.main
 
 }
 
