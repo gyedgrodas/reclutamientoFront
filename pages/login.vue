@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import axios from 'axios'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
@@ -46,13 +47,42 @@ const onSubmit = async () => {
   const { valid: isValid } = await refVForm.value?.validate()
   if (isValid) {
     try {
+      // Realizar login primero (si aún no se ha hecho)
       await login(form.value)
-    }
-    catch (error) {
-      msgError.value = error?.response?._data.message
+
+      const tokenEncoded = document.cookie.match(/(?:^|; )sanctum\.token\.cookie=([^;]*)/)?.[1]
+
+      const token = decodeURIComponent(tokenEncoded)
+
+      console.log('Token:', token)
+
+      if (!token) {
+        console.error('Token no encontrado en las cookies')
+        return
+      }
+
+      // Luego, realizamos la solicitud a la API usando el token que obtenemos de las cookies
+      const response = await axios.get('http://backend-gocredit.local/api/getUser', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      console.log('Datos del usuario:', response.data.roles)
+
+      // Guardar los roles en las cookies (puedes ajustar el tiempo de expiración y la ruta según sea necesario)
+      const roles = response.data.roles // Asegúrate de que 'roles' esté presente en la respuesta
+      const rolesString = JSON.stringify(roles) // Convertir los roles a string para almacenarlos en la cookie
+
+      // Crear la cookie para los roles
+      document.cookie = `userRoles=${encodeURIComponent(rolesString)}; path=/; max-age=86400` // max-age=86400 es un día
+
+    } catch (error) {
+      msgError.value = error?.response?._data.message || 'Error desconocido'
     }
   }
 }
+
 </script>
 
 <template>
