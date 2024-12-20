@@ -28,7 +28,7 @@ export const createLayouts = (userConfig: PartialDeep<LayoutConfig>): Plugin => 
 
     // Reactive Values (Store)
     configStore.$patch({
-      appContentLayoutNav: cookieRef('diseño_contenido_barra_navegacion', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
+      appContentLayoutNav: cookieRef('disenio_contenido_barra_navegacion', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
       appContentWidth: cookieRef('ancho_contenido_aplicacion', userConfig.app?.contentWidth ?? layoutConfig.app.contentWidth).value,
       footerType: cookieRef('tipo_footer', userConfig.footer?.type ?? layoutConfig.footer.type).value,
       navbarType: cookieRef('tipo_barra_navegacion', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,

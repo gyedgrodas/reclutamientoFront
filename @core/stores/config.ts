@@ -21,7 +21,7 @@ export const useConfigStore = defineStore('config', () => {
   const theme = cookieRef('tema', themeConfig.app.theme)
 
   // 👉 isVerticalNavSemiDark
-  const isVerticalNavSemiDark = cookieRef('es_navegación_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark)
+  const isVerticalNavSemiDark = cookieRef('es_navegacion_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark)
 
   // 👉 isVerticalNavSemiDark
   const skin = cookieRef('aspecto', themeConfig.app.skin)
