@@ -10,10 +10,41 @@ import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
 import { VerticalNavLayout } from '@layouts'
+
+import { ref } from 'vue'
+import LoadingSpinner from "@/components/Loading.vue";
+
+const loadings = ref(true)
+
+const cliente = useClienteRequest()
+
+const users = ref([])
+
+const getUsers = async () => {
+
+  try {
+
+    const response = await cliente.get('api/users')
+
+    users.value = response
+
+  } catch (error) {
+
+    console.log(error)
+
+  }
+
+  loadings.value = false
+
+}
+
+getUsers()
+
+
 </script>
 
 <template>
-  <VerticalNavLayout :nav-items="navItems">
+  <VerticalNavLayout :nav-items="navItems" v-if="!loadings">
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">
@@ -51,4 +82,7 @@ import { VerticalNavLayout } from '@layouts'
     <!-- 👉 Customizer -->
      <TheCustomizer />
   </VerticalNavLayout>
+
+  <loading-spinner v-else />
+
 </template>
