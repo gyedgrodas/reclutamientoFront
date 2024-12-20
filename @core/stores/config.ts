@@ -7,8 +7,7 @@ import { themeConfig } from '@themeConfig'
 export const useConfigStore = defineStore('config', () => {
   // 👉 Theme
   const userPreferredColorScheme = usePreferredColorScheme()
-  const cookieColorScheme = cookieRef<'light' | 'dark'>('combinación_colores', 'light')
-
+  const cookieColorScheme = cookieRef<'light' | 'dark'>('combinacion_colores', 'light')
   watch(
     userPreferredColorScheme,
     val => {
