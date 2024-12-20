@@ -18,13 +18,13 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const navbarType = ref(layoutConfig.navbar.type)
 
   // 👉 Navbar Type
-  const isNavbarBlurEnabled = cookieRef('isNavbarBlurEnabled', layoutConfig.navbar.navbarBlur)
+  const isNavbarBlurEnabled = cookieRef('desenfoque_habilitado_barra_navegacion', layoutConfig.navbar.navbarBlur)
 
   // 👉 Vertical Nav Collapsed
-  const isVerticalNavCollapsed = cookieRef('isVerticalNavCollapsed', layoutConfig.verticalNav.isVerticalNavCollapsed)
+  const isVerticalNavCollapsed = cookieRef('esta_navBar_vertical_habilitada', layoutConfig.verticalNav.isVerticalNavCollapsed)
 
   // 👉 App Content Width
-  const appContentWidth = cookieRef('appContentWidth', layoutConfig.app.contentWidth)
+  const appContentWidth = cookieRef('ancho_contenido_aplicacion', layoutConfig.app.contentWidth)
 
   // 👉 App Content Layout Nav
   const appContentLayoutNav = ref(layoutConfig.app.contentLayoutNav)

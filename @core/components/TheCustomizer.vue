@@ -41,27 +41,6 @@
         <div class="d-flex align-center gap-1">
 
           <VBtn
-
-            size="small"
-            color="medium-emphasis"
-            @click="guardarPreferencias"
-          >
-            <VBtn
-              icon="tabler-device-floppy"
-              variant="tonal"
-              color="success"
-              rounded
-            />
-            <VTooltip
-              open-on-focus
-              location="top"
-              activator="parent"
-            >
-              Guardar
-            </VTooltip>
-          </VBtn>
-
-          <VBtn
             icon
             variant="text"
             size="small"
@@ -647,10 +626,10 @@ const resetCustomizer = async () => {
     useStorage<string | null>('initial-loader-color', null).value = staticPrimaryColor
     currentLayout.value = themeConfig.app.contentLayoutNav
 
-    cookieRef('lightThemePrimaryColor', null).value = null
-    cookieRef('darkThemePrimaryColor', null).value = null
+    cookieRef('color_primario_del_tema_claro', null).value = null
+    cookieRef('color_primario_tema_oscuro', null).value = null
     cookieRef('lightThemePrimaryDarkenColor', null).value = null
-    cookieRef('darkThemePrimaryDarkenColor', null).value = null
+    cookieRef('tema_oscuro_color_oscurecimiento_primario', null).value = null
 
     await nextTick()
 

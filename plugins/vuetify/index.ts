@@ -17,14 +17,14 @@ export default defineNuxtPlugin(nuxtApp => {
     themes: {
       light: {
         colors: {
-          'primary': cookieRef('lightThemePrimaryColor', staticPrimaryColor).value,
-          'primary-darken-1': cookieRef('lightThemePrimaryDarkenColor', staticPrimaryDarkenColor).value,
+          'primary': cookieRef('color_primario_tema_claro', staticPrimaryColor).value,
+          'primary-darken-1': cookieRef('tema_claro_color_oscurecimiento_primario', staticPrimaryDarkenColor).value,
         },
       },
       dark: {
         colors: {
-          'primary': cookieRef('darkThemePrimaryColor', staticPrimaryColor).value,
-          'primary-darken-1': cookieRef('darkThemePrimaryDarkenColor', staticPrimaryDarkenColor).value,
+          'primary': cookieRef('color_primario_tema_oscuro', staticPrimaryColor).value,
+          'primary-darken-1': cookieRef('tema_oscuro_color_oscurecimiento_primario', staticPrimaryDarkenColor).value,
         },
       },
     },

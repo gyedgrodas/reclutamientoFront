@@ -22,7 +22,7 @@ import { Direction, Layout, Skins, Theme } from '@core/enums'
 import { useConfigStore } from '@core/stores/config'
 import horizontalLight from '@images/customizer-icons/horizontal-light.svg'
 import { AppContentLayoutNav, ContentWidth } from '@layouts/enums'
-import { cookieRef, namespaceConfig } from '@layouts/stores/config'
+import { cookieRef } from '@layouts/stores/config'
 import { themeConfig } from '@themeConfig'
 
 import borderSkin from '@images/customizer-icons/border-light.svg'
@@ -79,7 +79,7 @@ const setPrimaryColor = useDebounceFn((color: { main: string; darken: string }) 
   cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryDarkenColor`, null).value = color.darken
 
   // ℹ️ Update initial loader color
-  useStorage<string | null>(namespaceConfig('initial-loader-color'), null).value = color.main
+  useStorage<string | null>('initial-loader-color', null).value = color.main
 }, 100)
 
 // 👉 Mode

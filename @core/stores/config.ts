@@ -7,7 +7,7 @@ import { themeConfig } from '@themeConfig'
 export const useConfigStore = defineStore('config', () => {
   // 👉 Theme
   const userPreferredColorScheme = usePreferredColorScheme()
-  const cookieColorScheme = cookieRef<'light' | 'dark'>('color-scheme', 'light')
+  const cookieColorScheme = cookieRef<'light' | 'dark'>('combinación_colores', 'light')
 
   watch(
     userPreferredColorScheme,
@@ -19,13 +19,13 @@ export const useConfigStore = defineStore('config', () => {
     { immediate: true },
   )
 
-  const theme = cookieRef('theme', themeConfig.app.theme)
+  const theme = cookieRef('tema', themeConfig.app.theme)
 
   // 👉 isVerticalNavSemiDark
-  const isVerticalNavSemiDark = cookieRef('isVerticalNavSemiDark', themeConfig.verticalNav.isVerticalNavSemiDark)
+  const isVerticalNavSemiDark = cookieRef('es_navegación_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark)
 
   // 👉 isVerticalNavSemiDark
-  const skin = cookieRef('skin', themeConfig.app.skin)
+  const skin = cookieRef('aspecto', themeConfig.app.skin)
 
   // ℹ️ We need to use `storeToRefs` to forward the state
   const {

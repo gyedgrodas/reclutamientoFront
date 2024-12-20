@@ -28,16 +28,16 @@ export const createLayouts = (userConfig: PartialDeep<LayoutConfig>): Plugin => 
 
     // Reactive Values (Store)
     configStore.$patch({
-      appContentLayoutNav: cookieRef('appContentLayoutNav', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
-      appContentWidth: cookieRef('appContentWidth', userConfig.app?.contentWidth ?? layoutConfig.app.contentWidth).value,
-      footerType: cookieRef('footerType', userConfig.footer?.type ?? layoutConfig.footer.type).value,
-      navbarType: cookieRef('navbarType', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,
-      isNavbarBlurEnabled: cookieRef('isNavbarBlurEnabled', userConfig.navbar?.navbarBlur ?? layoutConfig.navbar.navbarBlur).value,
-      isVerticalNavCollapsed: cookieRef('isVerticalNavCollapsed', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
+      appContentLayoutNav: cookieRef('diseño_contenido_barra_navegacion', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
+      appContentWidth: cookieRef('ancho_contenido_aplicacion', userConfig.app?.contentWidth ?? layoutConfig.app.contentWidth).value,
+      footerType: cookieRef('tipo_footer', userConfig.footer?.type ?? layoutConfig.footer.type).value,
+      navbarType: cookieRef('tipo_barra_navegacion', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,
+      isNavbarBlurEnabled: cookieRef('desenfoque_habilitado_barra_navegacion', userConfig.navbar?.navbarBlur ?? layoutConfig.navbar.navbarBlur).value,
+      isVerticalNavCollapsed: cookieRef('esta_barra_navegacion_vertical_habilitada', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
 
       // isAppRTL: userConfig.app?.isRTL ?? config.app.isRTL,
       // isLessThanOverlayNavBreakpoint: false,
-      horizontalNavType: cookieRef('horizontalNavType', userConfig.horizontalNav?.type ?? layoutConfig.horizontalNav.type).value,
+      horizontalNavType: cookieRef('tipo_barra_navegacion_horizontal', userConfig.horizontalNav?.type ?? layoutConfig.horizontalNav.type).value,
     })
 
     // _setDirAttr(config.app.isRTL ? 'rtl' : 'ltr')
