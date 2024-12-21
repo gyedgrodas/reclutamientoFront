@@ -21,7 +21,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const isNavbarBlurEnabled = cookieRef('desenfoque_habilitado_barra_navegacion', layoutConfig.navbar.navbarBlur)
 
   // 👉 Vertical Nav Collapsed
-  const isVerticalNavCollapsed = cookieRef('esta_navBar_vertical_habilitada', layoutConfig.verticalNav.isVerticalNavCollapsed)
+  const isVerticalNavCollapsed = cookieRef('esta_navBar_vertical_colapsada', layoutConfig.verticalNav.isVerticalNavCollapsed)
 
   // 👉 App Content Width
   const appContentWidth = cookieRef('ancho_contenido_aplicacion', layoutConfig.app.contentWidth)

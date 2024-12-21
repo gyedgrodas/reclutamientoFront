@@ -4,6 +4,7 @@ import {themeConfig} from '@themeConfig'
 
 const vuetifyTheme = useTheme()
 import {cookieRef} from '@/@layouts/stores/config'
+const configStore = useConfigStore()
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
@@ -12,12 +13,13 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
-import {VerticalNavLayout} from '@layouts'
+import {layoutConfig, VerticalNavLayout} from '@layouts'
 
 import {ref} from 'vue'
 import LoadingSpinner from "@/components/Loading.vue";
 import {useTheme} from "vuetify";
 import {staticPrimaryColor, staticPrimaryDarkenColor} from "@/plugins/vuetify/theme";
+import {useConfigStore} from "@core/stores/config";
 
 const loadings = ref(true)
 
@@ -36,15 +38,31 @@ const getPreferencias = async () => {
 
     cookieRef('color_primario_tema_claro', data.color_primario_tema_claro).value = data.color_primario_tema_claro;
     cookieRef('color_oscurecimiento_primario_tema_claro', data.color_primario_tema_claro).value = data.color_oscurecimiento_primario_tema_claro;
-
-    cookieRef('color_primario_tema_oscuro', data.color_primario_tema_oscuro).value = data.color_primario_tema_oscuro;
-    cookieRef('color_oscurecimiento_primario_tema_oscuro', data.color_primario_tema_oscuro).value = data.color_oscurecimiento_primario_tema_oscuro;
-
     vuetifyTheme.themes.value['light'].colors.primary = data.color_primario_tema_claro
     vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = data.color_oscurecimiento_primario_tema_claro
 
+    cookieRef('color_primario_tema_oscuro', data.color_primario_tema_oscuro).value = data.color_primario_tema_oscuro;
+    cookieRef('color_oscurecimiento_primario_tema_oscuro', data.color_primario_tema_oscuro).value = data.color_oscurecimiento_primario_tema_oscuro;
     vuetifyTheme.themes.value['dark'].colors.primary = data.color_primario_tema_oscuro
     vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = data.color_oscurecimiento_primario_tema_oscuro
+
+    cookieRef('tema', data.tema).value = data.tema;
+    configStore.theme = data.tema
+
+    //este queda pendiente
+    cookieRef('tema_color', data.tema_color).value = data.tema_color;
+
+
+    cookieRef('aspecto', data.aspecto).value = data.aspecto;
+    configStore.skin = data.aspecto
+
+
+    cookieRef('esta_navBar_vertical_colapsada', data.esta_navBar_vertical_colapsada === "1" ? true : false).value = data.esta_navBar_vertical_colapsada === "1" ? true : false;
+    configStore.isVerticalNavCollapsed = data.esta_navBar_vertical_colapsada === "1" ? true : false
+
+    cookieRef('esta_navBar_vertical_habilitada', data.esta_navBar_vertical_habilitada).value = esta_navBar_vertical_habilitada;
+
+
 
 
         // cookieRef<string | null>(`${vuetifyTheme.name.value}color_primario_tema_oscuro`, null).value = data.color_primario_tema_claro

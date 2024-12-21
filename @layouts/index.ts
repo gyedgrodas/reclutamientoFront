@@ -33,7 +33,7 @@ export const createLayouts = (userConfig: PartialDeep<LayoutConfig>): Plugin => 
       footerType: cookieRef('tipo_footer', userConfig.footer?.type ?? layoutConfig.footer.type).value,
       navbarType: cookieRef('tipo_barra_navegacion', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,
       isNavbarBlurEnabled: cookieRef('desenfoque_habilitado_barra_navegacion', userConfig.navbar?.navbarBlur ?? layoutConfig.navbar.navbarBlur).value,
-      isVerticalNavCollapsed: cookieRef('esta_barra_navegacion_vertical_habilitada', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
+      isVerticalNavCollapsed: cookieRef('esta_navBar_vertical_habilitada', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
 
       // isAppRTL: userConfig.app?.isRTL ?? config.app.isRTL,
       // isLessThanOverlayNavBreakpoint: false,
