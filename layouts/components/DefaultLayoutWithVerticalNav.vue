@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import navItems from '@/navigation/vertical'
-import { themeConfig } from '@themeConfig'
+import {themeConfig} from '@themeConfig'
+
 const vuetifyTheme = useTheme()
+import {cookieRef} from '@/@layouts/stores/config'
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
@@ -10,11 +12,12 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
-import { VerticalNavLayout } from '@layouts'
+import {VerticalNavLayout} from '@layouts'
 
-import { ref } from 'vue'
+import {ref} from 'vue'
 import LoadingSpinner from "@/components/Loading.vue";
 import {useTheme} from "vuetify";
+import {staticPrimaryColor, staticPrimaryDarkenColor} from "@/plugins/vuetify/theme";
 
 const loadings = ref(true)
 
@@ -31,12 +34,29 @@ const getPreferencias = async () => {
       return
     }
 
-    console.log(data.color_primario_tema_claro)
+    cookieRef('color_primario_tema_claro', data.color_primario_tema_claro).value = data.color_primario_tema_claro;
+    cookieRef('color_oscurecimiento_primario_tema_claro', data.color_primario_tema_claro).value = data.color_oscurecimiento_primario_tema_claro;
 
-    console.log(data.tema_claro_color_oscurecimiento_primario)
+    cookieRef('color_primario_tema_oscuro', data.color_primario_tema_oscuro).value = data.color_primario_tema_oscuro;
+    cookieRef('color_oscurecimiento_primario_tema_oscuro', data.color_primario_tema_oscuro).value = data.color_oscurecimiento_primario_tema_oscuro;
 
-    vuetifyTheme.themes.value[data.combinacion_colores].colors.primary = data.color_primario_tema_claro
-    vuetifyTheme.themes.value[data.combinacion_colores].colors['primary-darken-1'] = data.tema_claro_color_oscurecimiento_primario
+    vuetifyTheme.themes.value['light'].colors.primary = data.color_primario_tema_claro
+    vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = data.color_oscurecimiento_primario_tema_claro
+
+    vuetifyTheme.themes.value['dark'].colors.primary = data.color_primario_tema_oscuro
+    vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = data.color_oscurecimiento_primario_tema_oscuro
+
+
+        // cookieRef<string | null>(`${vuetifyTheme.name.value}color_primario_tema_oscuro`, null).value = data.color_primario_tema_claro
+    // cookieRef<string | null>(`${vuetifyTheme.name.value}color_oscurecimiento_primario_tema_oscuro`, null).value = data.color_oscurecimiento_primario_tema_claro
+    //
+    // console.log('Los valores que tienen actualmente tienen las cokkies')
+    // console.log(cookieRef<string | null>(`${vuetifyTheme.name.value}color_primario_tema_oscuro`, null).value)
+    // console.log(cookieRef<string | null>(`${vuetifyTheme.name.value}color_oscurecimiento_primario_tema_oscuro`, null).value)
+    //
+    // console.log('Los valores que tienen actualmente las configuraciones de la aplicacion')
+    // console.log(vuetifyTheme.themes.value[data.tema_color].colors.primary)
+    // console.log(vuetifyTheme.themes.value[data.tema_color].colors['primary-darken-1'])
 
     //asignar a las variables reactivas las preferencias de los usuarios
     //
@@ -83,30 +103,30 @@ getPreferencias()
           />
         </IconBtn>
 
-        <NavbarThemeSwitcher />
+        <NavbarThemeSwitcher/>
 
-        <VSpacer />
+        <VSpacer/>
 
         <NavBarI18n
           v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
           :languages="themeConfig.app.i18n.langConfig"
         />
-        <UserProfile />
+        <UserProfile/>
       </div>
     </template>
 
     <!-- 👉 Pages -->
-    <slot />
+    <slot/>
 
     <!-- 👉 Footer -->
     <template #footer>
-      <Footer />
+      <Footer/>
     </template>
 
     <!-- 👉 Customizer -->
-     <TheCustomizer />
+    <TheCustomizer/>
   </VerticalNavLayout>
 
-  <loading-spinner v-else />
+  <loading-spinner v-else/>
 
 </template>

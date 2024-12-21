@@ -639,7 +639,7 @@ const resetCustomizer = async () => {
     cookieRef('color_primario_del_tema_claro', null).value = null
     cookieRef('color_primario_tema_oscuro', null).value = null
     cookieRef('lightThemePrimaryDarkenColor', null).value = null
-    cookieRef('tema_oscuro_color_oscurecimiento_primario', null).value = null
+    cookieRef('color_oscurecimiento_primario_tema_oscuro', null).value = null
 
     await nextTick()
 
@@ -673,9 +673,12 @@ const guardarPreferencias = async ():void => {
   try {
 
     const data:Preferencias = {
+
       tema: configStore.theme,
-      combinacion_colores: cookieRef('combinacion_colores', 'light').value,
-      apariencia: configStore.skin,
+      tema_color: cookieRef('tema_color', 'light').value,
+
+      aspecto: configStore.skin,
+
       ancho_contenido_aplicacion: configStore.appContentWidth,
       desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled,
       disenio_contenido_barra_navegacion: configStore.appContentLayoutNav,
@@ -684,13 +687,17 @@ const guardarPreferencias = async ():void => {
       esta_navBar_vertical_habilitada: configStore.isVerticalNavCollapsed,
       tipo_barra_navegacion: configStore.navbarType,
       tipo_barra_navegacion_horizontal: configStore.horizontalNavType,
+
       color_primario_tema_claro: vuetifyTheme.themes.value['light'].colors.primary,
-      tema_claro_color_oscurecimiento_primario: vuetifyTheme.themes.value['light'].colors['primary-darken-1'],
+      color_oscurecimiento_primario_tema_claro: vuetifyTheme.themes.value['light'].colors['primary-darken-1'],
+
       color_primario_tema_oscuro: vuetifyTheme.themes.value['dark'].colors.primary,
-      tema_oscuro_color_oscurecimiento_primario: vuetifyTheme.themes.value['dark'].colors['primary-darken-1'],
+      color_oscurecimiento_primario_tema_oscuro: vuetifyTheme.themes.value['dark'].colors['primary-darken-1'],
+
     }
 
     console.log(data);
+
     const response = await cliente.post('api/preferencias', data);
 
   } catch (error) {

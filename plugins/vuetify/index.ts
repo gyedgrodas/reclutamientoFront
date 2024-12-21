@@ -18,13 +18,13 @@ export default defineNuxtPlugin(nuxtApp => {
       light: {
         colors: {
           'primary': cookieRef('color_primario_tema_claro', staticPrimaryColor).value,
-          'primary-darken-1': cookieRef('tema_claro_color_oscurecimiento_primario', staticPrimaryDarkenColor).value,
+          'primary-darken-1': cookieRef('color_oscurecimiento_primario_tema_claro', staticPrimaryDarkenColor).value,
         },
       },
       dark: {
         colors: {
           'primary': cookieRef('color_primario_tema_oscuro', staticPrimaryColor).value,
-          'primary-darken-1': cookieRef('tema_oscuro_color_oscurecimiento_primario', staticPrimaryDarkenColor).value,
+          'primary-darken-1': cookieRef('color_oscurecimiento_primario_tema_oscuro', staticPrimaryDarkenColor).value,
         },
       },
     },
