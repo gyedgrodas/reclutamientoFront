@@ -33,6 +33,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     console.log('Este watch se ejecuta cuando cambia el menu de navegacion (vertical, horizontal)')
     // If Navbar type is hidden while switching to horizontal nav => Reset it to sticky
     if (val === AppContentLayoutNav.Horizontal) {
+      cookieRef('tipo_navBar', val).value = val
       if (navbarType.value === NavbarType.Hidden)
         navbarType.value = NavbarType.Sticky
 

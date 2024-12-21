@@ -28,12 +28,12 @@ export const createLayouts = (userConfig: PartialDeep<LayoutConfig>): Plugin => 
 
     // Reactive Values (Store)
     configStore.$patch({
-      appContentLayoutNav: cookieRef('disenio_contenido_barra_navegacion', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
+      appContentLayoutNav: cookieRef('tipo_navBar', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
       appContentWidth: cookieRef('ancho_contenido_aplicacion', userConfig.app?.contentWidth ?? layoutConfig.app.contentWidth).value,
       footerType: cookieRef('tipo_footer', userConfig.footer?.type ?? layoutConfig.footer.type).value,
       navbarType: cookieRef('tipo_barra_navegacion', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,
       isNavbarBlurEnabled: cookieRef('desenfoque_habilitado_barra_navegacion', userConfig.navbar?.navbarBlur ?? layoutConfig.navbar.navbarBlur).value,
-      isVerticalNavCollapsed: cookieRef('esta_navBar_vertical_habilitada', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
+      isVerticalNavCollapsed: cookieRef('esta_navBar_vertical_colapsada', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
 
       // isAppRTL: userConfig.app?.isRTL ?? config.app.isRTL,
       // isLessThanOverlayNavBreakpoint: false,

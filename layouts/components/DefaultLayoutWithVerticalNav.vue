@@ -52,41 +52,24 @@ const getPreferencias = async () => {
     //este queda pendiente
     cookieRef('tema_color', data.tema_color).value = data.tema_color;
 
-
     cookieRef('aspecto', data.aspecto).value = data.aspecto;
     configStore.skin = data.aspecto
-
 
     cookieRef('esta_navBar_vertical_colapsada', data.esta_navBar_vertical_colapsada === "1" ? true : false).value = data.esta_navBar_vertical_colapsada === "1" ? true : false;
     configStore.isVerticalNavCollapsed = data.esta_navBar_vertical_colapsada === "1" ? true : false
 
-    cookieRef('esta_navBar_vertical_habilitada', data.esta_navBar_vertical_habilitada).value = esta_navBar_vertical_habilitada;
+    cookieRef('esta_navBar_vertical_habilitada', data.esta_navBar_vertical_habilitada).value = data.esta_navBar_vertical_habilitada;
 
+    cookieRef('tipo_navBar', data.tipo_navBar).value = data.tipo_navBar;
+    configStore.appContentLayoutNav = data.tipo_navBar
 
+    cookieRef('ancho_contenido_aplicacion', data.ancho_contenido_aplicacion).value = data.ancho_contenido_aplicacion;
+    configStore.appContentWidth = data.ancho_contenido_aplicacion
 
+    console.log(data.direccion)
+    cookieRef('orientacion', data.direccion).value = data.direccion;
+    configStore.isAppRTL = data.direccion === "rtl" ? true : false
 
-        // cookieRef<string | null>(`${vuetifyTheme.name.value}color_primario_tema_oscuro`, null).value = data.color_primario_tema_claro
-    // cookieRef<string | null>(`${vuetifyTheme.name.value}color_oscurecimiento_primario_tema_oscuro`, null).value = data.color_oscurecimiento_primario_tema_claro
-    //
-    // console.log('Los valores que tienen actualmente tienen las cokkies')
-    // console.log(cookieRef<string | null>(`${vuetifyTheme.name.value}color_primario_tema_oscuro`, null).value)
-    // console.log(cookieRef<string | null>(`${vuetifyTheme.name.value}color_oscurecimiento_primario_tema_oscuro`, null).value)
-    //
-    // console.log('Los valores que tienen actualmente las configuraciones de la aplicacion')
-    // console.log(vuetifyTheme.themes.value[data.tema_color].colors.primary)
-    // console.log(vuetifyTheme.themes.value[data.tema_color].colors['primary-darken-1'])
-
-    //asignar a las variables reactivas las preferencias de los usuarios
-    //
-    // theme: configStore.theme,
-    //   skin: configStore.skin,
-    //   isVerticalNavSemiDark: configStore.isVerticalNavSemiDark,
-    //   appContentLayoutNav: configStore.appContentLayoutNav,
-    //   appContentWidth: configStore.appContentWidth,
-    //   isAppRTL: configStore.isAppRTL,
-    //   isVerticalNavCollapsed: configStore.isVerticalNavCollapsed,
-    //   color_primario: vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary,
-    //   Color_oscuro_primario: vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'],
 
 
   } catch (error) {

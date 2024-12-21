@@ -514,7 +514,9 @@ watch(currentLayout, () => {
   else {
     configStore.isVerticalNavCollapsed = false
     configStore.appContentLayoutNav = currentLayout.value
+    cookieRef('tipo_navBar', currentLayout.value).value = currentLayout.value
   }
+
 })
 
 // watch vertical sidebar collapse state
@@ -565,11 +567,12 @@ const direction = computed(() => {
 })
 
 watch(currentDir, () => {
-  if (currentDir.value === 'rtl')
-    configStore.isAppRTL = true
-
-  else
+  if (currentDir.value === 'rtl') {
+    configStore.isAppRTL = true;
+  }
+  else {
     configStore.isAppRTL = false
+  }
 })
 
 // check if any value set in cookie
@@ -681,7 +684,7 @@ const guardarPreferencias = async ():void => {
 
       ancho_contenido_aplicacion: configStore.appContentWidth,
       desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled,
-      disenio_contenido_barra_navegacion: configStore.appContentLayoutNav,
+      tipo_navBar: configStore.appContentLayoutNav,
       es_navegacion_vertical_semioscura: configStore.isVerticalNavSemiDark,
       esta_navBar_vertical_colapsada: configStore.isVerticalNavCollapsed,
       // esta_navBar_vertical_habilitada:
@@ -693,6 +696,8 @@ const guardarPreferencias = async ():void => {
 
       color_primario_tema_oscuro: vuetifyTheme.themes.value['dark'].colors.primary,
       color_oscurecimiento_primario_tema_oscuro: vuetifyTheme.themes.value['dark'].colors['primary-darken-1'],
+
+      direccion: configStore.isAppRTL ? 'rtl' : 'ltr',
 
     }
 
