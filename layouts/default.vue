@@ -19,6 +19,7 @@ injectSkinClasses()
 import {ref} from 'vue'
 import LoadingSpinner from "@/components/Loading.vue";
 import {useTheme} from "vuetify";
+const vuetifyTheme = useTheme()
 
 import {cookieRef} from '@/@layouts/stores/config'
 const loadings = ref(true)
