@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios from 'axios'
+import { toRaw } from 'vue'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
@@ -10,6 +10,7 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
+import { ability } from '@/plugins/casl/ability'
 
 const { login } = useSanctumAuth()
 
@@ -54,35 +55,29 @@ const onSubmit = async () => {
 
       const token = decodeURIComponent(tokenEncoded)
 
-      console.log('Token:', token)
+      const user = useSanctumUser()
 
-      if (!token) {
-        console.error('Token no encontrado en las cookies')
-        return
-      }
+      console.log('Roles:', user.value.abilityRules)
 
-      // Luego, realizamos la solicitud a la API usando el token que obtenemos de las cookies
-      const response = await axios.get('http://backend-gocredit.local/api/getUser', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      // Extraer datos de manera sencilla
+      const abilityRules = toRaw(user.value.abilityRules) || [] // Elimina el Proxy reactivo
 
-      console.log('Datos del usuario:', response.data.roles)
+      console.log('Roles:', abilityRules)
 
-      // Guardar los roles en las cookies (puedes ajustar el tiempo de expiración y la ruta según sea necesario)
-      const roles = response.data.roles // Asegúrate de que 'roles' esté presente en la respuesta
-      const rolesString = JSON.stringify(roles) // Convertir los roles a string para almacenarlos en la cookie
+      // Guardar los datos en la cookie
+      useCookie('userAbilityRules').value = abilityRules
 
-      // Crear la cookie para los roles
-      document.cookie = `userRoles=${encodeURIComponent(rolesString)}; path=/; max-age=86400` // max-age=86400 es un día
+      // Actualizar las habilidades en CASE
+      ability.update(abilityRules)
 
-    } catch (error) {
+      // Actualizar las habilidades en CASE
+      ability.update(rawAbilityRules)
+    }
+    catch (error) {
       msgError.value = error?.response?._data.message || 'Error desconocido'
     }
   }
 }
-
 </script>
 
 <template>
@@ -139,21 +134,24 @@ const onSubmit = async () => {
           <h4 class="text-h4 mb-1">
             Bienvenido a <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
           </h4>
-          <p class="mb-0">Iniciar sesión con tu cuenta </p>
+          <p class="mb-0">
+            Iniciar sesión con tu cuenta
+          </p>
           <VAlert
+            v-if="msgError"
             color="error"
             variant="tonal"
-            v-if="msgError"
           >
             <p class="text-sm mb-0">
-              <strong>{{msgError}}</strong>
+              <strong>{{ msgError }}</strong>
             </p>
           </VAlert>
         </VCardText>
         <VCardText>
           <VForm
             ref="refVForm"
-            @submit.prevent="onSubmit">
+            @submit.prevent="onSubmit"
+          >
             <VRow>
               <!-- email -->
               <VCol cols="12">
