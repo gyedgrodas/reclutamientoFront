@@ -4,21 +4,21 @@ export default [
     to: { name: 'index' },
     icon: { icon: 'tabler-smart-home' },
     action: 'crear usuarios',
-    subject: 'crear',
+    subject: 'usuarios',
   },
   {
     title: 'Second page',
     to: { name: 'second-page' },
     icon: { icon: 'tabler-file' },
     action: 'crear usuarios',
-    subject: 'crear',
+    subject: 'usuarios',
   },
   {
     title: 'Tercer page',
     to: { name: 'tercera-pagina' },
     icon: { icon: 'tabler-file' },
     action: 'editar usuarios',
-    subject: 'editar',
+    subject: 'usuarios',
   },
 
 ]
