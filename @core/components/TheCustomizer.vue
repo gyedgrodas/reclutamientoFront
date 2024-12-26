@@ -671,6 +671,23 @@ const metodoSimple = () => {
   console.log('metodo simple')
 }
 
+import Swal from 'sweetalert2';
+
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: "bottom-end",
+  showConfirmButton: false,
+  timer: 3000,
+  background: "#25293C",
+  customClass: 'text-white',
+  iconColor: vuetifyTheme.themes.value['dark'].colors.primary,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  }
+});
 const guardarPreferencias = async ():void => {
 
   try {
@@ -704,6 +721,11 @@ const guardarPreferencias = async ():void => {
     console.log(data);
 
     const response = await cliente.post('api/preferencias', data);
+
+    Toast.fire({
+      icon: "success",
+      title: response.message
+    });
 
   } catch (error) {
 

@@ -24,7 +24,7 @@ export const useClienteRequest = () => {
 
       const res = await client(fullUrl, options);
 
-      return res.data as RequestResponse<T>;
+      return res as RequestResponse<T>;
 
     } catch (e) {
 
