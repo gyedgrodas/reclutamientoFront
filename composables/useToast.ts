@@ -4,34 +4,6 @@ import { cookieRef } from '@layouts/stores/config'
 
 export default function useToast(){
   
-  const getTemaActual = (): string => {
-    
-    console.log(cookieRef('tema_color').value)
-    if(cookieRef('tema_color').value === 'dark'){
-      
-      return '#25293C';
-      
-    } else {
-        
-        return '#fff';
-    }
-    
-  }
-  
-  const getColorTexto = (): string => {
-    
-    if (cookieRef('tema_color').value === 'dark') {
-        
-      return 'text-white';
-        
-    } else {
-          
-      return 'text-black';
-      
-    }
-    
-  }
-  
   const toast = Swal.mixin({
     toast: true,
     position: 'bottom-end',
@@ -50,8 +22,8 @@ export default function useToast(){
       icon: 'success',
       title: message,
       iconColor: 'success',
-      background: getTemaActual(),
-      customClass: getColorTexto(),
+      background: cookieRef('tema_color').value === 'dark' ? '#25293C' : '#fff',
+      customClass:  cookieRef('tema_color').value === 'dark' ? 'text-white' : 'text-black',
     })
   }
   
@@ -61,15 +33,37 @@ export default function useToast(){
       icon: 'error',
       title: message,
       iconColor: 'error',
-      background: getTemaActual(),
-      customClass: getColorTexto(),
+      background: cookieRef('tema_color').value === 'dark' ? '#25293C' : '#fff',
+      customClass: cookieRef('tema_color').value === 'dark' ? 'text-white' : 'text-black',
     })
     
   }
   
+  const showToastWarning = (message: string) => {
+      toast.fire({
+        icon: 'warning',
+        title: message,
+        iconColor: 'warning',
+        background: cookieRef('tema_color').value === 'dark' ? '#25293C' : '#fff',
+        customClass: cookieRef('tema_color').value === 'dark' ? 'text-white' : 'text-black',
+      })
+  }
+  
+  const showToastInfo = (message: string) => {
+      toast.fire({
+        icon: 'info',
+        title: message,
+        iconColor: 'info',
+        background: cookieRef('tema_color').value === 'dark' ? '#25293C' : '#fff',
+        customClass: cookieRef('tema_color').value === 'dark' ? 'text-white' : 'text-black',
+      })
+  }
+  
   return {
     showToastSuccess,
-    showToastError
+    showToastError,
+    showToastWarning,
+    showToastInfo
   }
   
 }
