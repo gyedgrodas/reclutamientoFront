@@ -22,11 +22,13 @@ import {useTheme} from "vuetify";
 const vuetifyTheme = useTheme()
 
 import {cookieRef} from '@/@layouts/stores/config'
-const loadings = ref(true)
+const loadings = ref(false)
 
 const cliente = useClienteRequest()
 
 const getPreferencias = async () => {
+
+  loadings.value = true
 
   try {
 
@@ -48,7 +50,6 @@ const getPreferencias = async () => {
   loadings.value = false
 
 }
-
 const asignarDataACokkies = (res) => {
   cookieRef('color_primario_tema_claro', res.data.color_primario_tema_claro).value = res.data.color_primario_tema_claro;
   cookieRef('color_oscurecimiento_primario_tema_claro', res.data.color_primario_tema_claro).value = res.data.color_oscurecimiento_primario_tema_claro;
@@ -100,11 +101,16 @@ onMounted(() => {
 
 <template>
   <Component
+    v-if="!loadings"
     v-bind="layoutAttrs"
     :is="configStore.appContentLayoutNav === AppContentLayoutNav.Vertical ? DefaultLayoutWithVerticalNav : DefaultLayoutWithHorizontalNav"
   >
     <slot />
   </Component>
+
+  <loading-spinner v-if="loadings" />
+  
+
 </template>
 
 <style lang="scss">

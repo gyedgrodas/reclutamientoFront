@@ -667,10 +667,6 @@ interface Preferencias {
   Color_oscuro_primario: string;
 }
 
-const metodoSimple = () => {
-  console.log('metodo simple')
-}
-
 import Swal from 'sweetalert2';
 
 
