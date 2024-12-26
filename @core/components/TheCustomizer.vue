@@ -667,23 +667,8 @@ interface Preferencias {
   Color_oscuro_primario: string;
 }
 
-import Swal from 'sweetalert2';
+const { showToastSuccess, showToastError } = useToast();
 
-
-const Toast = Swal.mixin({
-  toast: true,
-  position: "bottom-end",
-  showConfirmButton: false,
-  timer: 3000,
-  background: "#25293C",
-  customClass: 'text-white',
-  iconColor: vuetifyTheme.themes.value['dark'].colors.primary,
-  timerProgressBar: true,
-  didOpen: (toast) => {
-    toast.onmouseenter = Swal.stopTimer;
-    toast.onmouseleave = Swal.resumeTimer;
-  }
-});
 const guardarPreferencias = async ():void => {
 
   try {
@@ -714,18 +699,13 @@ const guardarPreferencias = async ():void => {
 
     }
 
-    console.log(data);
-
     const response = await cliente.post('api/preferencias', data);
 
-    Toast.fire({
-      icon: "success",
-      title: response.message
-    });
+    showToastSuccess(response.message);
 
   } catch (error) {
 
-    console.log(error);
+    showToastError(error.message);
 
   }
 

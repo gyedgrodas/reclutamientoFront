@@ -62,6 +62,7 @@ export const initConfigStore = () => {
   const vuetifyTheme = useTheme()
   const configStore = useConfigStore()
   const resolver = resolveVuetifyTheme(themeConfig.app.theme)
+  const cookieColorScheme = cookieRef<'light' | 'dark'>('tema_color', 'light')
 
   watch(
     [() => configStore.theme, userPreferredColorScheme],
@@ -72,6 +73,8 @@ export const initConfigStore = () => {
           ? 'dark'
           : 'light'
         : configStore.theme
+      
+        cookieColorScheme.value = vuetifyTheme.global.name.value
     })
 
   onMounted(() => {
