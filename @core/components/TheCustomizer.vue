@@ -42,10 +42,21 @@
 
 
           <VBtn
-
+            icon
             @click="guardarPreferencias"
+            color="success"
           >
-           Guardar
+            <VTooltip
+              location="top"
+              activator="parent"
+              start
+            >
+              <span>Guardar Cambios</span>
+            </VTooltip>
+            <VIcon
+              size="24"
+              icon="tabler-device-floppy"
+            />
           </VBtn>
 
 
