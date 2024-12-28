@@ -10,7 +10,9 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
+
 const { login } = useSanctumAuth()
+const user = useSanctumUser()
 
 definePageMeta({
   layout: 'blank',
@@ -47,12 +49,15 @@ const onSubmit = async () => {
   if (isValid) {
     try {
       await login(form.value)
+
     }
     catch (error) {
       msgError.value = error?.response?._data.message
     }
   }
 }
+
+console.log('User data', user?.nombre);
 </script>
 
 <template>

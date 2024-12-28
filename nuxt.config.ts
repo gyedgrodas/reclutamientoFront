@@ -18,6 +18,16 @@ export default defineNuxtConfig({
   },
 
   // ssr: false,
+  runtimeConfig: {
+    // Private keys are only available on the server
+    AUTH_ORIGIN: process.env.AUTH_ORIGIN,
+    AUTH_SECRET: process.env.AUTH_SECRET,
+
+    // Public keys that are exposed to the client.
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
+    },
+  },
 
   sanctum: {
     mode: 'token',
@@ -27,8 +37,8 @@ export default defineNuxtConfig({
     redirectIfUnauthenticated: true,
     endpoints: {
       csrf: '/sanctum/csrf-cookie',
-      login: 'api/auth/login',
-      logout: 'api/auth/logout',
+      login: '/api/auth/login',
+      logout: '/api/auth/logout',
       user: '/api/user',
     },
     csrf: {
