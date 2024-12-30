@@ -15,7 +15,7 @@ export const useConfigStore = defineStore('config', () => {
       if (val !== 'no-preference')
         cookieColorScheme.value = val
     },
-    { immediate: true },
+    // { immediate: true },
   )
 
   const theme = cookieRef('tema', themeConfig.app.theme)
