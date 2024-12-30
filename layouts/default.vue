@@ -51,15 +51,15 @@ const getPreferencias = async () => {
 
 }
 const asignarDataACokkies = (res) => {
-  cookieRef('color_primario_tema_claro', res.data.color_primario_tema_claro).value = res.data.color_primario_tema_claro;
-  cookieRef('color_oscurecimiento_primario_tema_claro', res.data.color_primario_tema_claro).value = res.data.color_oscurecimiento_primario_tema_claro;
-  vuetifyTheme.themes.value['light'].colors.primary = res.data.color_primario_tema_claro
-  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_claro
+  cookieRef('color_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_primario_tema_light;
+  cookieRef('color_oscurecimiento_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_oscurecimiento_primario_tema_light;
+  vuetifyTheme.themes.value['light'].colors.primary = res.data.color_primario_tema_light
+  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_light
 
-  cookieRef('color_primario_tema_oscuro', res.data.color_primario_tema_oscuro).value = res.data.color_primario_tema_oscuro;
-  cookieRef('color_oscurecimiento_primario_tema_oscuro', res.data.color_primario_tema_oscuro).value = res.data.color_oscurecimiento_primario_tema_oscuro;
-  vuetifyTheme.themes.value['dark'].colors.primary = res.data.color_primario_tema_oscuro
-  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_oscuro
+  cookieRef('color_primario_tema_dark', res.data.color_primario_tema_dark).value = res.data.color_primario_tema_dark;
+  cookieRef('color_oscurecimiento_primario_tema_dark', res.data.color_primario_tema_dark).value = res.data.color_oscurecimiento_primario_tema_dark;
+  vuetifyTheme.themes.value['dark'].colors.primary = res.data.color_primario_tema_dark
+  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_dark
 
   cookieRef('tema', res.data.tema).value = res.data.tema;
   configStore.theme = res.data.tema

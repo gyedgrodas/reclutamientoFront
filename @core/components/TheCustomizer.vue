@@ -446,6 +446,8 @@ const setPrimaryColor = useDebounceFn((color: { main: string; darken: string }) 
   vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary = color.main
   vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'] = color.darken
 
+  cookieRef<string | null>(`color_primario_tema_${vuetifyTheme.name.value}`).value = color.main
+  cookieRef<string | null>(`color_oscurecimiento_primario_tema_${vuetifyTheme.name.value}`).value = color.darken
 
   //Por ahora no se dejara guardar en cokkies en el metodo de guardar se actualizaran!
   // ℹ️ We need to store this color value in cookie so vuetify plugin can pick on next reload
@@ -650,10 +652,10 @@ const resetCustomizer = async () => {
     useStorage<string | null>('initial-loader-color', null).value = staticPrimaryColor
     currentLayout.value = themeConfig.app.contentLayoutNav
 
-    cookieRef('color_primario_del_tema_claro', null).value = null
-    cookieRef('color_primario_tema_oscuro', null).value = null
-    cookieRef('lightThemePrimaryDarkenColor', null).value = null
-    cookieRef('color_oscurecimiento_primario_tema_oscuro', null).value = null
+    cookieRef('color_primario_tema_light', null).value = null
+    cookieRef('color_primario_tema_dark', null).value = null
+    cookieRef('color_oscurecimiento_primario_tema_dark', null).value = null
+    cookieRef('color_oscurecimiento_primario_tema_light', null).value = null
 
     await nextTick()
 
@@ -700,11 +702,11 @@ const guardarPreferencias = async ():void => {
       tipo_barra_navegacion: configStore.navbarType,
       tipo_barra_navegacion_horizontal: configStore.horizontalNavType,
 
-      color_primario_tema_claro: vuetifyTheme.themes.value['light'].colors.primary,
-      color_oscurecimiento_primario_tema_claro: vuetifyTheme.themes.value['light'].colors['primary-darken-1'],
+      color_primario_tema_light: vuetifyTheme.themes.value['light'].colors.primary,
+      color_oscurecimiento_primario_tema_light: vuetifyTheme.themes.value['light'].colors['primary-darken-1'],
 
-      color_primario_tema_oscuro: vuetifyTheme.themes.value['dark'].colors.primary,
-      color_oscurecimiento_primario_tema_oscuro: vuetifyTheme.themes.value['dark'].colors['primary-darken-1'],
+      color_primario_tema_dark: vuetifyTheme.themes.value['dark'].colors.primary,
+      color_oscurecimiento_primario_tema_dark: vuetifyTheme.themes.value['dark'].colors['primary-darken-1'],
 
       direccion: configStore.isAppRTL ? 'rtl' : 'ltr',
 
