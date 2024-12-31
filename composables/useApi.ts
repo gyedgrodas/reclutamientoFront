@@ -2,25 +2,12 @@ import { defu } from 'defu';
 import { ofetch, type FetchOptions } from 'ofetch';
 import type { Data } from './types';
 
+
+
 export const UseApi = () => {
-  const getBaseConfig = (): FetchOptions<'json'> => {
-    const config = useRuntimeConfig();
-    const accessToken = useCookie('sanctum.token.cookie').value;
-    return {
-      baseURL: config.public.apiBaseUrl,
-      headers: accessToken
-        ? {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json',
-        }
-        : {
-          Accept: 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json',
-        },
-      responseType: 'json',
-    };
-  };
+  //Usar el useSanctumClient para hacer la petición
+  const client = useSanctumClient();
+
 
   // Función para formatear datos según JSON:API
   const formatData = (
@@ -28,8 +15,6 @@ export const UseApi = () => {
     type: string,
     id?: string,
     relationships?: Record<string, { data: { id: string; type: string } | undefined }> | undefined,
-    links?: Record<string, string>,
-    included?: Record<string, any>
   ): { data: Data } => {
     const formattedData: { data: Data } = {
       data: {
@@ -46,22 +31,14 @@ export const UseApi = () => {
       formattedData.data.relationships = relationships;
     }
 
-    if (links) {
-      formattedData.data.links = links;
-    }
-
-    if (included) {
-      formattedData.data.included = included;
-    }
 
     return formattedData;
   };
 
   /* Funciones para realizar solicitudes HTTP */
   const fetchGet = async <T>(url: string, params: FetchOptions<'json'> = {}) => {
-    const config = getBaseConfig();
-    const mergedParams = defu(params, { method: 'GET', ...config }) as FetchOptions<'json'>;
-    return ofetch<T>(url, mergedParams);
+    const mergedParams = defu(params, { method: 'GET' }) as FetchOptions<'json'>;
+    return client<T>(url,mergedParams);
   };
 
   /* Función para realizar solicitudes POST
@@ -69,8 +46,6 @@ export const UseApi = () => {
   * @param attributes: Record<string, any>
   * @param type: string
   * @param relationships?: Record<string, { data: { id: string; type: string } | undefined }> | undefined
-  * @param links?: Record<string, string>
-  * @param included?: Record<string, any>
   * @param params: FetchOptions<'json'> = {}
   * @returns Promise<T>
   * */
@@ -79,14 +54,11 @@ export const UseApi = () => {
     attributes: Record<string, any>,
     type: string,
     relationships?: Record<string, { data: { id: string; type: string } | undefined }> | undefined,
-    links?: Record<string, string>,
-    included?: Record<string, any>,
     params: FetchOptions<'json'> = {}
   ) => {
-    const config = getBaseConfig();
-    const formattedBody = formatData(attributes, type, undefined, relationships, links, included);
-    const mergedParams = defu(params, { method: 'POST', body: formattedBody, ...config }) as FetchOptions<'json'>;
-    return ofetch<T>(url, mergedParams);
+    const formattedBody = formatData(attributes, type, undefined, relationships);
+    const mergedParams = defu(params, { method: 'POST', body: formattedBody }) as FetchOptions<'json'>;
+    return client<T>(url, mergedParams);
   };
 
   /* Función para realizar solicitudes PUT
@@ -95,8 +67,6 @@ export const UseApi = () => {
   * @param id: string
   * @param type: string
   * @param relationships?: Record<string, { data: { id: string; type: string } | undefined }> | undefined
-  * @param links?: Record<string, string>
-  * @param included?: Record<string, any>
   * @param params: FetchOptions<'json'> = {}
   * @returns Promise<T>
   * */
@@ -106,14 +76,11 @@ export const UseApi = () => {
     id: string,
     type: string,
     relationships?: Record<string, { data: { id: string; type: string } | undefined }> | undefined,
-    links?: Record<string, string>,
-    included?: Record<string, any>,
     params: FetchOptions<'json'> = {}
   ) => {
-    const config = getBaseConfig();
-    const formattedBody = formatData(attributes, type, id, relationships, links, included);
-    const mergedParams = defu(params, { method: 'PUT', body: formattedBody, ...config }) as FetchOptions<'json'>;
-    return ofetch<T>(url, mergedParams);
+    const formattedBody = formatData(attributes, type, id, relationships);
+    const mergedParams = defu(params, { method: 'PUT', body: formattedBody }) as FetchOptions<'json'>;
+    return client<T>(url, mergedParams);
   };
 
   /* Función para realizar solicitudes DELETE
@@ -122,9 +89,8 @@ export const UseApi = () => {
   * @returns Promise<T>
    */
   const fetchDelete = async <T>(url: string, params: FetchOptions<'json'> = {}) => {
-    const config = getBaseConfig();
-    const mergedParams = defu(params, { method: 'DELETE', ...config }) as FetchOptions<'json'>;
-    return ofetch<T>(url, mergedParams);
+    const mergedParams = defu(params, { method: 'DELETE'}) as FetchOptions<'json'>;
+    return client<T>(url, mergedParams);
   };
 
   return { fetchGet, fetchPost, fetchPut, fetchDelete };

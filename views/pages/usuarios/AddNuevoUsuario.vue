@@ -30,6 +30,15 @@ const estado = ref()
 const puesto_id = ref()
 const password = ref()
 const nuevoPassword = ref()
+//crear selector de puesto id 1 al 3
+const puestos = [
+  {id: 1, nombre: 'Gerente'},
+  {id: 2, nombre: 'Ejecutivo'},
+  {id: 3, nombre: 'Administrativo'}
+]
+
+
+const puesto = ref<string>(''); // Definir el tipo como string
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -44,25 +53,25 @@ const closeNavigationDrawer = () => {
 const onSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
+
       // Formatea los datos según JSON:API
       const data =
         {
           usuario_dominio:usuario_dominio.value,
           cif:cif.value,
-          codigobankworks: codigo_bankworks.value,
-          codigoejecutivo: codigo_ejecutivo.value,
+          codigo_bankworks: codigo_bankworks.value,
+          codigo_ejecutivo: codigo_ejecutivo.value,
           nombre :nombre.value,
           apellido:apellido.value,
           email :email.value,
           fecha_labores :fecha_labores.value,
           estado :estado.value,
-          puesto_id :puesto_id.value,
           password :password.value,
           nuevoPassword :nuevoPassword.value,
         },
       // Incluye relaciones en la estructura JSON:API si las necesitas
         relationships = {
-        // puesto: { data: { id: puestoId.value, type: 'puestos' } },
+        puesto: { data: { id:  String(puesto.value), type: 'puesto' } },
         // region: { data: { id: regionId.value, type: 'regiones' } },
         // gerencia: { data: { id: gerenciaId.value, type: 'gerencias' } },
       };
@@ -206,11 +215,15 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
 
               <!-- Puesto ID -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="puesto_id"
-                  type="number"
-                  label="Puesto ID"
-                  placeholder="ID del Puesto"
+                <AppSelect
+                  v-model="puesto"
+                  label="Puesto"
+                  placeholder="Seleccione un puesto"
+                  :rules="[requiredValidator]"
+                  :items="puestos"
+                  item-text="nombre"
+                  item-value="id"
+                  item-title="nombre"
                 />
               </VCol>
 
