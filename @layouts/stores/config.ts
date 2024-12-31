@@ -5,10 +5,10 @@ import { _setDirAttr } from '@layouts/utils'
 // ℹ️ We should not import themeConfig here but in urgency we are doing it for now
 import { layoutConfig } from '@themeConfig'
 
-export const namespaceConfig = (str: string) => `${layoutConfig.app.title}-${str}`
+// export const namespaceConfig = (str: string) => `${layoutConfig.app.title}-${str}`
 
 export const cookieRef = <T>(key: string, defaultValue: T) => {
-  return useCookie<T>(namespaceConfig(key), { default: () => defaultValue })
+  return useCookie<T>(key, { default: () => defaultValue })
 }
 
 export const useLayoutConfigStore = defineStore('layoutConfig', () => {
@@ -18,20 +18,22 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const navbarType = ref(layoutConfig.navbar.type)
 
   // 👉 Navbar Type
-  const isNavbarBlurEnabled = cookieRef('isNavbarBlurEnabled', layoutConfig.navbar.navbarBlur)
+  const isNavbarBlurEnabled = cookieRef('desenfoque_habilitado_barra_navegacion', layoutConfig.navbar.navbarBlur)
 
   // 👉 Vertical Nav Collapsed
-  const isVerticalNavCollapsed = cookieRef('isVerticalNavCollapsed', layoutConfig.verticalNav.isVerticalNavCollapsed)
+  const isVerticalNavCollapsed = cookieRef('esta_navBar_vertical_colapsada', layoutConfig.verticalNav.isVerticalNavCollapsed)
 
   // 👉 App Content Width
-  const appContentWidth = cookieRef('appContentWidth', layoutConfig.app.contentWidth)
+  const appContentWidth = cookieRef('ancho_contenido_aplicacion', layoutConfig.app.contentWidth)
 
   // 👉 App Content Layout Nav
   const appContentLayoutNav = ref(layoutConfig.app.contentLayoutNav)
 
   watch(appContentLayoutNav, val => {
+    console.log('Este watch se ejecuta cuando cambia el menu de navegacion (vertical, horizontal)')
     // If Navbar type is hidden while switching to horizontal nav => Reset it to sticky
     if (val === AppContentLayoutNav.Horizontal) {
+      cookieRef('tipo_navBar', val).value = val
       if (navbarType.value === NavbarType.Hidden)
         navbarType.value = NavbarType.Sticky
 
@@ -78,6 +80,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const isAppRTL = ref(false)
 
   watch(isAppRTL, val => {
+    console.log('Este watch se ejecuta cuando cambia el valor de isAppRTL')
     _setDirAttr(val ? 'rtl' : 'ltr')
   })
 

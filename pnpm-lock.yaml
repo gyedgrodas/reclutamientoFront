@@ -102,6 +102,9 @@ importers:
       shepherd.js:
         specifier: 13.0.1
         version: 13.0.1
+      sweetalert2:
+        specifier: ^11.15.3
+        version: 11.15.3
       swiper:
         specifier: 11.1.9
         version: 11.1.9
@@ -5507,6 +5510,9 @@ packages:
     resolution: {integrity: sha512-OoohrmuUlBs8B8o6MB2Aevn+pRIH9zDALSR+6hhqVfa6fRwG/Qw9VUMSMW9VNg2CFc/MTIfabtdOVl9ODIJjpw==}
     engines: {node: '>=14.0.0'}
     hasBin: true
+
+  sweetalert2@11.15.3:
+    resolution: {integrity: sha512-+0imNg+XYL8tKgx8hM0xoiXX3KfgxHDmiDc8nTJFO89fQEEhJlkecSdyYOZ3IhVMcUmoNte4fTIwWiugwkPU6w==}
 
   swiper@11.1.9:
     resolution: {integrity: sha512-rflu8zvfGa3x1v/aeSufk4zRJffhOQowyvtJlp46sUBnOqAuk1Rdv5Ldj0AWWBV595iZ+ZMk7VB35ZRtRUomtA==}
@@ -12451,6 +12457,8 @@ snapshots:
       css-what: 6.1.0
       csso: 5.0.5
       picocolors: 1.0.1
+
+  sweetalert2@11.15.3: {}
 
   swiper@11.1.9: {}
 

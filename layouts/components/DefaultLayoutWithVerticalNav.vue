@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 import navItems from '@/navigation/vertical'
-import { themeConfig } from '@themeConfig'
+import {themeConfig} from '@themeConfig'
+
+const vuetifyTheme = useTheme()
+import {useTheme} from "vuetify";
+
+
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
@@ -9,7 +14,8 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
-import { VerticalNavLayout } from '@layouts'
+import {layoutConfig, VerticalNavLayout} from '@layouts'
+
 </script>
 
 <template>
@@ -28,27 +34,28 @@ import { VerticalNavLayout } from '@layouts'
           />
         </IconBtn>
 
-        <NavbarThemeSwitcher />
+        <NavbarThemeSwitcher/>
 
-        <VSpacer />
+        <VSpacer/>
 
         <NavBarI18n
           v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
           :languages="themeConfig.app.i18n.langConfig"
         />
-        <UserProfile />
+        <UserProfile/>
       </div>
     </template>
 
     <!-- 👉 Pages -->
-    <slot />
+    <slot/>
 
     <!-- 👉 Footer -->
     <template #footer>
-      <Footer />
+      <Footer/>
     </template>
 
     <!-- 👉 Customizer -->
-    <!-- <TheCustomizer /> -->
+    <TheCustomizer/>
   </VerticalNavLayout>
+
 </template>

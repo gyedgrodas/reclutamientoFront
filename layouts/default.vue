@@ -15,15 +15,102 @@ switchToVerticalNavOnLtOverlayNavBreakpoint()
 const { layoutAttrs, injectSkinClasses } = useSkins()
 
 injectSkinClasses()
+
+import {ref, onMounted} from 'vue'
+import LoadingSpinner from "@/components/Loading.vue";
+import {useTheme} from "vuetify";
+const vuetifyTheme = useTheme()
+
+import {cookieRef} from '@/@layouts/stores/config'
+const loadings = ref(false)
+
+const cliente = useClienteRequest()
+
+const getPreferencias = async () => {
+
+  loadings.value = true
+
+  try {
+
+    const res = await cliente.get('api/preferencias')
+
+    if (!res.data) {
+      loadings.value = false
+      return
+    }
+
+    asignarDataACokkies(res)
+
+  } catch (error) {
+
+    console.log(error)
+
+  }
+
+  loadings.value = false
+
+}
+const asignarDataACokkies = (res) => {
+  cookieRef('color_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_primario_tema_light;
+  cookieRef('color_oscurecimiento_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_oscurecimiento_primario_tema_light;
+  vuetifyTheme.themes.value['light'].colors.primary = res.data.color_primario_tema_light
+  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_light
+
+  cookieRef('color_primario_tema_dark', res.data.color_primario_tema_dark).value = res.data.color_primario_tema_dark;
+  cookieRef('color_oscurecimiento_primario_tema_dark', res.data.color_primario_tema_dark).value = res.data.color_oscurecimiento_primario_tema_dark;
+  vuetifyTheme.themes.value['dark'].colors.primary = res.data.color_primario_tema_dark
+  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_dark
+
+  cookieRef('tema', res.data.tema).value = res.data.tema;
+  configStore.theme = res.data.tema
+
+  //este queda pendiente
+  cookieRef('tema_color', res.data.tema_color).value = res.data.tema_color;
+
+  cookieRef('aspecto', res.data.aspecto).value = res.data.aspecto;
+  configStore.skin = res.data.aspecto
+
+  cookieRef('esta_navBar_vertical_colapsada', res.data.esta_navBar_vertical_colapsada === "1" ? true : false).value = res.data.esta_navBar_vertical_colapsada === "1" ? true : false;
+  configStore.isVerticalNavCollapsed = res.data.esta_navBar_vertical_colapsada === "1" ? true : false
+
+  cookieRef('esta_navBar_vertical_habilitada', res.data.esta_navBar_vertical_habilitada).value = res.data.esta_navBar_vertical_habilitada;
+
+  cookieRef('tipo_navBar', res.data.tipo_navBar).value = res.data.tipo_navBar;
+  configStore.appContentLayoutNav = res.data.tipo_navBar
+
+  cookieRef('ancho_contenido_aplicacion', res.data.ancho_contenido_aplicacion).value = res.data.ancho_contenido_aplicacion;
+  configStore.appContentWidth = res.data.ancho_contenido_aplicacion
+
+  cookieRef('orientacion', res.data.direccion).value = res.data.direccion;
+  configStore.isAppRTL = res.data.direccion === "rtl" ? true : false
+
+  cookieRef('tiene_preferencias').value = 1;
+}
+
+onMounted(() => {
+
+  if(!cookieRef('tiene_preferencias').value){
+
+    getPreferencias()
+
+  }
+
+})
+
 </script>
 
 <template>
   <Component
+    v-if="!loadings"
     v-bind="layoutAttrs"
     :is="configStore.appContentLayoutNav === AppContentLayoutNav.Vertical ? DefaultLayoutWithVerticalNav : DefaultLayoutWithHorizontalNav"
   >
     <slot />
   </Component>
+
+  <loading-spinner v-if="loadings" />
+  
+
 </template>
 
 <style lang="scss">
