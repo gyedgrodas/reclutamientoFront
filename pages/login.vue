@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { toRaw } from 'vue'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
@@ -9,6 +10,7 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
+import { ability } from '@/plugins/casl/ability'
 
 
 const { login } = useSanctumAuth()
@@ -48,11 +50,33 @@ const onSubmit = async () => {
   const { valid: isValid } = await refVForm.value?.validate()
   if (isValid) {
     try {
+      // Realizar login primero (si aún no se ha hecho)
       await login(form.value)
 
+      const tokenEncoded = document.cookie.match(/(?:^|; )sanctum\.token\.cookie=([^;]*)/)?.[1]
+
+      const token = decodeURIComponent(tokenEncoded)
+
+      const user = useSanctumUser()
+
+      console.log('Roles:', user.value.abilityRules)
+
+      // Extraer datos de manera sencilla
+      const abilityRules = toRaw(user.value.abilityRules) || [] // Elimina el Proxy reactivo
+
+      console.log('Roles:', abilityRules)
+
+      // Guardar los datos en la cookie
+      useCookie('userAbilityRules').value = abilityRules
+
+      // Actualizar las habilidades en CASE
+      ability.update(abilityRules)
+
+      // Actualizar las habilidades en CASE
+      ability.update(rawAbilityRules)
     }
     catch (error) {
-      msgError.value = error?.response?._data.message
+      msgError.value = error?.response?._data.message || 'Error desconocido'
     }
   }
 }

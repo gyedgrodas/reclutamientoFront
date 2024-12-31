@@ -13,9 +13,12 @@ defineProps<{
 
 const configStore = useLayoutConfigStore()
 const hideTitleAndBadge = configStore.isVerticalNavMini()
+
+
 </script>
 
 <template>
+
   <li
     v-if="can(item.action, item.subject)"
     class="nav-link"
