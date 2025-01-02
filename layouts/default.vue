@@ -32,14 +32,12 @@ const getPreferencias = async () => {
 
   loadings.value = true
 
-  configStore.prefijoCookie = `${user.id}cookie_`;
-
   try {
 
     const res = await cliente.get('api/preferencias')
 
     if (!res.data) {
-      asigarValorDefectoCookies()
+      // asigarValorDefectoCookies()
       loadings.value = false
       return
     }

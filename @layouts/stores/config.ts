@@ -16,6 +16,19 @@ export const cookieRef = <T>(key: string, defaultValue: T) => {
 export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const route = useRoute()
   
+  const {isAuthenticated, user} = useSanctumAuth();
+  
+  const prefijoCookie = ref('default_');
+  
+  watch(
+    isAuthenticated,
+    (val) => {
+      prefijoCookie.value = val ? `${user.value.id}_` : 'default_';
+    },
+    { immediate: true }
+  );
+
+  
   // 👉 Navbar Type
   const navbarType = ref(layoutConfig.navbar.type)
   
@@ -103,16 +116,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     return computed(() => isVerticalNavCollapsed.value && !isVerticalNavHoveredLocal.value && !isLessThanOverlayNavBreakpoint.value)
   }
   
-  const {isAuthenticated, user} = useSanctumAuth();
-  
-  const prefijoCookie = ref('default_');
-  
-  if (isAuthenticated.value) {
-    console.log('Esta autenticado y va asignar el valor de: ' + user.value.id + '_')
-    
-    prefijoCookie.value = user.value.id + '_';
-    
-  }
+
   
   return {
     appContentWidth,
