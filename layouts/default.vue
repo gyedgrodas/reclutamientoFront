@@ -24,6 +24,8 @@ const vuetifyTheme = useTheme()
 import {cookieRef} from '@/@layouts/stores/config'
 const loadings = ref(false)
 
+const { user } = useSanctumAuth();
+
 const cliente = useClienteRequest()
 
 const getPreferencias = async () => {
@@ -51,6 +53,10 @@ const getPreferencias = async () => {
 
 }
 const asignarDataACokkies = (res) => {
+
+  console.log('asignando el prefijo a la cokkie')
+  configStore.prefijoCookie = `${user.id}cookie_`;
+
   cookieRef('color_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_primario_tema_light;
   cookieRef('color_oscurecimiento_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_oscurecimiento_primario_tema_light;
   vuetifyTheme.themes.value['light'].colors.primary = res.data.color_primario_tema_light

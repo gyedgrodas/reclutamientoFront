@@ -7,13 +7,24 @@ import { layoutConfig } from '@themeConfig'
 
 // export const namespaceConfig = (str: string) => `${layoutConfig.app.title}-${str}`
 
+const estaAutenticado = ref(false);
+
+const usuarioAutenticado = ref(null);
+
+
 export const cookieRef = <T>(key: string, defaultValue: T) => {
   return useCookie<T>(key, { default: () => defaultValue })
 }
 
 export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const route = useRoute()
-
+  
+  const { isAuthenticated, user } = useSanctumAuth();
+  
+  estaAutenticado.value = isAuthenticated.value;
+  
+  usuarioAutenticado.value = user.value;
+  
   // 👉 Navbar Type
   const navbarType = ref(layoutConfig.navbar.type)
 
@@ -100,6 +111,9 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
 
     return computed(() => isVerticalNavCollapsed.value && !isVerticalNavHoveredLocal.value && !isLessThanOverlayNavBreakpoint.value)
   }
+  
+  const prefijoCookie = ref('default_');
+  
 
   return {
     appContentWidth,
@@ -114,5 +128,6 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     isAppRTL,
     _layoutClasses,
     isVerticalNavMini,
+    prefijoCookie,
   }
 })
