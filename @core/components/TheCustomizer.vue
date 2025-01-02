@@ -446,9 +446,6 @@ const setPrimaryColor = useDebounceFn((color: { main: string; darken: string }) 
   vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary = color.main
   vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'] = color.darken
 
-  cookieRef<string | null>(`color_primario_tema_${vuetifyTheme.name.value}`).value = color.main
-  cookieRef<string | null>(`color_oscurecimiento_primario_tema_${vuetifyTheme.name.value}`).value = color.darken
-
   //Por ahora no se dejara guardar en cokkies en el metodo de guardar se actualizaran!
   // ℹ️ We need to store this color value in cookie so vuetify plugin can pick on next reload
   // cookieRef<string | null>(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value = color.main
@@ -712,6 +709,8 @@ const guardarPreferencias = async ():void => {
 
     }
 
+    asignarValorACokkies();
+
     const response = await cliente.post('api/preferencias', data);
 
     showToastSuccess(response.message);
@@ -721,6 +720,14 @@ const guardarPreferencias = async ():void => {
     showToastError(error.message);
 
   }
+
+}
+
+
+const asignarValorACokkies = () => {
+
+  cookieRef<string>(`color_primario_tema_${vuetifyTheme.name.value}`).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary
+  cookieRef<string>(`color_oscurecimiento_primario_tema_${vuetifyTheme.name.value}`).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1']
 
 }
 

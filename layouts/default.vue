@@ -108,7 +108,7 @@ const asigarValorDefectoCookies = () => {
   cookieRef('tema').value = 'light';
   configStore.theme = 'light'
 
-  cookieRef('tema_color').value = 'primary';
+  cookieRef('tema_color').value = 'light';
 
   cookieRef('aspecto').value = 'default';
   configStore.skin = 'default'
