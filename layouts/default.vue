@@ -32,11 +32,14 @@ const getPreferencias = async () => {
 
   loadings.value = true
 
+  configStore.prefijoCookie = `${user.id}cookie_`;
+
   try {
 
     const res = await cliente.get('api/preferencias')
 
     if (!res.data) {
+      asigarValorDefectoCookies()
       loadings.value = false
       return
     }
@@ -53,9 +56,6 @@ const getPreferencias = async () => {
 
 }
 const asignarDataACokkies = (res) => {
-
-  console.log('asignando el prefijo a la cokkie')
-  configStore.prefijoCookie = `${user.id}cookie_`;
 
   cookieRef('color_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_primario_tema_light;
   cookieRef('color_oscurecimiento_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_oscurecimiento_primario_tema_light;
@@ -91,6 +91,44 @@ const asignarDataACokkies = (res) => {
   configStore.isAppRTL = res.data.direccion === "rtl" ? true : false
 
   cookieRef('tiene_preferencias').value = 1;
+}
+
+const asigarValorDefectoCookies = () => {
+
+  cookieRef('color_primario_tema_light').value = '#1976D2';
+  cookieRef('color_oscurecimiento_primario_tema_light').value = '#1565C0';
+  vuetifyTheme.themes.value['light'].colors.primary = '#1976D2'
+  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = '#1565C0'
+
+  cookieRef('color_primario_tema_dark').value = '#1976D2';
+  cookieRef('color_oscurecimiento_primario_tema_dark').value = '#1565C0';
+  vuetifyTheme.themes.value['dark'].colors.primary = '#1976D2'
+  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = '#1565C0'
+
+  cookieRef('tema').value = 'light';
+  configStore.theme = 'light'
+
+  cookieRef('tema_color').value = 'primary';
+
+  cookieRef('aspecto').value = 'default';
+  configStore.skin = 'default'
+
+  cookieRef('esta_navBar_vertical_colapsada').value = false;
+  configStore.isVerticalNavCollapsed = false
+
+  cookieRef('esta_navBar_vertical_habilitada').value = true;
+
+  cookieRef('tipo_navBar').value = 'vertical';
+  configStore.appContentLayoutNav = 'vertical'
+
+  cookieRef('ancho_contenido_aplicacion').value = 'full';
+  configStore.appContentWidth = 'full'
+
+  cookieRef('orientacion').value = 'ltr';
+  configStore.isAppRTL = false
+
+  cookieRef('tiene_preferencias').value = 0;
+
 }
 
 onMounted(() => {
