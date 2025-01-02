@@ -1,12 +1,3 @@
-export default [
-  {
-    title: 'Home',
-    to: { name: 'index' },
-    icon: { icon: 'tabler-smart-home' },
-  },
-  {
-    title: 'Second page',
-    to: { name: 'second-page' },
-    icon: { icon: 'tabler-file' },
-  },
-]
+import menuConfig from '../shared/menuConfig'
+
+export default menuConfig
