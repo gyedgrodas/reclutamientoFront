@@ -135,6 +135,12 @@ const asignarValorDesdeCokies = () => {
 
   configStore.reset();
 
+  vuetifyTheme.themes.value['light'].colors.primary = cookieRef('color_primario_tema_light').value
+  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = cookieRef('color_oscurecimiento_primario_tema_light').value
+
+  vuetifyTheme.themes.value['dark'].colors.primary = cookieRef('color_primario_tema_dark').value
+  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = cookieRef('color_oscurecimiento_primario_tema_dark').value
+
 }
 
 

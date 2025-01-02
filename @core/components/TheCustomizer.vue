@@ -723,7 +723,6 @@ const guardarPreferencias = async ():void => {
 
 }
 
-
 const asignarValorACokkies = () => {
 
   cookieRef<string>(`color_primario_tema_${vuetifyTheme.name.value}`).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary
