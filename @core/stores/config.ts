@@ -7,18 +7,18 @@ import { themeConfig } from '@themeConfig'
 export const useConfigStore = defineStore('config', () => {
   // 👉 Theme
   const userPreferredColorScheme = usePreferredColorScheme()
-  const cookieColorScheme = cookieRef<'light' | 'dark'>('tema_color', 'light')
+  const tema_color = ref(cookieRef<'light' | 'dark'>('tema_color', 'light').value);
   watch(
     userPreferredColorScheme,
     val => {
       console.log('Este es el watch que se debe ejecutar cuando cambia el tema del sistema')
       if (val !== 'no-preference')
-        cookieColorScheme.value = val
+        tema_color.value = val
     },
     // { immediate: true },
   )
 
-  const theme = cookieRef('tema', themeConfig.app.theme)
+  const theme = ref(cookieRef('tema', themeConfig.app.theme).value);
 
   // 👉 isVerticalNavSemiDark
   const isVerticalNavSemiDark = cookieRef('es_navegacion_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark)
@@ -65,6 +65,7 @@ export const useConfigStore = defineStore('config', () => {
     isVerticalNavCollapsed,
     footerType,
     isAppRTL,
+    tema_color,
     // methods
     reset,
   }
@@ -77,7 +78,6 @@ export const initConfigStore = () => {
   const vuetifyTheme = useTheme()
   const configStore = useConfigStore()
   const resolver = resolveVuetifyTheme(themeConfig.app.theme)
-  const cookieColorScheme = cookieRef<'light' | 'dark'>('tema_color', 'light')
 
   watch(
     [() => configStore.theme, userPreferredColorScheme],
@@ -89,7 +89,7 @@ export const initConfigStore = () => {
           : 'light'
         : configStore.theme
       
-        cookieColorScheme.value = vuetifyTheme.global.name.value
+      configStore.tema_color = vuetifyTheme.global.name.value
     })
 
   onMounted(() => {

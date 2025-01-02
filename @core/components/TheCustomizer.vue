@@ -427,16 +427,16 @@ const colors: { main: string; darken: string }[] = [
 
 const customPrimaryColor = ref('#663131')
 
-watch(
-  () => configStore.theme,
-  () => {
-    const cookiePrimaryColor = cookieRef(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value
-
-    if (cookiePrimaryColor && !colors.some(color => color.main === cookiePrimaryColor))
-      customPrimaryColor.value = cookiePrimaryColor
-  },
-  { immediate: true },
-)
+// watch(
+//   () => configStore.theme,
+//   () => {
+//     // const cookiePrimaryColor = cookieRef(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value
+//
+//     if (cookiePrimaryColor && !colors.some(color => color.main === cookiePrimaryColor))
+//       customPrimaryColor.value = cookiePrimaryColor
+//   },
+//   { immediate: true },
+// )
 
 // ℹ️ It will set primary color for current theme only
 const setPrimaryColor = useDebounceFn((color: { main: string; darken: string }) => {
@@ -728,6 +728,10 @@ const asignarValorACokkies = () => {
 
   cookieRef<string>(`color_primario_tema_${vuetifyTheme.name.value}`).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary
   cookieRef<string>(`color_oscurecimiento_primario_tema_${vuetifyTheme.name.value}`).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1']
+
+  cookieRef('tema_color').value = configStore.tema_color;
+  cookieRef('tema').value = configStore.theme;
+
 
 }
 
