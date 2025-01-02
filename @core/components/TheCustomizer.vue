@@ -693,7 +693,7 @@ const guardarPreferencias = async ():void => {
       ancho_contenido_aplicacion: configStore.appContentWidth,
       desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled,
       tipo_navBar: configStore.appContentLayoutNav,
-      es_navegacion_vertical_semioscura: configStore.isVerticalNavSemiDark,
+      es_navBar_vertical_semioscura: configStore.isVerticalNavSemiDark,
       esta_navBar_vertical_colapsada: configStore.isVerticalNavCollapsed,
       // esta_navBar_vertical_habilitada:
       tipo_barra_navegacion: configStore.navbarType,

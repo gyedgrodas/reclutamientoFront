@@ -76,8 +76,11 @@ const asignarDataACokkies = (res) => {
   cookieRef('aspecto').value = res.data.aspecto;
   configStore.skin = res.data.aspecto
 
-  cookieRef('esta_navBar_vertical_colapsada' ).value = res.data.esta_navBar_vertical_colapsada === "1" ? true : false;
+  cookieRef('esta_navBar_vertical_colapsada').value = res.data.esta_navBar_vertical_colapsada === "1" ? true : false;
   configStore.isVerticalNavCollapsed = res.data.esta_navBar_vertical_colapsada === "1" ? true : false
+
+  cookieRef('es_navBar_vertical_semioscura').value = res.data.es_navBar_vertical_semioscura === "1" ? true : false;
+  configStore.isVerticalNavSemiDark = res.data.es_navBar_vertical_semioscura === "1" ? true : false
 
   cookieRef('esta_navBar_vertical_habilitada').value = res.data.esta_navBar_vertical_habilitada;
 
