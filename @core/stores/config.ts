@@ -25,7 +25,19 @@ export const useConfigStore = defineStore('config', () => {
 
   // 👉 isVerticalNavSemiDark
   const skin = cookieRef('aspecto', themeConfig.app.skin)
-
+  
+  
+  function reset() {
+    theme.value = cookieRef('tema').value
+    isVerticalNavSemiDark.value = cookieRef('es_navegacion_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark).value
+    skin.value = cookieRef('aspecto', themeConfig.app.skin).value
+    
+    useLayoutConfigStore().resetLayoutConfig()
+    
+  }
+  
+  
+  
   // ℹ️ We need to use `storeToRefs` to forward the state
   const {
     isLessThanOverlayNavBreakpoint,
@@ -53,6 +65,8 @@ export const useConfigStore = defineStore('config', () => {
     isVerticalNavCollapsed,
     footerType,
     isAppRTL,
+    // methods
+    reset,
   }
 })
 // !SECTION

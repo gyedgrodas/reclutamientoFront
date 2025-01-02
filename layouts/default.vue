@@ -37,7 +37,7 @@ const getPreferencias = async () => {
     const res = await cliente.get('api/preferencias')
 
     if (!res.data) {
-      // asigarValorDefectoCookies()
+      asigarValorDefectoCookies()
       loadings.value = false
       return
     }
@@ -55,37 +55,39 @@ const getPreferencias = async () => {
 }
 const asignarDataACokkies = (res) => {
 
-  cookieRef('color_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_primario_tema_light;
-  cookieRef('color_oscurecimiento_primario_tema_light', res.data.color_primario_tema_light).value = res.data.color_oscurecimiento_primario_tema_light;
+
+
+  cookieRef('color_primario_tema_light').value = res.data.color_primario_tema_light;
+  cookieRef('color_oscurecimiento_primario_tema_light').value = res.data.color_oscurecimiento_primario_tema_light;
   vuetifyTheme.themes.value['light'].colors.primary = res.data.color_primario_tema_light
   vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_light
 
-  cookieRef('color_primario_tema_dark', res.data.color_primario_tema_dark).value = res.data.color_primario_tema_dark;
-  cookieRef('color_oscurecimiento_primario_tema_dark', res.data.color_primario_tema_dark).value = res.data.color_oscurecimiento_primario_tema_dark;
+  cookieRef('color_primario_tema_dark').value = res.data.color_primario_tema_dark;
+  cookieRef('color_oscurecimiento_primario_tema_dark').value = res.data.color_oscurecimiento_primario_tema_dark;
   vuetifyTheme.themes.value['dark'].colors.primary = res.data.color_primario_tema_dark
   vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_dark
 
-  cookieRef('tema', res.data.tema).value = res.data.tema;
+  cookieRef('tema').value = res.data.tema;
   configStore.theme = res.data.tema
 
   //este queda pendiente
-  cookieRef('tema_color', res.data.tema_color).value = res.data.tema_color;
+  cookieRef('tema_color').value = res.data.tema_color;
 
-  cookieRef('aspecto', res.data.aspecto).value = res.data.aspecto;
+  cookieRef('aspecto').value = res.data.aspecto;
   configStore.skin = res.data.aspecto
 
-  cookieRef('esta_navBar_vertical_colapsada', res.data.esta_navBar_vertical_colapsada === "1" ? true : false).value = res.data.esta_navBar_vertical_colapsada === "1" ? true : false;
+  cookieRef('esta_navBar_vertical_colapsada' ).value = res.data.esta_navBar_vertical_colapsada === "1" ? true : false;
   configStore.isVerticalNavCollapsed = res.data.esta_navBar_vertical_colapsada === "1" ? true : false
 
-  cookieRef('esta_navBar_vertical_habilitada', res.data.esta_navBar_vertical_habilitada).value = res.data.esta_navBar_vertical_habilitada;
+  cookieRef('esta_navBar_vertical_habilitada').value = res.data.esta_navBar_vertical_habilitada;
 
-  cookieRef('tipo_navBar', res.data.tipo_navBar).value = res.data.tipo_navBar;
+  cookieRef('tipo_navBar').value = res.data.tipo_navBar;
   configStore.appContentLayoutNav = res.data.tipo_navBar
 
-  cookieRef('ancho_contenido_aplicacion', res.data.ancho_contenido_aplicacion).value = res.data.ancho_contenido_aplicacion;
+  cookieRef('ancho_contenido_aplicacion').value = res.data.ancho_contenido_aplicacion;
   configStore.appContentWidth = res.data.ancho_contenido_aplicacion
 
-  cookieRef('orientacion', res.data.direccion).value = res.data.direccion;
+  cookieRef('orientacion').value = res.data.direccion;
   configStore.isAppRTL = res.data.direccion === "rtl" ? true : false
 
   cookieRef('tiene_preferencias').value = 1;
@@ -129,11 +131,22 @@ const asigarValorDefectoCookies = () => {
 
 }
 
+const asignarValorDesdeCokies = () => {
+
+  configStore.reset();
+
+}
+
+
 onMounted(() => {
 
   if(!cookieRef('tiene_preferencias').value){
 
     getPreferencias()
+
+  } else {
+
+    asignarValorDesdeCokies()
 
   }
 

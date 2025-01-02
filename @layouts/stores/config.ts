@@ -68,6 +68,17 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   // 👉 Misc
   const isLessThanOverlayNavBreakpoint = computed(() => useMediaQuery(`(max-width: ${layoutConfig.app.overlayNavFromBreakpoint}px)`).value)
   
+  function resetLayoutConfig() {
+    appContentWidth.value = cookieRef('ancho_contenido_aplicacion').value
+    navbarType.value = cookieRef('tipo_barra_navegacion').value
+    isNavbarBlurEnabled.value = cookieRef('desenfoque_habilitado_barra_navegacion').value
+    appContentLayoutNav.value = cookieRef('tipo_navBar').value
+    isVerticalNavCollapsed.value = cookieRef('esta_navBar_vertical_colapsada').value
+    footerType.value = cookieRef('tipo_pie_pagina').value
+    horizontalNavType.value = cookieRef('tipo_nav_horizontal').value
+    horizontalNavPopoverOffset.value = cookieRef('offset_popover_nav_horizontal').value
+  }
+  
   // 👉 Layout Classes
   const _layoutClasses = computed(() => {
     const {y: windowScrollY} = useWindowScroll()
@@ -132,5 +143,6 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     _layoutClasses,
     isVerticalNavMini,
     prefijoCookie,
+    resetLayoutConfig,
   }
 })
