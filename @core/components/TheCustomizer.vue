@@ -427,16 +427,16 @@ const colors: { main: string; darken: string }[] = [
 
 const customPrimaryColor = ref('#663131')
 
-watch(
-  () => configStore.theme,
-  () => {
-    const cookiePrimaryColor = cookieRef(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value
-
-    if (cookiePrimaryColor && !colors.some(color => color.main === cookiePrimaryColor))
-      customPrimaryColor.value = cookiePrimaryColor
-  },
-  { immediate: true },
-)
+// watch(
+//   () => configStore.theme,
+//   () => {
+//     // const cookiePrimaryColor = cookieRef(`${vuetifyTheme.name.value}ThemePrimaryColor`, null).value
+//
+//     if (cookiePrimaryColor && !colors.some(color => color.main === cookiePrimaryColor))
+//       customPrimaryColor.value = cookiePrimaryColor
+//   },
+//   { immediate: true },
+// )
 
 // ℹ️ It will set primary color for current theme only
 const setPrimaryColor = useDebounceFn((color: { main: string; darken: string }) => {
@@ -445,9 +445,6 @@ const setPrimaryColor = useDebounceFn((color: { main: string; darken: string }) 
 
   vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary = color.main
   vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1'] = color.darken
-
-  cookieRef<string | null>(`color_primario_tema_${vuetifyTheme.name.value}`).value = color.main
-  cookieRef<string | null>(`color_oscurecimiento_primario_tema_${vuetifyTheme.name.value}`).value = color.darken
 
   //Por ahora no se dejara guardar en cokkies en el metodo de guardar se actualizaran!
   // ℹ️ We need to store this color value in cookie so vuetify plugin can pick on next reload
@@ -527,7 +524,7 @@ watch(currentLayout, () => {
   else {
     configStore.isVerticalNavCollapsed = false
     configStore.appContentLayoutNav = currentLayout.value
-    cookieRef('tipo_navBar', currentLayout.value).value = currentLayout.value
+    // cookieRef('navBar_loyout'', currentLayout.value).value = currentLayout.value
   }
 
 })
@@ -695,12 +692,12 @@ const guardarPreferencias = async ():void => {
 
       ancho_contenido_aplicacion: configStore.appContentWidth,
       desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled,
-      tipo_navBar: configStore.appContentLayoutNav,
-      es_navegacion_vertical_semioscura: configStore.isVerticalNavSemiDark,
+      navBar_loyout: configStore.appContentLayoutNav,
+      es_navBar_vertical_semioscura: configStore.isVerticalNavSemiDark,
       esta_navBar_vertical_colapsada: configStore.isVerticalNavCollapsed,
       // esta_navBar_vertical_habilitada:
-      tipo_barra_navegacion: configStore.navbarType,
-      tipo_barra_navegacion_horizontal: configStore.horizontalNavType,
+      navBar_vertical_tipo: configStore.navbarType,
+      navBar_horizontal_tipo: configStore.horizontalNavType,
 
       color_primario_tema_light: vuetifyTheme.themes.value['light'].colors.primary,
       color_oscurecimiento_primario_tema_light: vuetifyTheme.themes.value['light'].colors['primary-darken-1'],
@@ -712,6 +709,8 @@ const guardarPreferencias = async ():void => {
 
     }
 
+    asignarValorACokkies();
+
     const response = await cliente.post('api/preferencias', data);
 
     showToastSuccess(response.message);
@@ -721,6 +720,17 @@ const guardarPreferencias = async ():void => {
     showToastError(error.message);
 
   }
+
+}
+
+const asignarValorACokkies = () => {
+
+  cookieRef<string>(`color_primario_tema_${vuetifyTheme.name.value}`).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors.primary
+  cookieRef<string>(`color_oscurecimiento_primario_tema_${vuetifyTheme.name.value}`).value = vuetifyTheme.themes.value[vuetifyTheme.name.value].colors['primary-darken-1']
+
+  cookieRef('tema_color').value = configStore.tema_color;
+  cookieRef('tema').value = configStore.theme;
+
 
 }
 

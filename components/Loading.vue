@@ -1,15 +1,27 @@
 <template>
-  <div class="loading-container">
+  <div :class="`loading-container ${color}`">
     <div class="spinner"></div>
     <p class="loading-text">Cargando...</p>
   </div>
 </template>
 
-<script>
-export default {
-  name: "LoadingSpinner",
-};
+<script setup lang="ts">
+import { computed } from "vue";
+
+interface User {
+  id: string;
+}
+
+const { user } = useSanctumAuth() as { user: User };
+
+const color = computed<string>(() => {
+
+  return useCookie(user.id + "tema_color") as string;
+
+});
+
 </script>
+
 
 <style scoped>
 .loading-container {
@@ -22,9 +34,17 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: white;
-  color: #000000;
   z-index: 9999;
+}
+
+.loading-container.light {
+  background: #F8F7FA;
+  color: black;
+}
+
+.loading-container.dark {
+  background: #25293C;
+  color: white;
 }
 
 .spinner {
