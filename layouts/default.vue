@@ -2,6 +2,10 @@
 import { useConfigStore } from '@core/stores/config'
 import { AppContentLayoutNav } from '@layouts/enums'
 import { switchToVerticalNavOnLtOverlayNavBreakpoint } from '@layouts/utils'
+import { ref, onMounted } from "vue";
+import LoadingSpinner from "@/components/Loading.vue";
+import { useTheme } from "vuetify";
+import { cookieRef } from "@/@layouts/stores/config";
 
 const DefaultLayoutWithHorizontalNav = defineAsyncComponent(() => import('./components/DefaultLayoutWithHorizontalNav.vue'))
 const DefaultLayoutWithVerticalNav = defineAsyncComponent(() => import('./components/DefaultLayoutWithVerticalNav.vue'))
@@ -15,155 +19,164 @@ switchToVerticalNavOnLtOverlayNavBreakpoint()
 const { layoutAttrs, injectSkinClasses } = useSkins()
 
 injectSkinClasses()
+interface Preferencias {
+  color_primario_tema_light: string;
+  color_oscurecimiento_primario_tema_light: string;
+  color_primario_tema_dark: string;
+  color_oscurecimiento_primario_tema_dark: string;
+  tema: string;
+  tema_color: string;
+  aspecto: string;
+  esta_navBar_vertical_colapsada: string;
+  es_navBar_vertical_semioscura: string;
+  esta_navBar_vertical_habilitada: boolean;
+  tipo_navBar: string;
+  ancho_contenido_aplicacion: string;
+  direccion: string;
+}
 
-import {ref, onMounted} from 'vue'
-import LoadingSpinner from "@/components/Loading.vue";
-import {useTheme} from "vuetify";
-const vuetifyTheme = useTheme()
-
-import {cookieRef} from '@/@layouts/stores/config'
-const loadings = ref(false)
+const vuetifyTheme = useTheme();
+const loadings = ref(true);
 
 const { user } = useSanctumAuth();
+const cliente = useClienteRequest();
 
-const cliente = useClienteRequest()
-
-const getPreferencias = async () => {
-
-  loadings.value = true
+const getPreferencias = async (): Promise<void> => {
 
   try {
-
-    const res = await cliente.get('api/preferencias')
+    const res = await cliente.get<{ data: Preferencias }>("api/preferencias");
 
     if (!res.data) {
-      asigarValorDefectoCookies()
-      loadings.value = false
-      return
+      asigarValorDefectoCookies();
+      return;
     }
 
-    asignarDataACokkies(res)
-
+    asignarDataACookies(res.data);
   } catch (error) {
-
-    console.log(error)
-
+    console.error(error);
   }
 
-  loadings.value = false
-
-}
-const asignarDataACokkies = (res) => {
+};
 
 
+const asignarDataACookies = (data: Preferencias): void => {
+  cookieRef("color_primario_tema_light").value = data.color_primario_tema_light;
+  cookieRef("color_oscurecimiento_primario_tema_light").value =
+    data.color_oscurecimiento_primario_tema_light;
 
-  cookieRef('color_primario_tema_light').value = res.data.color_primario_tema_light;
-  cookieRef('color_oscurecimiento_primario_tema_light').value = res.data.color_oscurecimiento_primario_tema_light;
-  vuetifyTheme.themes.value['light'].colors.primary = res.data.color_primario_tema_light
-  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_light
+  vuetifyTheme.themes.value["light"].colors.primary = data.color_primario_tema_light;
+  vuetifyTheme.themes.value["light"].colors["primary-darken-1"] =
+    data.color_oscurecimiento_primario_tema_light;
 
-  cookieRef('color_primario_tema_dark').value = res.data.color_primario_tema_dark;
-  cookieRef('color_oscurecimiento_primario_tema_dark').value = res.data.color_oscurecimiento_primario_tema_dark;
-  vuetifyTheme.themes.value['dark'].colors.primary = res.data.color_primario_tema_dark
-  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = res.data.color_oscurecimiento_primario_tema_dark
+  cookieRef("color_primario_tema_dark").value = data.color_primario_tema_dark;
+  cookieRef("color_oscurecimiento_primario_tema_dark").value =
+    data.color_oscurecimiento_primario_tema_dark;
 
-  cookieRef('tema').value = res.data.tema;
-  configStore.theme = res.data.tema
+  vuetifyTheme.themes.value["dark"].colors.primary = data.color_primario_tema_dark;
+  vuetifyTheme.themes.value["dark"].colors["primary-darken-1"] =
+    data.color_oscurecimiento_primario_tema_dark;
 
-  //este queda pendiente
-  cookieRef('tema_color').value = res.data.tema_color;
+  cookieRef("tema").value = data.tema;
+  configStore.theme = data.tema;
 
-  cookieRef('aspecto').value = res.data.aspecto;
-  configStore.skin = res.data.aspecto
+  cookieRef("tema_color").value = data.tema_color;
+  cookieRef("aspecto").value = data.aspecto;
+  configStore.skin = data.aspecto;
 
-  cookieRef('esta_navBar_vertical_colapsada').value = res.data.esta_navBar_vertical_colapsada === "1" ? true : false;
-  configStore.isVerticalNavCollapsed = res.data.esta_navBar_vertical_colapsada === "1" ? true : false
+  cookieRef("esta_navBar_vertical_colapsada").value =
+    data.esta_navBar_vertical_colapsada === "1";
+  configStore.isVerticalNavCollapsed =
+    data.esta_navBar_vertical_colapsada === "1";
 
-  cookieRef('es_navBar_vertical_semioscura').value = res.data.es_navBar_vertical_semioscura === "1" ? true : false;
-  configStore.isVerticalNavSemiDark = res.data.es_navBar_vertical_semioscura === "1" ? true : false
+  cookieRef("es_navBar_vertical_semioscura").value =
+    data.es_navBar_vertical_semioscura === "1";
+  configStore.isVerticalNavSemiDark = data.es_navBar_vertical_semioscura === "1";
 
-  cookieRef('esta_navBar_vertical_habilitada').value = res.data.esta_navBar_vertical_habilitada;
+  cookieRef("esta_navBar_vertical_habilitada").value = data.esta_navBar_vertical_habilitada;
 
-  cookieRef('tipo_navBar').value = res.data.tipo_navBar;
-  configStore.appContentLayoutNav = res.data.tipo_navBar
+  cookieRef("tipo_navBar").value = data.tipo_navBar;
+  configStore.appContentLayoutNav = data.tipo_navBar;
 
-  cookieRef('ancho_contenido_aplicacion').value = res.data.ancho_contenido_aplicacion;
-  configStore.appContentWidth = res.data.ancho_contenido_aplicacion
+  cookieRef("ancho_contenido_aplicacion").value = data.ancho_contenido_aplicacion;
+  configStore.appContentWidth = data.ancho_contenido_aplicacion;
 
-  cookieRef('orientacion').value = res.data.direccion;
-  configStore.isAppRTL = res.data.direccion === "rtl" ? true : false
+  cookieRef("orientacion").value = data.direccion;
+  configStore.isAppRTL = data.direccion === "rtl";
 
-  cookieRef('tiene_preferencias').value = 1;
-}
+  cookieRef("tiene_preferencias").value = 1;
+};
 
-const asigarValorDefectoCookies = () => {
+const asigarValorDefectoCookies = (): void => {
+  cookieRef("color_primario_tema_light").value = "#7367F0";
+  cookieRef("color_oscurecimiento_primario_tema_light").value = "#675DD8";
 
-  cookieRef('color_primario_tema_light').value = '#7367F0';
-  cookieRef('color_oscurecimiento_primario_tema_light').value = '#675DD8';
-  vuetifyTheme.themes.value['light'].colors.primary = '#7367F0'
-  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = '#675DD8'
+  vuetifyTheme.themes.value["light"].colors.primary = "#7367F0";
+  vuetifyTheme.themes.value["light"].colors["primary-darken-1"] = "#675DD8";
 
-  cookieRef('color_primario_tema_dark').value = '#7367F0';
-  cookieRef('color_oscurecimiento_primario_tema_dark').value = '#675DD8';
-  vuetifyTheme.themes.value['dark'].colors.primary = '#7367F0'
-  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = '#675DD8'
+  cookieRef("color_primario_tema_dark").value = "#7367F0";
+  cookieRef("color_oscurecimiento_primario_tema_dark").value = "#675DD8";
 
-  cookieRef('tema').value = 'light';
-  configStore.theme = 'light'
+  vuetifyTheme.themes.value["dark"].colors.primary = "#7367F0";
+  vuetifyTheme.themes.value["dark"].colors["primary-darken-1"] = "#675DD8";
 
-  cookieRef('tema_color').value = 'light';
+  cookieRef("tema").value = "light";
+  configStore.theme = "light";
 
-  cookieRef('aspecto').value = 'default';
-  configStore.skin = 'default'
+  cookieRef("tema_color").value = "light";
 
-  cookieRef('esta_navBar_vertical_colapsada').value = false;
-  configStore.isVerticalNavCollapsed = false
+  cookieRef("aspecto").value = "default";
+  configStore.skin = "default";
 
-  cookieRef('esta_navBar_vertical_habilitada').value = true;
+  cookieRef("esta_navBar_vertical_colapsada").value = false;
+  configStore.isVerticalNavCollapsed = false;
 
-  cookieRef('tipo_navBar').value = 'vertical';
-  configStore.appContentLayoutNav = 'vertical'
+  cookieRef("esta_navBar_vertical_habilitada").value = true;
 
-  cookieRef('ancho_contenido_aplicacion').value = 'fluid';
-  configStore.appContentWidth = 'fluid'
+  cookieRef("tipo_navBar").value = "vertical";
+  configStore.appContentLayoutNav = "vertical";
 
-  cookieRef('orientacion').value = 'ltr';
-  configStore.isAppRTL = false
+  cookieRef("ancho_contenido_aplicacion").value = "fluid";
+  configStore.appContentWidth = "fluid";
 
-  cookieRef('tiene_preferencias').value = 0;
+  cookieRef("orientacion").value = "ltr";
+  configStore.isAppRTL = false;
 
-}
+  cookieRef("tiene_preferencias").value = 0;
+};
 
-const asignarValorDesdeCokies = () => {
+const asignarValorDesdeCookies = (): void => {
 
   configStore.reset();
 
-  vuetifyTheme.themes.value['light'].colors.primary = cookieRef('color_primario_tema_light').value
-  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = cookieRef('color_oscurecimiento_primario_tema_light').value
+  vuetifyTheme.themes.value["light"].colors.primary = cookieRef("color_primario_tema_light").value;
 
-  vuetifyTheme.themes.value['dark'].colors.primary = cookieRef('color_primario_tema_dark').value
-  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = cookieRef('color_oscurecimiento_primario_tema_dark').value
+  vuetifyTheme.themes.value["light"].colors["primary-darken-1"] = cookieRef("color_oscurecimiento_primario_tema_light").value;
 
-  configStore.isAppRTL = cookieRef('orientacion').value === "rtl"
+  vuetifyTheme.themes.value["dark"].colors.primary = cookieRef("color_primario_tema_dark").value;
+
+  vuetifyTheme.themes.value["dark"].colors["primary-darken-1"] = cookieRef("color_oscurecimiento_primario_tema_dark").value;
+
+  configStore.isAppRTL = cookieRef("orientacion").value === "rtl";
+
+};
+
+const tienePreferencias = cookieRef<boolean>("tiene_preferencias");
+
+
+if (!tienePreferencias.value) {
+
+  getPreferencias();
+
+} else {
+
+  asignarValorDesdeCookies();
 
 }
-
-
 onMounted(() => {
-
-  if(!cookieRef('tiene_preferencias').value){
-
-    getPreferencias()
-
-  } else {
-
-    asignarValorDesdeCokies()
-
-  }
-
-})
-
+  loadings.value = false;
+});
 </script>
+
 
 <template>
   <Component

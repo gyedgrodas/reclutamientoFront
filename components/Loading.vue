@@ -8,7 +8,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-
 interface User {
   id: string;
 }
@@ -16,8 +15,11 @@ interface User {
 const { user } = useSanctumAuth() as { user: User };
 
 const color = computed<string>(() => {
+
   return useCookie(user.id + "tema_color") as string;
+
 });
+
 </script>
 
 
