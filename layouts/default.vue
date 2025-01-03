@@ -83,25 +83,28 @@ const asignarDataACookies = (data: Preferencias): void => {
   cookieRef("aspecto").value = data.aspecto;
   configStore.skin = data.aspecto;
 
-  cookieRef("esta_navBar_vertical_colapsada").value =
-    data.esta_navBar_vertical_colapsada === "1";
-  configStore.isVerticalNavCollapsed =
-    data.esta_navBar_vertical_colapsada === "1";
+  cookieRef("esta_navBar_vertical_colapsada").value = data.esta_navBar_vertical_colapsada === "1";
+  configStore.isVerticalNavCollapsed = data.esta_navBar_vertical_colapsada === "1";
 
-  cookieRef("es_navBar_vertical_semioscura").value =
-    data.es_navBar_vertical_semioscura === "1";
+  cookieRef("es_navBar_vertical_semioscura").value = data.es_navBar_vertical_semioscura === "1";
   configStore.isVerticalNavSemiDark = data.es_navBar_vertical_semioscura === "1";
 
   cookieRef("esta_navBar_vertical_habilitada").value = data.esta_navBar_vertical_habilitada;
 
-  cookieRef('navBar_loyout').value = data.tipo_navBar;
-  configStore.appContentLayoutNav = data.tipo_navBar;
+  cookieRef('navBar_loyout').value = data.navBar_loyout;
+  configStore.appContentLayoutNav = data.navBar_loyout;
 
   cookieRef("ancho_contenido_aplicacion").value = data.ancho_contenido_aplicacion;
   configStore.appContentWidth = data.ancho_contenido_aplicacion;
 
   cookieRef("orientacion").value = data.direccion;
   configStore.isAppRTL = data.direccion === "rtl";
+
+  cookieRef("navBar_vertical_tipo").value = data.navBar_vertical_tipo;
+  configStore.navbarType = data.navBar_vertical_tipo;
+
+  cookieRef("navBar_horizontal_tipo").value = data.navBar_horizontal_tipo;
+  configStore.horizontalNavType = data.navBar_horizontal_tipo;
 
   cookieRef("tiene_preferencias").value = 1;
 };
