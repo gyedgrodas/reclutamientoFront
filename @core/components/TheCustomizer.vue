@@ -662,8 +662,9 @@ const resetCustomizer = async () => {
   }
 }
 
+const cliente = useJsonApiClient();
 
-const cliente = useClienteRequest();
+
 
 interface Preferencias {
   theme: string;
@@ -695,9 +696,9 @@ const guardarPreferencias = async ():void => {
       navBar_loyout: configStore.appContentLayoutNav,
       es_navBar_vertical_semioscura: configStore.isVerticalNavSemiDark,
       esta_navBar_vertical_colapsada: configStore.isVerticalNavCollapsed,
-      // esta_navBar_vertical_habilitada:
+
       navBar_vertical_tipo: configStore.navbarType,
-      navBar_horizontal_tipo: configStore.horizontalNavType,
+      navBar_horizontal_tipo: configStore.horizontalNavType ?? 'sticky',
 
       color_primario_tema_light: vuetifyTheme.themes.value['light'].colors.primary,
       color_oscurecimiento_primario_tema_light: vuetifyTheme.themes.value['light'].colors['primary-darken-1'],
@@ -711,9 +712,10 @@ const guardarPreferencias = async ():void => {
 
     asignarValorACokkies();
 
-    const response = await cliente.post('api/preferencias', data);
 
-    showToastSuccess(response.message);
+    await cliente.Post('api/user_preferencias', data, 'user_preferencias');
+
+    showToastSuccess('Preferencias Actualizadas');
 
   } catch (error) {
 

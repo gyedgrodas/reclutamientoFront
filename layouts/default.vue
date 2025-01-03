@@ -29,7 +29,6 @@ interface Preferencias {
   aspecto: string;
   esta_navBar_vertical_colapsada: string;
   es_navBar_vertical_semioscura: string;
-  esta_navBar_vertical_habilitada: boolean;
   navBar_loyout: string;
   ancho_contenido_aplicacion: string;
   direccion: string;
@@ -44,14 +43,17 @@ const cliente = useClienteRequest();
 const getPreferencias = async (): Promise<void> => {
 
   try {
-    const res = await cliente.get<{ data: Preferencias }>("api/preferencias");
+    const res = await cliente.get<{ data: Preferencias }>("api/user_preferencias");
+
+    console.log(res)
 
     if (!res.data) {
       asigarValorDefectoCookies();
       return;
     }
 
-    asignarDataACookies(res.data);
+    asignarDataACookies(res.data.attributes);
+
   } catch (error) {
     console.error(error);
   }
@@ -89,7 +91,6 @@ const asignarDataACookies = (data: Preferencias): void => {
   cookieRef("es_navBar_vertical_semioscura").value = data.es_navBar_vertical_semioscura === "1";
   configStore.isVerticalNavSemiDark = data.es_navBar_vertical_semioscura === "1";
 
-  cookieRef("esta_navBar_vertical_habilitada").value = data.esta_navBar_vertical_habilitada;
 
   cookieRef('navBar_loyout').value = data.navBar_loyout;
   configStore.appContentLayoutNav = data.navBar_loyout;
@@ -133,7 +134,6 @@ const asigarValorDefectoCookies = (): void => {
   cookieRef("esta_navBar_vertical_colapsada").value = false;
   configStore.isVerticalNavCollapsed = false;
 
-  cookieRef("esta_navBar_vertical_habilitada").value = true;
 
   cookieRef('navBar_loyout').value = "vertical";
   configStore.appContentLayoutNav = "vertical";

@@ -48,13 +48,15 @@ export const useConfigStore = defineStore('config', () => {
     isVerticalNavCollapsed,
     footerType,
     isAppRTL,
-    prefijoCookie
+    prefijoCookie,
+    horizontalNavType
   } = storeToRefs(useLayoutConfigStore())
 
   return {
     theme,
     isVerticalNavSemiDark,
     skin,
+    horizontalNavType,
     prefijoCookie,
     // @layouts exports
     isLessThanOverlayNavBreakpoint,
