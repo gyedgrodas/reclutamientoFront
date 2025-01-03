@@ -144,6 +144,8 @@ const asignarValorDesdeCokies = () => {
   vuetifyTheme.themes.value['dark'].colors.primary = cookieRef('color_primario_tema_dark').value
   vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = cookieRef('color_oscurecimiento_primario_tema_dark').value
 
+  configStore.isAppRTL = cookieRef('orientacion').value === "rtl"
+
 }
 
 
