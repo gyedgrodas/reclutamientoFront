@@ -10,8 +10,6 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
-import { ability } from '@/plugins/casl/ability'
-
 
 const { login } = useSanctumAuth()
 const user = useSanctumUser()
@@ -36,6 +34,8 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const refVForm = ref()
 const msgError = ref('')
 
+const ability = useAbility()
+
 const form = ref({
   usuario_dominio: '',
   password: '',
@@ -53,35 +53,22 @@ const onSubmit = async () => {
       // Realizar login primero (si aún no se ha hecho)
       await login(form.value)
 
-      const tokenEncoded = document.cookie.match(/(?:^|; )sanctum\.token\.cookie=([^;]*)/)?.[1]
-
-      const token = decodeURIComponent(tokenEncoded)
-
       const user = useSanctumUser()
 
-      console.log('Roles:', user.value.abilityRules)
-
       // Extraer datos de manera sencilla
-      const abilityRules = toRaw(user.value.abilityRules) || [] // Elimina el Proxy reactivo
-
-      console.log('Roles:', abilityRules)
+      const abilityRules = toRaw(user?.value.abilityRules) || [] // Elimina el Proxy reactivo
 
       // Guardar los datos en la cookie
       useCookie('userAbilityRules').value = abilityRules
 
       // Actualizar las habilidades en CASE
       ability.update(abilityRules)
-
-      // Actualizar las habilidades en CASE
-      ability.update(rawAbilityRules)
     }
     catch (error) {
       msgError.value = error?.response?._data.message || 'Error desconocido'
     }
   }
 }
-
-console.log('User data', user?.nombre);
 </script>
 
 <template>
@@ -138,21 +125,24 @@ console.log('User data', user?.nombre);
           <h4 class="text-h4 mb-1">
             Bienvenido a <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
           </h4>
-          <p class="mb-0">Iniciar sesión con tu cuenta </p>
+          <p class="mb-0">
+            Iniciar sesión con tu cuenta
+          </p>
           <VAlert
+            v-if="msgError"
             color="error"
             variant="tonal"
-            v-if="msgError"
           >
             <p class="text-sm mb-0">
-              <strong>{{msgError}}</strong>
+              <strong>{{ msgError }}</strong>
             </p>
           </VAlert>
         </VCardText>
         <VCardText>
           <VForm
             ref="refVForm"
-            @submit.prevent="onSubmit">
+            @submit.prevent="onSubmit"
+          >
             <VRow>
               <!-- email -->
               <VCol cols="12">

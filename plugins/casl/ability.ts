@@ -1,7 +1,9 @@
-import { createMongoAbility } from '@casl/ability'
+import { createMongoAbility} from '@casl/ability';
+import type { Subject } from '@casl/ability'; // Importación explícita del tipo
 
-// Regla genérica que permite acciones y sujetos dinámicos
-export interface Rule { action: string; subject: string }
+// Define Rule como una tupla de [acción, sujeto]
+type Rule = [string, Subject];
 
-// Instancia de habilidad sin restricciones estáticas
-export const ability = createMongoAbility<Rule[]>()
+// Instancia de habilidad con el tipo correcto
+export const ability = createMongoAbility<Rule>();
+

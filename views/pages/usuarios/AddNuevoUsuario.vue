@@ -3,7 +3,6 @@ import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 
 import type { VForm } from 'vuetify/components/VForm'
 
-
 interface Emit {
   (e: 'update:esVisible', value: boolean): void
   (e: 'userData', value: any): void
@@ -18,27 +17,26 @@ const emit = defineEmits<Emit>()
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
-const usuario_dominio= ref('')
-const cif= ref('')
-const codigo_bankworks= ref('')
-const codigo_ejecutivo= ref('')
+const usuario_dominio = ref('')
+const cif = ref('')
+const codigo_bankworks = ref('')
+const codigo_ejecutivo = ref('')
 const nombre = ref()
-const apellido= ref('')
+const apellido = ref('')
 const email = ref()
 const fecha_labores = ref()
 const estado = ref()
-const puesto_id = ref()
 const password = ref()
 const nuevoPassword = ref()
-//crear selector de puesto id 1 al 3
+
+// crear selector de puesto id 1 al 3
 const puestos = [
-  {id: 1, nombre: 'Gerente'},
-  {id: 2, nombre: 'Ejecutivo'},
-  {id: 3, nombre: 'Administrativo'}
+  { id: 1, nombre: 'Gerente' },
+  { id: 2, nombre: 'Ejecutivo' },
+  { id: 3, nombre: 'Administrativo' },
 ]
 
-
-const puesto = ref<string>(''); // Definir el tipo como string
+const puesto = ref<string>('') // Definir el tipo como string
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -53,42 +51,42 @@ const closeNavigationDrawer = () => {
 const onSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
-
       // Formatea los datos según JSON:API
-      const data =
-        {
-          usuario_dominio:usuario_dominio.value,
-          cif:cif.value,
+      const data
+        = {
+          usuario_dominio: usuario_dominio.value,
+          cif: cif.value,
           codigo_bankworks: codigo_bankworks.value,
           codigo_ejecutivo: codigo_ejecutivo.value,
-          nombre :nombre.value,
-          apellido:apellido.value,
-          email :email.value,
-          fecha_labores :fecha_labores.value,
-          estado :estado.value,
-          password :password.value,
-          nuevoPassword :nuevoPassword.value,
-        },
+          nombre: nombre.value,
+          apellido: apellido.value,
+          email: email.value,
+          fecha_labores: fecha_labores.value,
+          estado: estado.value,
+          password: password.value,
+          nuevoPassword: nuevoPassword.value,
+        }
+
       // Incluye relaciones en la estructura JSON:API si las necesitas
-        relationships = {
-        puesto: { data: { id:  String(puesto.value), type: 'puesto' } },
+      const relationships = {
+        puesto: { data: { id: String(puesto.value), type: 'puesto' } },
+
         // region: { data: { id: regionId.value, type: 'regiones' } },
         // gerencia: { data: { id: gerenciaId.value, type: 'gerencias' } },
-      };
+      }
 
       // Emite la data formateada
-      emit('userData', { data, relationships });
+      emit('userData', { data, relationships })
 
       // Cierra el formulario y resetea
-      emit('update:esVisible', false);
+      emit('update:esVisible', false)
       nextTick(() => {
-        refForm.value?.reset();
-        refForm.value?.resetValidation();
-      });
+        refForm.value?.reset()
+        refForm.value?.resetValidation()
+      })
     }
-  });
-};
-
+  })
+}
 
 const handleDrawerModelValueUpdate = (val: boolean) => {
   emit('update:esVisible', val)
@@ -227,7 +225,7 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                 />
               </VCol>
 
-              <!--password -->
+              <!-- password -->
               <VCol cols="12">
                 <AppTextField
                   v-model="password"
@@ -237,15 +235,15 @@ const handleDrawerModelValueUpdate = (val: boolean) => {
                 />
               </VCol>
 
-              <!--password_confirmation -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="nuevoPassword"
-                  :rules="[requiredValidator]"
-                  label="Password Confirmation"
-                  placeholder="Password Confirmation"
-                />
-              </VCol>
+              <!-- password_confirmation -->
+<!--              <VCol cols="12">-->
+<!--                <AppTextField-->
+<!--                  v-model="nuevoPassword"-->
+<!--                  :rules="[requiredValidator]"-->
+<!--                  label="Password Confirmation"-->
+<!--                  placeholder="Password Confirmation"-->
+<!--                />-->
+<!--              </VCol>-->
 
               <!-- 👉 Submit and Cancel -->
               <VCol cols="12">
