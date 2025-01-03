@@ -524,7 +524,7 @@ watch(currentLayout, () => {
   else {
     configStore.isVerticalNavCollapsed = false
     configStore.appContentLayoutNav = currentLayout.value
-    cookieRef('tipo_navBar', currentLayout.value).value = currentLayout.value
+    // cookieRef('navBar_loyout'', currentLayout.value).value = currentLayout.value
   }
 
 })
@@ -692,12 +692,12 @@ const guardarPreferencias = async ():void => {
 
       ancho_contenido_aplicacion: configStore.appContentWidth,
       desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled,
-      tipo_navBar: configStore.appContentLayoutNav,
+      navBar_loyout: configStore.appContentLayoutNav,
       es_navBar_vertical_semioscura: configStore.isVerticalNavSemiDark,
       esta_navBar_vertical_colapsada: configStore.isVerticalNavCollapsed,
       // esta_navBar_vertical_habilitada:
-      tipo_barra_navegacion: configStore.navbarType,
-      tipo_barra_navegacion_horizontal: configStore.horizontalNavType,
+      navBar_vertical_tipo: configStore.navbarType,
+      navBar_horizontal_tipo: configStore.horizontalNavType,
 
       color_primario_tema_light: vuetifyTheme.themes.value['light'].colors.primary,
       color_oscurecimiento_primario_tema_light: vuetifyTheme.themes.value['light'].colors['primary-darken-1'],

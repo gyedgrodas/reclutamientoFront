@@ -30,7 +30,7 @@ interface Preferencias {
   esta_navBar_vertical_colapsada: string;
   es_navBar_vertical_semioscura: string;
   esta_navBar_vertical_habilitada: boolean;
-  tipo_navBar: string;
+  navBar_loyout: string;
   ancho_contenido_aplicacion: string;
   direccion: string;
 }
@@ -94,7 +94,7 @@ const asignarDataACookies = (data: Preferencias): void => {
 
   cookieRef("esta_navBar_vertical_habilitada").value = data.esta_navBar_vertical_habilitada;
 
-  cookieRef("tipo_navBar").value = data.tipo_navBar;
+  cookieRef('navBar_loyout').value = data.tipo_navBar;
   configStore.appContentLayoutNav = data.tipo_navBar;
 
   cookieRef("ancho_contenido_aplicacion").value = data.ancho_contenido_aplicacion;
@@ -132,7 +132,7 @@ const asigarValorDefectoCookies = (): void => {
 
   cookieRef("esta_navBar_vertical_habilitada").value = true;
 
-  cookieRef("tipo_navBar").value = "vertical";
+  cookieRef('navBar_loyout').value = "vertical";
   configStore.appContentLayoutNav = "vertical";
 
   cookieRef("ancho_contenido_aplicacion").value = "fluid";
