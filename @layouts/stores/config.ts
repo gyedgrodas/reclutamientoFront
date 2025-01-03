@@ -70,12 +70,12 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   
   function resetLayoutConfig() {
     appContentWidth.value = cookieRef('ancho_contenido_aplicacion').value
-    navbarType.value = cookieRef('tipo_barra_navegacion').value
+    navbarType.value = cookieRef('navBar_vertical_tipo').value
     isNavbarBlurEnabled.value = cookieRef('desenfoque_habilitado_barra_navegacion').value
     appContentLayoutNav.value = cookieRef('navBar_loyout').value
     isVerticalNavCollapsed.value = cookieRef('esta_navBar_vertical_colapsada').value
     footerType.value = cookieRef('tipo_pie_pagina').value
-    horizontalNavType.value = cookieRef('tipo_nav_horizontal').value
+    horizontalNavType.value = cookieRef('navBar_horizontal_tipo').value
     horizontalNavPopoverOffset.value = cookieRef('offset_popover_nav_horizontal').value
   }
   
