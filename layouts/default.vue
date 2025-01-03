@@ -98,15 +98,15 @@ const asignarDataACokkies = (res) => {
 
 const asigarValorDefectoCookies = () => {
 
-  cookieRef('color_primario_tema_light').value = '#1976D2';
-  cookieRef('color_oscurecimiento_primario_tema_light').value = '#1565C0';
-  vuetifyTheme.themes.value['light'].colors.primary = '#1976D2'
-  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = '#1565C0'
+  cookieRef('color_primario_tema_light').value = '#7367F0';
+  cookieRef('color_oscurecimiento_primario_tema_light').value = '#675DD8';
+  vuetifyTheme.themes.value['light'].colors.primary = '#7367F0'
+  vuetifyTheme.themes.value['light'].colors['primary-darken-1'] = '#675DD8'
 
-  cookieRef('color_primario_tema_dark').value = '#1976D2';
-  cookieRef('color_oscurecimiento_primario_tema_dark').value = '#1565C0';
-  vuetifyTheme.themes.value['dark'].colors.primary = '#1976D2'
-  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = '#1565C0'
+  cookieRef('color_primario_tema_dark').value = '#7367F0';
+  cookieRef('color_oscurecimiento_primario_tema_dark').value = '#675DD8';
+  vuetifyTheme.themes.value['dark'].colors.primary = '#7367F0'
+  vuetifyTheme.themes.value['dark'].colors['primary-darken-1'] = '#675DD8'
 
   cookieRef('tema').value = 'light';
   configStore.theme = 'light'
@@ -124,8 +124,8 @@ const asigarValorDefectoCookies = () => {
   cookieRef('tipo_navBar').value = 'vertical';
   configStore.appContentLayoutNav = 'vertical'
 
-  cookieRef('ancho_contenido_aplicacion').value = 'full';
-  configStore.appContentWidth = 'full'
+  cookieRef('ancho_contenido_aplicacion').value = 'fluid';
+  configStore.appContentWidth = 'fluid'
 
   cookieRef('orientacion').value = 'ltr';
   configStore.isAppRTL = false
