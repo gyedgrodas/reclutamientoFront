@@ -45,8 +45,6 @@ const getPreferencias = async (): Promise<void> => {
   try {
     const res = await cliente.get<{ data: Preferencias }>("api/user_preferencias");
 
-    console.log(res)
-
     if (!res.data) {
       asigarValorDefectoCookies();
       return;
@@ -63,20 +61,16 @@ const getPreferencias = async (): Promise<void> => {
 
 const asignarDataACookies = (data: Preferencias): void => {
   cookieRef("color_primario_tema_light").value = data.color_primario_tema_light;
-  cookieRef("color_oscurecimiento_primario_tema_light").value =
-    data.color_oscurecimiento_primario_tema_light;
+  cookieRef("color_oscurecimiento_primario_tema_light").value = data.color_oscurecimiento_primario_tema_light;
 
   vuetifyTheme.themes.value["light"].colors.primary = data.color_primario_tema_light;
-  vuetifyTheme.themes.value["light"].colors["primary-darken-1"] =
-    data.color_oscurecimiento_primario_tema_light;
+  vuetifyTheme.themes.value["light"].colors["primary-darken-1"] = data.color_oscurecimiento_primario_tema_light;
 
   cookieRef("color_primario_tema_dark").value = data.color_primario_tema_dark;
-  cookieRef("color_oscurecimiento_primario_tema_dark").value =
-    data.color_oscurecimiento_primario_tema_dark;
+  cookieRef("color_oscurecimiento_primario_tema_dark").value = data.color_oscurecimiento_primario_tema_dark;
 
   vuetifyTheme.themes.value["dark"].colors.primary = data.color_primario_tema_dark;
-  vuetifyTheme.themes.value["dark"].colors["primary-darken-1"] =
-    data.color_oscurecimiento_primario_tema_dark;
+  vuetifyTheme.themes.value["dark"].colors["primary-darken-1"] = data.color_oscurecimiento_primario_tema_dark;
 
   cookieRef("tema").value = data.tema;
   configStore.theme = data.tema;
@@ -108,6 +102,28 @@ const asignarDataACookies = (data: Preferencias): void => {
   configStore.horizontalNavType = data.navBar_horizontal_tipo;
 
   cookieRef("tiene_preferencias").value = 1;
+
+  asignarDataACokkiesDefault();
+
+};
+
+const asignarDataACokkiesDefault = (): void => {
+
+  useCookie("default_color_primario_tema_light").value = vuetifyTheme.themes.value["light"].colors.primary;
+  useCookie("default_color_oscurecimiento_primario_tema_light").value = vuetifyTheme.themes.value["light"].colors["primary-darken-1"];
+  useCookie("default_color_primario_tema_dark").value = vuetifyTheme.themes.value["dark"].colors.primary;
+  useCookie("default_color_oscurecimiento_primario_tema_dark").value = vuetifyTheme.themes.value["dark"].colors["primary-darken-1"];
+  useCookie("default_tema").value = configStore.theme;
+  useCookie("default_tema_color").value = cookieRef("tema_color").value;
+  useCookie("default_aspecto").value = configStore.skin;
+  useCookie("default_esta_navBar_vertical_colapsada").value = configStore.isVerticalNavCollapsed;
+  useCookie("default_es_navBar_vertical_semioscura").value = configStore.isVerticalNavSemiDark;
+  useCookie("default_navBar_loyout").value = configStore.appContentLayoutNav;
+  useCookie("default_ancho_contenido_aplicacion").value = configStore.appContentWidth;
+  useCookie("default_orientacion").value = configStore.isAppRTL;
+  useCookie("default_navBar_vertical_tipo").value = configStore.navbarType;
+  useCookie("default_navBar_horizontal_tipo").value = configStore.horizontalNavType;
+
 };
 
 const asigarValorDefectoCookies = (): void => {
