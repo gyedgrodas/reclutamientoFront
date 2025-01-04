@@ -27,7 +27,7 @@ export const useConfigStore = defineStore('config', () => {
   const skin = cookieRef('aspecto', themeConfig.app.skin)
   
   
-  function reset() {
+  function reset(): void {
     theme.value = cookieRef('tema').value
     isVerticalNavSemiDark.value = cookieRef('es_navegacion_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark).value
     skin.value = cookieRef('aspecto', themeConfig.app.skin).value
@@ -36,7 +36,24 @@ export const useConfigStore = defineStore('config', () => {
     
   }
   
-  
+  function asignarDataACookiesDefault(): void {
+    
+    useCookie("default_color_primario_tema_light").value = cookieRef("color_primario_tema_light").value;
+    useCookie("default_color_oscurecimiento_primario_tema_light").value = cookieRef("color_oscurecimiento_primario_tema_light").value;
+    useCookie("default_color_primario_tema_dark").value = cookieRef("color_primario_tema_dark").value;
+    useCookie("default_color_oscurecimiento_primario_tema_dark").value = cookieRef("color_oscurecimiento_primario_tema_dark").value;
+    useCookie("default_tema").value = cookieRef("tema").value;
+    useCookie("default_tema_color").value = cookieRef("tema_color").value;
+    useCookie("default_aspecto").value = cookieRef("aspecto").value;
+    useCookie("default_esta_navBar_vertical_colapsada").value = cookieRef("esta_navBar_vertical_colapsada").value;
+    useCookie("default_es_navBar_vertical_semioscura").value = cookieRef("es_navBar_vertical_semioscura").value;
+    useCookie("default_navBar_loyout").value = cookieRef("navBar_loyout").value;
+    useCookie("default_ancho_contenido_aplicacion").value = cookieRef("ancho_contenido_aplicacion").value;
+    useCookie("default_orientacion").value = cookieRef("orientacion").value;
+    useCookie("default_navBar_vertical_tipo").value = cookieRef("navBar_vertical_tipo").value;
+    useCookie("default_navBar_horizontal_tipo").value = cookieRef("navBar_horizontal_tipo").value;
+    
+  }
   
   // ℹ️ We need to use `storeToRefs` to forward the state
   const {
@@ -70,6 +87,7 @@ export const useConfigStore = defineStore('config', () => {
     tema_color,
     // methods
     reset,
+    asignarDataACookiesDefault
   }
 })
 // !SECTION

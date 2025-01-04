@@ -692,9 +692,9 @@ const guardarPreferencias = async ():void => {
       aspecto: configStore.skin,
 
       ancho_contenido_aplicacion: configStore.appContentWidth,
-      desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled,
+      desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled ?? false,
       navBar_loyout: configStore.appContentLayoutNav,
-      es_navBar_vertical_semioscura: configStore.isVerticalNavSemiDark,
+      es_navBar_vertical_semioscura: configStore.isVerticalNavSemiDark ?? false,
       esta_navBar_vertical_colapsada: configStore.isVerticalNavCollapsed,
 
       navBar_vertical_tipo: configStore.navbarType,
@@ -710,10 +710,11 @@ const guardarPreferencias = async ():void => {
 
     }
 
-    asignarValorACokkies();
-
-
     await cliente.Post('api/user_preferencias', data, 'user_preferencias');
+
+    await asignarValorACokkies();
+
+    configStore.asignarDataACookiesDefault();
 
     showToastSuccess('Preferencias Actualizadas');
 

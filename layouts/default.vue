@@ -16,9 +16,10 @@ const configStore = useConfigStore()
 // Remove below composable usage if you are not using horizontal nav layout in your app
 switchToVerticalNavOnLtOverlayNavBreakpoint()
 
-const { layoutAttrs, injectSkinClasses } = useSkins()
+const {layoutAttrs, injectSkinClasses} = useSkins()
 
 injectSkinClasses()
+
 interface Preferencias {
   color_primario_tema_light: string;
   color_oscurecimiento_primario_tema_light: string;
@@ -37,7 +38,7 @@ interface Preferencias {
 const vuetifyTheme = useTheme();
 const loadings = ref(true);
 
-const { user } = useSanctumAuth();
+const {user} = useSanctumAuth();
 const cliente = useClienteRequest();
 
 const getPreferencias = async (): Promise<void> => {
@@ -50,7 +51,9 @@ const getPreferencias = async (): Promise<void> => {
       return;
     }
 
-    asignarDataACookies(res.data.attributes);
+    await asignarDataACookies(res.data.attributes);
+
+    configStore.asignarDataACookiesDefault()
 
   } catch (error) {
     console.error(error);
@@ -102,27 +105,6 @@ const asignarDataACookies = (data: Preferencias): void => {
   configStore.horizontalNavType = data.navBar_horizontal_tipo;
 
   cookieRef("tiene_preferencias").value = 1;
-
-  asignarDataACokkiesDefault();
-
-};
-
-const asignarDataACokkiesDefault = (): void => {
-
-  useCookie("default_color_primario_tema_light").value = vuetifyTheme.themes.value["light"].colors.primary;
-  useCookie("default_color_oscurecimiento_primario_tema_light").value = vuetifyTheme.themes.value["light"].colors["primary-darken-1"];
-  useCookie("default_color_primario_tema_dark").value = vuetifyTheme.themes.value["dark"].colors.primary;
-  useCookie("default_color_oscurecimiento_primario_tema_dark").value = vuetifyTheme.themes.value["dark"].colors["primary-darken-1"];
-  useCookie("default_tema").value = configStore.theme;
-  useCookie("default_tema_color").value = cookieRef("tema_color").value;
-  useCookie("default_aspecto").value = configStore.skin;
-  useCookie("default_esta_navBar_vertical_colapsada").value = configStore.isVerticalNavCollapsed;
-  useCookie("default_es_navBar_vertical_semioscura").value = configStore.isVerticalNavSemiDark;
-  useCookie("default_navBar_loyout").value = configStore.appContentLayoutNav;
-  useCookie("default_ancho_contenido_aplicacion").value = configStore.appContentWidth;
-  useCookie("default_orientacion").value = configStore.isAppRTL;
-  useCookie("default_navBar_vertical_tipo").value = configStore.navbarType;
-  useCookie("default_navBar_horizontal_tipo").value = configStore.horizontalNavType;
 
 };
 
