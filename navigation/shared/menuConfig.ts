@@ -1,32 +1,33 @@
 const menuConfig = [
   {
     title: 'Home',
-    to: { name: 'index' },
-    icon: { icon: 'tabler-smart-home' },
+    to: 'index' ,
+    icon: 'tabler-smart-home' ,
     action: 'crear usuarios',
     subject: 'usuarios',
   },
   {
     title: 'Second page',
-    to: { name: 'second-page' },
-    icon: { icon: 'tabler-file' },
+    to: 'second-page' ,
+    icon: 'tabler-arrows-double-se-nw' ,
     action: 'crear usuarios',
     subject: 'usuarios',
   },
   {
     title: 'Tercer page',
-    to: { name: 'tercera-pagina' },
-    icon: { icon: 'tabler-file' },
+    to: 'tercera-pagina' ,
+    icon: 'tabler-smart-home' ,
     action: 'editar usuarios',
     subject: 'usuarios',
   },
   {
     title: 'Modulo Usuarios',
-    icon: { icon: 'tabler-users' },
+    icon: 'tabler-users' ,
     children: [
       {
         title: 'Usuarios',
         to: 'usuarios',
+        icon: 'tabler-user' ,
         action: 'listar usuarios',
         subject: 'usuarios',
       },
