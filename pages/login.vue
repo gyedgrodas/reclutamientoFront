@@ -52,11 +52,8 @@ const onSubmit = async () => {
     try {
       // Realizar login primero (si aún no se ha hecho)
       await login(form.value)
-
-      const user = useSanctumUser()
-
       // Extraer datos de manera sencilla
-      const abilityRules = toRaw(user?.value.abilityRules) || [] // Elimina el Proxy reactivo
+      const abilityRules = toRaw(user?.value?.abilityRules) || [] // Elimina el Proxy reactivo
 
       // Guardar los datos en la cookie
       useCookie('userAbilityRules').value = abilityRules
@@ -65,10 +62,16 @@ const onSubmit = async () => {
       ability.update(abilityRules)
     }
     catch (error) {
-      msgError.value = error?.response?._data.message || 'Error desconocido'
+      msgError.value = error?.response?._data.errors[0].title || 'Error desconocido'
     }
   }
 }
+
+
+watch(form, () => {
+  msgError.value = ''
+}, { deep: true })
+
 </script>
 
 <template>
@@ -151,7 +154,7 @@ const onSubmit = async () => {
                   autofocus
                   label="Usuario Dominio"
                   type="email"
-                  placeholder="johndoe@email.com"
+                  placeholder="gyxxxxxx"
                   :rules="[requiredValidator, usuarioValidator]"
                   :error-messages="errors.usuario_dominio"
                 />

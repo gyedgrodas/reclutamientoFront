@@ -24,9 +24,26 @@ export default defineAppConfig({
         ctx: FetchContext,  // Contexto de la respuesta de la solicitud
         logger: ConsolaInstance,  // Logger para registrar mensajes de depuración o error
       ) => {
+        if (ctx.response?.status === 401) {
+          // Elimina las cookies relacionadas con permisos
+          eliminarCookiesPermisos();
+        }
         // Mensaje de log para mostrar que el interceptor onResponse ha sido llamado
         logger.debug(`[onResponse] custom interceptor (${ctx.request})`)  // Log de depuración con la solicitud que ha recibido la respuesta
       },
     },
   },
 })
+
+
+// Función para eliminar las cookies relacionadas con permisos
+const eliminarCookiesPermisos = () => {
+  const cookies = document.cookie.split(';');
+
+  cookies.forEach(cookie => {
+    const cookieName = cookie.split('=')[0].trim();
+    if (cookieName.includes('userAbilityRules')) {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    }
+  });
+};
