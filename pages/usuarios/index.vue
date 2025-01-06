@@ -8,8 +8,8 @@ import { useJsonApiClient } from '@/composables/useJsonApiClient'
 // agregar middeleware para la pagina definePageMeta
 definePageMeta({
   middleware: 'permissions',
-  action: 'listar usuario', // Acción requerida
-  subject: 'usuario',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+  action: 'listar usuarios', // Acción requerida
+  subject: 'usuarios',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 });
 
 
@@ -83,10 +83,7 @@ const headers = [
 ]
 
 const addNuevoUsuario = async (userData: any) => {
-  console.log(userData.data)
-
   const response = await cliente.Post('/api/users', userData.data, 'users', userData.relationships)
-
   if (response)
     fetchUsers()
 }
@@ -138,7 +135,7 @@ const editUser = (user: any) => {
 
         <!-- Botón para agregar un nuevo usuario -->
         <VBtn
-          v-if="can('crear usuario', 'usuario')"
+          v-if="can('crear usuarios', 'usuarios')"
           prepend-icon="tabler-plus"
           @click="agregarUsuario = true"
         >
@@ -146,7 +143,6 @@ const editUser = (user: any) => {
         </VBtn>
       </div>
     </VCardText>
-    <h1>{{ user?.nombre || user?.usuario_dominio }}</h1>
     <VDataTableServer
       v-model:items-per-page="itemsPerPage"
       v-model:page="currentPage"
@@ -161,7 +157,7 @@ const editUser = (user: any) => {
     >
       <template #item.actions="{ item }">
         <VBtn
-          v-if="can('editar usuario', 'usuario')"
+          v-if="can('editar usuarios', 'usuarios')"
           icon
           variant="text"
           color="primary"
@@ -170,7 +166,7 @@ const editUser = (user: any) => {
           <VIcon icon="tabler-edit" />
         </VBtn>
         <VBtn
-          v-if="can('eliminar usuario', 'usuario')"
+          v-if="can('eliminar usuarios', 'usuarios')"
           icon
           color="error"
           variant="text"
