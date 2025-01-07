@@ -28,10 +28,11 @@ provide(injectionKeyIsVerticalNavHovered, isHovered)
 const configStore = useLayoutConfigStore()
 
 const resolveNavItemComponent = (item: NavLink | NavSectionTitle | NavGroup): unknown => {
-  if ('heading' in item)
+  if ('heading' in item) {
+
     return VerticalNavSectionTitle
-  if ('children' in item)
-    return VerticalNavGroup
+  }
+
 
   return VerticalNavLink
 }

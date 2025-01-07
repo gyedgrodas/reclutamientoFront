@@ -6,13 +6,9 @@
 
 
       <v-card-text>
-        <h1 v-text="user?.id"></h1>
 
-        <VBtn
-          @click="getOpcionesMenu"
-        >
-          GetMenuOpciones
-        </VBtn>
+        <p v-text="opcionesMenu"></p>
+        <p v-text="navItems"></p>
 
       </v-card-text>
 
@@ -26,27 +22,9 @@
 
 <script setup>
 
-const { user } = useSanctumAuth();
+import navItems from '@/navigation/vertical'
 
-import { useConfigStore } from '@core/stores/config'
-
-const configStore = useConfigStore();
-
-const { Get } = useJsonApiClient();
-
-const getOpcionesMenu = async () => {
-
-  try {
-
-    const res = await Get("api/menu_opciones");
-
-    console.log(res)
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-}
+const opcionesMenu = useState('menu')
+// const navItems = ref(opcionesMenu.value)
 
 </script>

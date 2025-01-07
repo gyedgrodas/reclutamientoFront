@@ -20,7 +20,7 @@ const hideTitleAndBadge = configStore.isVerticalNavMini()
 <template>
 
   <li
-    v-if="can(item.action, item.subject)"
+
     class="nav-link"
     :class="{ disabled: item.disable }"
   >
@@ -43,7 +43,7 @@ const hideTitleAndBadge = configStore.isVerticalNavMini()
           class="nav-item-title"
           v-bind="getDynamicI18nProps(item.title, 'span')"
         >
-          {{ item.title }}
+          {{ item.titulo }}
         </Component>
 
         <!-- 👉 Badge -->

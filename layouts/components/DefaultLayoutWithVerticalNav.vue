@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import navItems from '@/navigation/vertical'
+// import navItems from '@/navigation/vertical'
 import {themeConfig} from '@themeConfig'
 
 const vuetifyTheme = useTheme()
 import {useTheme} from "vuetify";
 
-
+const navItems = useState('menu')
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
