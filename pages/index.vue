@@ -9,9 +9,9 @@
         <h1 v-text="user?.id"></h1>
 
         <VBtn
-          @click="cambiarPrefijo"
+          @click="getOpcionesMenu"
         >
-          Cambiar prefijo
+          GetMenuOpciones
         </VBtn>
 
       </v-card-text>
@@ -32,10 +32,21 @@ import { useConfigStore } from '@core/stores/config'
 
 const configStore = useConfigStore();
 
-const cambiarPrefijo = () => {
+const { Get } = useJsonApiClient();
 
-  configStore.prefijoCookie = 'nuevoPrefijo_';
+const getOpcionesMenu = async () => {
 
+  try {
+
+    const res = await Get("api/menu_opciones");
+
+    console.log(res)
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
 }
 
 </script>

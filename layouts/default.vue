@@ -39,12 +39,61 @@ const vuetifyTheme = useTheme();
 const loadings = ref(true);
 
 const {user} = useSanctumAuth();
-const cliente = useClienteRequest();
+
+const { Get } = useJsonApiClient()
+
+const { showToastSuccess, showToastError } = useToast();
+
+const getOpcionesMenu = async (): Promise<void> => {
+
+  try {
+
+    const res = await Get("api/menu_opciones");
+
+    console.log(res);
+
+    return res;
+
+  } catch (error) {
+
+    throw error;
+
+  }
+};
+
+const getConfiguraciones = async ():void => {
+
+  loadings.value = true;
+
+  try {
+
+    await getOpcionesMenu();
+
+    await getPreferencias();
+
+    showToastSuccess("Configuraciones obtenidas con éxito");
+
+  } catch (error) {
+
+    showToastError("Error al cargar las configuraciones");
+
+  } finally {
+
+    loadings.value = false;
+  }
+
+};
+
+getConfiguraciones();
 
 const getPreferencias = async (): Promise<void> => {
 
+  if (tienePreferencias.value)
+      return asignarValorDesdeCookies();
+
   try {
-    const res = await cliente.get<{ data: Preferencias }>("api/user_preferencias");
+
+    const res = await Get<{ data: Preferencias }>("api/user_preferencias");
 
     if (!res.data) {
       asigarValorDefectoCookies();
@@ -56,11 +105,12 @@ const getPreferencias = async (): Promise<void> => {
     configStore.asignarDataACookiesDefault()
 
   } catch (error) {
+
     console.error(error);
+
   }
 
 };
-
 
 const asignarDataACookies = (data: Preferencias): void => {
   cookieRef("color_primario_tema_light").value = data.color_primario_tema_light;
@@ -163,19 +213,6 @@ const asignarValorDesdeCookies = (): void => {
 
 const tienePreferencias = cookieRef<boolean>("tiene_preferencias");
 
-
-if (!tienePreferencias.value) {
-
-  getPreferencias();
-
-} else {
-
-  asignarValorDesdeCookies();
-
-}
-onMounted(() => {
-  loadings.value = false;
-});
 </script>
 
 
