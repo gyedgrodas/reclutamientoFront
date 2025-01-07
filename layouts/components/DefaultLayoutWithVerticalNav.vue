@@ -6,6 +6,7 @@ const vuetifyTheme = useTheme()
 import {useTheme} from "vuetify";
 
 const navItems = useState('menu')
+console.log(navItems)
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
@@ -14,7 +15,7 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
-import {layoutConfig, VerticalNavLayout} from '@layouts'
+import {VerticalNavLayout} from '@layouts'
 
 </script>
 
