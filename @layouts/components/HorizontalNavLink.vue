@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
         class="nav-item-title"
         v-bind="getDynamicI18nProps(item.title, 'span')"
       >
-        {{ item.title }}
+        {{ item.titulo }}
       </Component>
     </Component>
   </li>
