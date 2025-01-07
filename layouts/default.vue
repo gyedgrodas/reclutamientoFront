@@ -20,11 +20,7 @@ const {layoutAttrs, injectSkinClasses} = useSkins()
 
 injectSkinClasses()
 
-import navItems from '@/navigation/vertical'
-
-const menu = useState('menu', () => {
-  return navItems
-})
+const menu = useState('menu', () => [])
 
 interface Preferencias {
   color_primario_tema_light: string;
@@ -56,7 +52,7 @@ const getOpcionesMenu = async (): Promise<void> => {
 
     const res = await Get("api/menu_opciones");
 
-    // console.log(res);
+    menu.value = res.data;
 
     return res;
 

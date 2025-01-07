@@ -84,13 +84,13 @@ watch(
 */
 watch(isGroupOpen, (val: boolean) => {
   // Find group index for adding/removing group from openGroups array
-  const grpIndex = openGroups.value.indexOf(props.item.title)
+  const grpIndex = openGroups.value.indexOf(props.item.titulo)
 
   // update openGroups array for addition/removal of current group
 
   // If group is opened => Add it to `openGroups` array
   if (val && grpIndex === -1) {
-    openGroups.value.push(props.item.title)
+    openGroups.value.push(props.item.titulo)
   }
 
   // If group is closed remove itself and its children from the `openGroups`
@@ -115,7 +115,7 @@ watch(isGroupOpen, (val: boolean) => {
 watch(openGroups, val => {
   // Prevent closing recently opened inactive group.
   const lastOpenedGroup = val.at(-1)
-  if (lastOpenedGroup === props.item.title)
+  if (lastOpenedGroup === props.item.titulo)
     return
 
   const isActive = isNavGroupActive(props.item.children, router)
@@ -170,12 +170,12 @@ watch(
         <!-- 👉 Title -->
         <Component
           :is=" layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
-          v-bind="getDynamicI18nProps(item.title, 'span')"
+          v-bind="getDynamicI18nProps(item.titulo, 'span')"
           v-show="!hideTitleAndBadge"
           key="title"
           class="nav-item-title"
         >
-          {{ item.title }}
+          {{ item.titulo }}
         </Component>
 
         <!-- 👉 Badge -->
