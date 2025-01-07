@@ -30,8 +30,14 @@ const configStore = useLayoutConfigStore()
 const resolveNavItemComponent = (item: NavLink | NavSectionTitle | NavGroup): unknown => {
   if ('heading' in item)
     return VerticalNavSectionTitle
-  if ('children' in item)
+  // if ('children' in item)
+  //   return VerticalNavGroup
+
+  if (item.children.length > 0)
     return VerticalNavGroup
+
+
+
 
   return VerticalNavLink
 }

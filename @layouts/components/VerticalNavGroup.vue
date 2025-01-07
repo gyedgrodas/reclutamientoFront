@@ -41,7 +41,7 @@ const isAnyChildOpen = (children: NavGroup['children']): boolean => {
   return children.some(child => {
     let result = openGroups.value.includes(child.title)
 
-    if ('children' in child)
+    if (child.children.length > 0)
       result = isAnyChildOpen(child.children) || result
 
     return result
@@ -50,7 +50,7 @@ const isAnyChildOpen = (children: NavGroup['children']): boolean => {
 
 const collapseChildren = (children: NavGroup['children']) => {
   children.forEach(child => {
-    if ('children' in child)
+    if (child.children.length > 0)
       collapseChildren(child.children)
 
     openGroups.value = openGroups.value.filter(group => group !== child.title)
@@ -205,7 +205,7 @@ watch(
         class="nav-group-children"
       >
         <Component
-          :is="'children' in child ? 'VerticalNavGroup' : VerticalNavLink"
+          :is="child.children.length > 0 ? 'VerticalNavGroup' : VerticalNavLink"
           v-for="child in item.children"
           :key="child.title"
           :item="child"
