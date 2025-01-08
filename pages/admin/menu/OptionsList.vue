@@ -1,5 +1,5 @@
 <template>
-  <ul class="list-group sortable">
+  <ul style="list-style-type: none; ">
     <option-item
       v-for="option in opciones"
       :key="option.id"
