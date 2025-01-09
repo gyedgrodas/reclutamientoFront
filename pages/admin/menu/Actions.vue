@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Aquí coloca el contenido del include 'admin.options.datatables_actions' -->
 
       <VBtn
         icon="tabler-plus"
@@ -8,7 +7,7 @@
         color="success"
         size="extra-small"
         @click="performAction"
-
+        v-if="!esTituloSeccion"
       />
 
       <VBtn
@@ -32,11 +31,15 @@
 
 <script>
 export default {
-  name: 'Actions',
+  // name: 'Actions',
   props: {
     id: {
       type: [String, Number],
       required: true,
+    },
+    esTituloSeccion: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {

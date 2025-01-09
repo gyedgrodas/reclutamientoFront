@@ -5,19 +5,7 @@
 
   >
 
-
-    <div style="display: flex">
-
-      <i :class=" option.titulo && !option.icon ? 'tabler-circle' : option.icon " style="width: 25px; height: 25px"></i>
-
-      {{ option.titulo ?? option.heading + ' (sección)' }}
-
-      &nbsp;
-
-      <Actions :id="option.id" />
-
-    </div>
-
+    <option-text :item="option" />
 
     <ul v-if="option.children && option.children.length > 0">
       <option-item
@@ -32,10 +20,11 @@
 
 <script>
 import Actions from './Actions.vue';
+import OptionText from './OptionText.vue';
 
 export default {
-  name: 'OptionItem',
-  components: { Actions },
+  // name: 'OptionItem',
+  components: {OptionText, Actions},
   props: {
     option: {
       type: Object,
