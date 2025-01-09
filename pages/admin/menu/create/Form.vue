@@ -88,103 +88,100 @@ watch(esTituloSeccion, (newVal) => {
 
 <template>
 
+  <VCol cols="12" class="d-flex flex-wrap" v-if="!props.parentId" >
+    <p class="text-h6 mt-3 ml-2 mr-2">¿Es un título de sección?</p>
+    <VSwitch v-model="esTituloSeccion"/>
+  </VCol>
 
-    <VCol cols="12" class="d-flex flex-wrap" v-if="!props.parentId" >
-      <p class="text-h6 mt-3 ml-2 mr-2">¿Es un título de sección?</p>
-      <VSwitch v-model="esTituloSeccion"/>
-    </VCol>
-
-    <VForm
-      ref="formOpcion"
-      @submit.prevent="onSubmitFormOpcion"
-      v-if="!esTituloSeccion"
-    >
-      <VCol cols="12" class="d-flex flex-wrap">
-        <VCol cols="12" md="6">
-          <AppTextField
-            v-model="opcion.titulo"
-            label="Titulo"
-            :rules="[requiredValidator]"
-          />
-        </VCol>
-
-        <VCol cols="12" md="6">
-
-          <AppAutocomplete
-            label="Ruta:"
-            :items="rutasSistema"
-            item-title="name"
-            item-value="name"
-            v-model="opcion.ruta"
-            placeholder="Seleccione una ruta"
-          />
-        </VCol>
-
-        <VCol cols="12" md="6">
-          <AppTextField
-            v-model="opcion.icono"
-            label="Icono"
-          />
-        </VCol>
-
-        <VCol cols="12" md="6">
-          <AppTextField
-            v-model="opcion.action"
-            label="Acción"
-            :rules="[requiredValidator]"
-          />
-        </VCol>
-
-        <VCol cols="12" md="6">
-          <AppTextField
-            v-model="opcion.subject"
-            label="Subject"
-            :rules="[requiredValidator]"
-          />
-        </VCol>
-
-        <VCol cols="12" class="d-flex gap-4">
-          <VBtn type="submit">Submit</VBtn>
-          <VBtn type="reset" color="secondary" variant="tonal">Reset</VBtn>
-        </VCol>
+  <VForm v-if="!esTituloSeccion"
+    ref="formOpcion"
+    @submit.prevent="onSubmitFormOpcion"
+  >
+    <VCol cols="12" class="d-flex flex-wrap">
+      <VCol cols="12" md="6">
+        <AppTextField
+          v-model="opcion.titulo"
+          label="Titulo"
+          :rules="[requiredValidator]"
+        />
       </VCol>
-    </VForm>
 
-    <VForm
-      ref="formTituloSeccion"
-      @submit.prevent="onSubmitFormTituloSeccion"
-      v-if="esTituloSeccion"
-    >
-      <VCol cols="12" class="d-flex flex-wrap">
-        <VCol cols="12" md="6">
-          <AppTextField
-            v-model="opcion.titulo_seccion"
-            label="Titulo Sección"
-            :rules="[requiredValidator]"
-          />
-        </VCol>
+      <VCol cols="12" md="6">
 
-        <VCol cols="12" md="6">
-          <AppTextField
-            v-model="opcion.action"
-            label="Acción"
-            :rules="[requiredValidator]"
-          />
-        </VCol>
+        <AppAutocomplete
+          label="Ruta:"
+          :items="rutasSistema"
+          item-title="name"
+          item-value="name"
+          v-model="opcion.ruta"
+          placeholder="Seleccione una ruta"
+        />
+      </VCol>
 
-        <VCol cols="12" md="6">
-          <AppTextField
-            v-model="opcion.subject"
-            label="Subject"
-            :rules="[requiredValidator]"
-          />
-        </VCol>
+      <VCol cols="12" md="6">
+        <AppTextField
+          v-model="opcion.icono"
+          label="Icono"
+        />
+      </VCol>
+
+      <VCol cols="12" md="6">
+        <AppTextField
+          v-model="opcion.action"
+          label="Acción"
+          :rules="[requiredValidator]"
+        />
+      </VCol>
+
+      <VCol cols="12" md="6">
+        <AppTextField
+          v-model="opcion.subject"
+          label="Subject"
+          :rules="[requiredValidator]"
+        />
       </VCol>
 
       <VCol cols="12" class="d-flex gap-4">
         <VBtn type="submit">Submit</VBtn>
         <VBtn type="reset" color="secondary" variant="tonal">Reset</VBtn>
       </VCol>
-    </VForm>
+    </VCol>
+  </VForm>
+
+  <VForm v-else
+    ref="formTituloSeccion"
+    @submit.prevent="onSubmitFormTituloSeccion"
+  >
+    <VCol cols="12" class="d-flex flex-wrap">
+      <VCol cols="12" md="6">
+        <AppTextField
+          v-model="opcion.titulo_seccion"
+          label="Titulo Sección"
+          :rules="[requiredValidator]"
+        />
+      </VCol>
+
+      <VCol cols="12" md="6">
+        <AppTextField
+          v-model="opcion.action"
+          label="Acción"
+          :rules="[requiredValidator]"
+        />
+      </VCol>
+
+      <VCol cols="12" md="6">
+        <AppTextField
+          v-model="opcion.subject"
+          label="Subject"
+          :rules="[requiredValidator]"
+        />
+      </VCol>
+    </VCol>
+
+    <VCol cols="12" class="d-flex gap-4">
+      <VBtn type="submit">Submit</VBtn>
+      <VBtn type="reset" color="secondary" variant="tonal">Reset</VBtn>
+    </VCol>
+  </VForm>
 
 </template>
