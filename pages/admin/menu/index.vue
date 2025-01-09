@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 
-import OptionsItem from './OptionsList.vue'
+import OptionsItem from './Opciones/ListaOpciones.vue';
 
 const opcionesMenu = useState('menu')
 

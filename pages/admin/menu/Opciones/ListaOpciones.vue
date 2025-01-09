@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import OptionItem from './OptionItem.vue';
+import OptionItem from './Opcion.vue';
 
 export default {
   name: 'OptionsList',

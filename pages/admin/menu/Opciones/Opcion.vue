@@ -8,7 +8,7 @@
     <option-text :item="option" />
 
     <ul v-if="option.children && option.children.length > 0">
-      <option-item
+      <opcion
         style="margin-left: 35px; margin-top: 10px; "
         v-for="child in option.children"
         :key="child.id"
@@ -19,8 +19,8 @@
 </template>
 
 <script>
-import Actions from './Actions.vue';
-import OptionText from './OptionText.vue';
+import Actions from './OpcionBotones.vue';
+import OptionText from './OpcionTexto.vue';
 
 export default {
   // name: 'OptionItem',
