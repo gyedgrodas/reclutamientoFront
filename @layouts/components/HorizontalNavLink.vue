@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <li
-    v-if="can(item.action, item.subject)"
+    v-if="can(item.action, item.subject) && item.titulo_seccion === null"
     class="nav-link"
     :class="[{
       'sub-item': props.isSubItem,
