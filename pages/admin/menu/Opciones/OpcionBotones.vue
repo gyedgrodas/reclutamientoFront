@@ -8,6 +8,7 @@
         size="extra-small"
         @click="performAction"
         v-if="!esTituloSeccion"
+        to="/admin/menu/create"
       />
 
       <VBtn
