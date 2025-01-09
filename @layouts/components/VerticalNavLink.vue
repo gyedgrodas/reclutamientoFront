@@ -25,13 +25,13 @@ const hideTitleAndBadge = configStore.isVerticalNavMini()
     :class="{ disabled: item.disable }"
   >
     <Component
-      :is="item.to ? NuxtLink : 'a'"
+      :is="item.ruta ? NuxtLink : 'a'"
       v-bind="getComputedNavLinkToProp(item)"
       :class="{ 'router-link-active router-link-exact-active': isNavLinkActive(item, $router) }"
     >
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
-        v-bind="item.icon ? { class: item.icon } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
+        v-bind="item.icono ? { class: item.icono } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
         class="nav-item-icon"
       />
       <TransitionGroup name="transition-slide-x">
@@ -41,7 +41,7 @@ const hideTitleAndBadge = configStore.isVerticalNavMini()
           v-show="!hideTitleAndBadge"
           key="title"
           class="nav-item-title"
-          v-bind="getDynamicI18nProps(item.title, 'span')"
+          v-bind="getDynamicI18nProps(item.titulo, 'span')"
         >
           {{ item.titulo }}
         </Component>
