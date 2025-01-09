@@ -54,7 +54,7 @@ const iconClass = computed(() => {
 .heading {
   font-weight: bold;
   font-size: 1.2em;
-  margin-bottom: 8px;
+  //margin-bottom: 8px;
   margin-right: 8px;
 }
 
