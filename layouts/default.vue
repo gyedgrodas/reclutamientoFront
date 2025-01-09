@@ -73,7 +73,7 @@ const getConfiguraciones = async ():void => {
 
     await getPreferencias();
 
-    showToastSuccess("Configuraciones obtenidas con éxito");
+    // showToastSuccess("Configuraciones obtenidas con éxito");
 
   } catch (error) {
 

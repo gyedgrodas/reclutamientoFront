@@ -10,6 +10,7 @@
     <VBtn
       class="ml-auto"
       color="success"
+      to="/admin/menu/create"
     >
       Nueva Opción
     </VBtn>
