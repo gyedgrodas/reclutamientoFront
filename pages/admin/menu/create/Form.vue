@@ -47,6 +47,7 @@ const submit = async (): Promise<void> => {
   try {
     const response = await post("api/menu_opciones", opcion.value);
     showToastSuccess(response.message);
+    useState('menu').value = response.data;
     navigateTo("/admin/menu");
   } catch (error: any) {
     showToastError(error.message);
