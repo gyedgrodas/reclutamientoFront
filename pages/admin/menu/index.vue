@@ -34,6 +34,6 @@
 
 import OptionsItem from '@/pages/admin/menu/opciones/ListaOpciones.vue';
 
-const opcionesMenu = useState('menu')
+const opcionesMenu = <[]>useState('menu')
 
 </script>
