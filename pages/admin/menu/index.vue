@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 
-import OptionsItem from './Opciones/ListaOpciones.vue';
+import OptionsItem from '@/pages/admin/menu/opciones/ListaOpciones.vue';
 
 const opcionesMenu = useState('menu')
 

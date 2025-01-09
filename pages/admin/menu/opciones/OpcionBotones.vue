@@ -8,7 +8,7 @@
         size="extra-small"
         @click="performAction"
         v-if="!esTituloSeccion"
-        to="/admin/menu/create"
+        :to="`/admin/menu/create/${id}`"
       />
 
       <VBtn
