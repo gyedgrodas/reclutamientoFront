@@ -5,19 +5,19 @@ import {computed} from 'vue';
 interface Item {
   id: string;
   titulo?: string | null;
-  icon?: string | null;
-  heading?: string | null;
+  icono?: string | null;
+  titulo_seccion?: string | null;
   children?: Item[];
 }
 
 const props = defineProps<{ item: Item }>();
 
-const esTituloSeccion = computed(() => props.item.heading !== null);
+const esTituloSeccion = computed(() => props.item.titulo_seccion !== null);
 
 const iconClass = computed(() => {
-  if (!props.item.icon)
+  if (!props.item.icono)
     return 'tabler-circle';
-  return props.item.icon || '';
+  return props.item.icono || '';
 });
 
 </script>
@@ -26,7 +26,7 @@ const iconClass = computed(() => {
   <div>
     <template v-if="esTituloSeccion">
       <div style="display: flex">
-        <span v-text="props.item.heading"
+        <span v-text="props.item.titulo_seccion"
               class="heading">
         </span>
         <Actions :id="props.item.id"

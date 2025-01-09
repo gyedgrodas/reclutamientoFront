@@ -28,14 +28,14 @@ const props = withDefaults(defineProps<Props>(), {
     }]"
   >
     <Component
-      :is="item.to ? NuxtLink : 'a'"
+      :is="item.ruta ? NuxtLink : 'a'"
       v-bind="getComputedNavLinkToProp(item)"
       :class="{ 'router-link-active router-link-exact-active': isNavLinkActive(item, $router) }"
     >
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
         class="nav-item-icon"
-        v-bind="item.icon ? { class: item.icon } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
+        v-bind="item.icono ? { class: item.icono } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
       />
       <Component
         :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"

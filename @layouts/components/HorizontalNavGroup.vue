@@ -60,7 +60,7 @@ watch(() => route.path, () => {
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
         class="nav-item-icon"
-        v-bind="item.icon ? { class: item.icon } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
+        v-bind="item.icono ? { class: item.icono } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
       />
       <Component
         :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
@@ -78,7 +78,7 @@ watch(() => route.path, () => {
 
     <template #content>
       <Component
-        :is="'children' in child ? 'HorizontalNavGroup' : HorizontalNavLink"
+        :is="child.children.length > 0 ? 'HorizontalNavGroup' : HorizontalNavLink"
         v-for="child in item.children"
         :key="child.titulo"
         :item="child"
