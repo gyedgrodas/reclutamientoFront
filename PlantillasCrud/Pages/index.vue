@@ -98,6 +98,14 @@ const deleteItem = async (id: number) => {
             icon
             variant="text"
             color="primary"
+            :to="'/{{ directory }}/show/' + item.id "
+          >
+            <VIcon icon="tabler-eye" />
+          </VBtn>
+          <VBtn
+            icon
+            variant="text"
+            color="primary"
             :to="'/{{ directory }}/edit/' + item.id "
           >
             <VIcon icon="tabler-edit" />
@@ -110,6 +118,7 @@ const deleteItem = async (id: number) => {
           >
             <VIcon icon="tabler-trash" />
           </VBtn>
+
         </template>
       </VDataTableServer>
 

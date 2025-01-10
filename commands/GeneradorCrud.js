@@ -114,12 +114,15 @@ const askQuestions = async () => {
       .replace(/{{ url }}/g, url)
       .replace(/{{ modelPlurar }}/g, modelPlurar)
       .replace(/{{ directory }}/g, directory.split('pages/')[1] );
-    //
-    // const showTemplate = fs.readFileSync(path.join(__dirname + '/app/generatorCrud/', 'template', 'showTemplate.vue'), 'utf-8')
-    //   .replace(/{{ model }}/g, modelo)
-    //   .replace(/{{ fields }}/g, columnasJSON)
-    //   .replace(/{{ directory }}/g, directory.split('pages/')[1] )
-    //   .replace(/{{ url }}/g, url);
+
+    const camposFormShow = formatoShowInputs(campos);
+
+      const showTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'show.vue'), 'utf-8')
+      .replace(/{{ model }}/g, modelo)
+      .replace(/{{ fields }}/g, columnasJSON)
+      .replace(/{{ directory }}/g, directory.split('pages/')[1] )
+      .replace(/{{ url }}/g, url)
+          .replace(/{{ camposForm }}/g, camposFormShow);
 
 
     fs.writeFileSync(path.join(directory, 'index.vue'), listTemplate);
@@ -135,12 +138,13 @@ const askQuestions = async () => {
       fs.mkdirSync(editDir, { recursive: true });
     }
     fs.writeFileSync(path.join(editDir, '[id].vue'), editTemplate);
-    //
-    // const showDir = path.join(directory, 'show');
-    // if (!fs.existsSync(showDir)) {
-    //   fs.mkdirSync(showDir, { recursive: true });
-    // }
-    // fs.writeFileSync(path.join(showDir, '[id].vue'), showTemplate);
+
+
+    const showDir = path.join(directory, 'show');
+    if (!fs.existsSync(showDir)) {
+      fs.mkdirSync(showDir, { recursive: true });
+    }
+    fs.writeFileSync(path.join(showDir, '[id].vue'), showTemplate);
 
     console.log(`Archivos creados en ${directory}:`);
     console.log('- index.vue');
@@ -244,4 +248,26 @@ const formatoCamposInterfaz = (campos) => {
     });
 
     return camposInterfaz.join('');
+}
+
+const formatoShowInputs = (campos) => {
+
+        let obj = Object.keys(campos);
+
+        let camposInterfaz = [];
+
+        obj.forEach(key => {
+            camposInterfaz.push(`
+              <VListItemTitle>
+                <h6 class="text-h6">
+                    ${formatearCampoLabel(campos[key])}:
+                  <div class="d-inline-block text-capitalize text-body-1">
+                    {{ item.${campos[key]} }}
+                  </div>
+                </h6>
+              </VListItemTitle>
+            `);
+        });
+
+        return camposInterfaz.join('');
 }
