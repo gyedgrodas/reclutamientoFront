@@ -8,7 +8,7 @@ const menuConfig = [
   },
   {
     title: 'Second page',
-    to: { name: 'second-page' },
+    to: 'second-page',
     icon: { icon: 'tabler-file' },
     action: 'crear usuarios',
     subject: 'usuarios',

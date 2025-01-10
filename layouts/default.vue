@@ -33,25 +33,27 @@ interface Preferencias {
   navBar_loyout: string;
   ancho_contenido_aplicacion: string;
   direccion: string;
+  navBar_vertical_tipo: string;
+  navBar_horizontal_tipo: string;
 }
 
 const vuetifyTheme = useTheme();
 const loadings = ref(true);
 
 const {user} = useSanctumAuth();
-const cliente = useClienteRequest();
+const cliente = useJsonApiClient();
 
 const getPreferencias = async (): Promise<void> => {
 
   try {
-    const res = await cliente.get<{ data: Preferencias }>("api/user_preferencias");
+    const res = await cliente.Get<{ data: Preferencias }>("api/user_preferencias");
 
     if (!res.data) {
       asigarValorDefectoCookies();
       return;
     }
 
-    await asignarDataACookies(res.data.attributes);
+    await asignarDataACookies(res.data);
 
     configStore.asignarDataACookiesDefault()
 

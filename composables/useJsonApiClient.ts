@@ -1,48 +1,19 @@
 import { defu } from 'defu'
 import { type FetchOptions } from 'ofetch'
-import type { Data } from './types'
 
 export const useJsonApiClient = () => {
   const client = useSanctumClient()
-
-  // Formatear datos según JSON:API
-  const formatData = ({
-    type,
-    attributes,
-    id,
-    relationships,
-  }: {
-    type: string
-    attributes: Record<string, any>
-    id?: string
-    relationships?: Record<string, { data: { id: string; type: string } | undefined }>
-  }): { data: Data } => ({
-    data: {
-      type,
-      attributes,
-      ...(id && { id }),
-      ...(relationships && { relationships }),
-    },
-  })
 
   // Método genérico para realizar solicitudes HTTP
   const request = async <T>(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     url: string,
     options: {
-      attributes?: Record<string, any>
-      type?: string
-      id?: string
-      relationships?: Record<string, { data: { id: string; type: string } | undefined }>
+      body?: Record<string, any>
       params?: FetchOptions<'json'>
     } = {},
   ) => {
-    const { attributes, type, id, relationships, params } = options
-
-    const body
-      = method !== 'GET' && method !== 'DELETE' && attributes && type
-        ? formatData({ type, attributes, id, relationships })
-        : undefined
+    const { body, params } = options
 
     const mergedParams = defu(params, { method, ...(body && { body }) }) as FetchOptions<'json'>
 
@@ -55,20 +26,15 @@ export const useJsonApiClient = () => {
 
   const Post = <T>(
     url: string,
-    attributes: Record<string, any>,
-    type: string,
-    relationships?: Record<string, { data: { id: string; type: string } | undefined }>,
+    body: Record<string, any>,
     params: FetchOptions<'json'> = {},
-  ) => request<T>('POST', url, { attributes, type, relationships, params })
+  ) => request<T>('POST', url, { body, params })
 
   const Put = <T>(
     url: string,
-    attributes: Record<string, any>,
-    type: string,
-    id: string,
-    relationships?: Record<string, { data: { id: string; type: string } | undefined }>,
+    body: Record<string, any>,
     params: FetchOptions<'json'> = {},
-  ) => request<T>('PUT', url, { attributes, type, id, relationships, params })
+  ) => request<T>('PUT', url, { body, params })
 
   const Delete = <T>(url: string, params: FetchOptions<'json'> = {}) =>
     request<T>('DELETE', url, { params })

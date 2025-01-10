@@ -62,7 +62,8 @@ const onSubmit = async () => {
       ability.update(abilityRules)
     }
     catch (error) {
-      msgError.value = error?.response?._data.errors[0].title || 'Error desconocido'
+      msgError.value =  error?.response?._data?.message || 'Ocurrió un error inesperado.'
+
     }
   }
 }

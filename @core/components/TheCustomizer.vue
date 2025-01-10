@@ -710,7 +710,7 @@ const guardarPreferencias = async ():void => {
 
     }
 
-    await cliente.Post('api/user_preferencias', data, 'user_preferencias');
+    await cliente.Post('api/user_preferencias', data );
 
     await asignarValorACokkies();
 
