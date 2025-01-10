@@ -60,7 +60,7 @@ const deleteItem = async (id: number) => {
     <VBtn
       class="ml-auto"
       color="success"
-      :to=" '{{ directory }}/create' "
+      to=" {{ directory }}/create "
     >
       Nuev@ {{ model }}
     </VBtn>

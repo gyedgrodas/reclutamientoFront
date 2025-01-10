@@ -5,16 +5,12 @@
     <VCard title="Want to integrate JWT? 🔒">
 
 
-      <v-card-text>
-        <h1 v-text="user?.id"></h1>
+      <v-card-text->
 
-        <VBtn
-          @click="cambiarPrefijo"
-        >
-          Cambiar prefijo
-        </VBtn>
 
-      </v-card-text>
+
+
+      </v-card-text->
 
 
 

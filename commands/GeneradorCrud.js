@@ -64,18 +64,45 @@ const askQuestions = async () => {
 
     const directory = `./pages/${pluralizar(modeloMinusculas)}`;
 
+    const directoryViews = `./views/pages/${pluralizar(modeloMinusculas)}`;
+
     if (!fs.existsSync(directory)) {
       fs.mkdirSync(directory, { recursive: true });
     }
 
+      if (!fs.existsSync(directoryViews)) {
+          fs.mkdirSync(directoryViews, { recursive: true });
+      }
+
     const columnas = formatearCamposTable(campos);
     const columnasJSON = JSON.stringify(columnas, null, 2);
 
+    const modelPlurar = pluralizar(modeloMinusculas);
+
     const listTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'index.vue'), 'utf-8')
+      .replace(/{{ modelPlural }}/g, modelPlurar)
       .replace(/{{ model }}/g, modelo)
       .replace(/{{ headers }}/g, columnasJSON)
       .replace(/{{ url }}/g, url)
       .replace(/{{ directory }}/g, directory.split('pages/')[1] );
+
+      const inputsFormulario = formatoHtmlInputsFormulario(campos);
+
+      const Viewfields = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Views', 'fields.vue'), 'utf-8')
+          .replace(/{{ model }}/g, modelo)
+          .replace(/{{ headers }}/g, columnasJSON)
+          .replace(/{{ url }}/g, url)
+          .replace(/{{ directory }}/g, directory.split('pages/')[1] )
+          .replace(/{{ inputsFormulario }}/g, inputsFormulario);
+
+    const createTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'create.vue'), 'utf-8')
+      .replace(/{{ model }}/g, modelPlurar)
+      // .replace(/{{ headers }}/g, columnasJSON)
+      .replace(/{{ url }}/g, url)
+      .replace(/{{ directory }}/g, directory.split('pages/')[1] );
+
+
+
 
     // const createTemplate = fs.readFileSync(path.join(__dirname + '/app/generatorCrud/', 'template', 'createTemplate.vue'), 'utf-8')
     //   .replace(/{{ model }}/g, modelo)
@@ -102,6 +129,10 @@ const askQuestions = async () => {
 
 
     fs.writeFileSync(path.join(directory, 'index.vue'), listTemplate);
+
+    fs.writeFileSync(path.join(directory, 'create.vue'), createTemplate);
+
+    fs.writeFileSync(path.join(directoryViews, 'fields.vue'), Viewfields);
 
 
     // fs.writeFileSync(path.join(directory, 'create.vue'), createTemplate);
@@ -180,4 +211,29 @@ const tiposInputFormulario = (campos) => {
   });
 
   return JSON.stringify(tipoInput, null, 2);
+}
+
+
+const formatoHtmlInputsFormulario = (campos) => {
+    let obj = Object.keys(campos);
+
+    let inputs = [];
+
+    obj.forEach(key => {
+        inputs.push(`
+               <VCol cols="12"
+                md="6"               
+               >
+                <AppTextField
+                  v-model="data.${campos[key]}"
+                  :rules="[requiredValidator]"
+                  label="${formatearCampoLabel(campos[key])}"
+                  placeholder="Ingrese ${formatearCampoLabel(campos[key])}"
+                />
+              </VCol>   
+        `);
+    });
+
+    return inputs.join('');
+
 }
