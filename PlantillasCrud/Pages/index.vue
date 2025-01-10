@@ -1,10 +1,17 @@
 <script setup lang="ts">
 
 import {ref} from "vue";
+import {can} from "@layouts/plugins/casl";
 
 const { get , deleted} = useClienteRequest();
 
-const { showToastSuccess, showToastError } = useToast()
+const { showToastSuccess, showToastError, preguntaEliminar } = useToast()
+
+const currentPage = ref(1) // Página actual
+const itemsPerPage = ref(2) // Elementos por página
+const totalItems = ref(0) // Total de elementos en el backend
+const loading = ref(false) // Indicador de carga
+const search = ref('') // Búsqueda de usuarios
 
 const headers =  {{ headers }}
 
@@ -13,6 +20,8 @@ const items = ref([])
 const getItems = async (): Promise<object> => {
 
   try {
+
+    loading.value = true;
 
     const respuesta = await get('{{ url }}');
 
@@ -24,23 +33,23 @@ const getItems = async (): Promise<object> => {
 
   }
 
+  loading.value = false;
+
 }
 
 getItems();
 
-const currentPage = ref(1) // Página actual
-const itemsPerPage = ref(2) // Elementos por página
-const totalItems = ref(0) // Total de elementos en el backend
-const loading = ref(false) // Indicador de carga
-const search = ref('') // Búsqueda de usuarios
-
 const deleteItem = async (id: number) => {
+
+  const confirm = await preguntaEliminar('¿Desea Eliminar {{ model }}?' );
+
+  if (!confirm) return;
 
     try {
 
       const respuesta = await deleted('{{ url }}/' + id);
 
-      showToastSuccess(respuesta.data.message);
+      showToastSuccess(respuesta.message);
 
       await getItems();
 
@@ -84,12 +93,12 @@ const deleteItem = async (id: number) => {
         :items-per-page-options="[2, 5, 10, 50, -1]"
         :loading="loading"
       >
-        <template #item.actions="{ item }">
+        <template #item.Acciones="{ item }">
           <VBtn
             icon
             variant="text"
             color="primary"
-            :to=" '{{ directory }}/edit/' + item.id "
+            :to="'/{{ directory }}/edit/' + item.id "
           >
             <VIcon icon="tabler-edit" />
           </VBtn>

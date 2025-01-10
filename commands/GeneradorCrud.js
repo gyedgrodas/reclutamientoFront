@@ -15,6 +15,7 @@ const question = (query) => {
 };
 
 const formatearCamposTable = (campos) => {
+
   return campos.map(campo => {
     return {
       title: formatearCampoLabel(campo),
@@ -73,9 +74,8 @@ const askQuestions = async () => {
       if (!fs.existsSync(directoryViews)) {
           fs.mkdirSync(directoryViews, { recursive: true });
       }
-
-    const columnas = formatearCamposTable(campos);
-    const columnasJSON = JSON.stringify(columnas, null, 2);
+  const columnas = formatearCamposTable([...campos, 'Acciones']);
+  const columnasJSON = JSON.stringify(columnas, null, 2);
 
     const modelPlurar = pluralizar(modeloMinusculas);
 
@@ -86,40 +86,34 @@ const askQuestions = async () => {
       .replace(/{{ url }}/g, url)
       .replace(/{{ directory }}/g, directory.split('pages/')[1] );
 
-      const inputsFormulario = formatoHtmlInputsFormulario(campos);
+  const inputsFormulario = formatoHtmlInputsFormulario(campos);
 
-      const Viewfields = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Views', 'fields.vue'), 'utf-8')
-          .replace(/{{ model }}/g, modelo)
-          .replace(/{{ headers }}/g, columnasJSON)
-          .replace(/{{ url }}/g, url)
-          .replace(/{{ directory }}/g, directory.split('pages/')[1] )
-          .replace(/{{ inputsFormulario }}/g, inputsFormulario);
+  const Viewfields = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Views', 'fields.vue'), 'utf-8')
+      .replace(/{{ model }}/g, modelo)
+      .replace(/{{ headers }}/g, columnasJSON)
+      .replace(/{{ modelPlural }}/g, modelPlurar)
+      .replace(/{{ url }}/g, url)
+      .replace(/{{ directory }}/g, directory.split('pages/')[1] )
+      .replace(/{{ inputsFormulario }}/g, inputsFormulario);
 
     const createTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'create.vue'), 'utf-8')
-      .replace(/{{ model }}/g, modelPlurar)
+      .replace(/{{ modelPlural }}/g, modelPlurar)
+      .replace(/{{ model }}/g, modelo)
       // .replace(/{{ headers }}/g, columnasJSON)
       .replace(/{{ url }}/g, url)
       .replace(/{{ directory }}/g, directory.split('pages/')[1] );
 
-
-
-
-    // const createTemplate = fs.readFileSync(path.join(__dirname + '/app/generatorCrud/', 'template', 'createTemplate.vue'), 'utf-8')
-    //   .replace(/{{ model }}/g, modelo)
-    //   .replace(/{{ camposCreate }}/g, formatearCamposFormCreate(campos))
-    //   .replace(/{{ validacionesCreate }}/g, objectSchema(campos))
-    //   .replace(/{{ url }}/g, url)
-    //   .replace(/{{ valoresInputFormulario }}/g, tiposInputFormulario(campos))
-    //   .replace(/{{ directory }}/g, directory.split('pages/')[1] );
+    // const camposInterfaz = formatoCamposInterfaz(campos);
     //
-    // const editTemplate = fs.readFileSync(path.join(__dirname + '/app/generatorCrud/', 'template', 'editTemplate.vue'), 'utf-8')
+    // const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'index.ts'), 'utf-8')
     //   .replace(/{{ model }}/g, modelo)
-    //   .replace(/{{ camposCreate }}/g, formatearCamposFormCreate(campos))
-    //   .replace(/{{ validacionesCreate }}/g, objectSchema(campos))
-    //   .replace(/{{ url }}/g, url)
-    //   .replace(/{{ fields }}/g, columnasJSON)
-    //   .replace(/{{ valoresInputFormulario }}/g, tiposInputFormulario(campos))
-    //   .replace(/{{ directory }}/g, directory.split('pages/')[1] );
+    //   .replace(/{{ fieldsInterfaz }}/g, camposInterfaz);
+
+    const editTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'edit.vue'), 'utf-8')
+      .replace(/{{ model }}/g, modelo)
+      .replace(/{{ url }}/g, url)
+      .replace(/{{ modelPlurar }}/g, modelPlurar)
+      .replace(/{{ directory }}/g, directory.split('pages/')[1] );
     //
     // const showTemplate = fs.readFileSync(path.join(__dirname + '/app/generatorCrud/', 'template', 'showTemplate.vue'), 'utf-8')
     //   .replace(/{{ model }}/g, modelo)
@@ -134,14 +128,13 @@ const askQuestions = async () => {
 
     fs.writeFileSync(path.join(directoryViews, 'fields.vue'), Viewfields);
 
+    // fs.writeFileSync(path.join(directory, 'Interface.ts'), interfazTemplate);
 
-    // fs.writeFileSync(path.join(directory, 'create.vue'), createTemplate);
-
-    // const editDir = path.join(directory, 'edit');
-    // if (!fs.existsSync(editDir)) {
-    //   fs.mkdirSync(editDir, { recursive: true });
-    // }
-    // fs.writeFileSync(path.join(editDir, '[id].vue'), editTemplate);
+    const editDir = path.join(directory, 'edit');
+    if (!fs.existsSync(editDir)) {
+      fs.mkdirSync(editDir, { recursive: true });
+    }
+    fs.writeFileSync(path.join(editDir, '[id].vue'), editTemplate);
     //
     // const showDir = path.join(directory, 'show');
     // if (!fs.existsSync(showDir)) {
@@ -236,4 +229,19 @@ const formatoHtmlInputsFormulario = (campos) => {
 
     return inputs.join('');
 
+}
+
+const formatoCamposInterfaz = (campos) => {
+
+    let obj = Object.keys(campos);
+
+    let camposInterfaz = [];
+
+    obj.forEach(key => {
+        camposInterfaz.push(`
+        ${campos[key]}: string;
+        `);
+    });
+
+    return camposInterfaz.join('');
 }

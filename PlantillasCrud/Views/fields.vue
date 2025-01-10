@@ -2,51 +2,45 @@
 
 import type {VForm} from "vuetify/lib/components/VForm";
 
-const data = ref({})
-
 const isFormValid = ref(false)
 
 const refForm = ref<VForm>()
 
+// import { {{ model }} } from '@/pages/{{ modelPlural }}/Interface.ts';
+
+const data = ref({})
+
 interface Emit {
-  // (e: 'update:esVisible', value: boolean): void
+
   (e: 'emitirDatos', value: any): void
+
 }
 
-interface Props {
-  esVisible: boolean
-}
-
-const props = defineProps<Props>()
+const props = defineProps({
+    item: {
+      type: Object || null,
+      default: null
+    }
+  }
+)
 const emit = defineEmits<Emit>()
 
+if (props.item) {
+  data.value = props.item
+}
+
 const onSubmit = () => {
+
   refForm.value?.validate().then(({valid}) => {
+
     if (valid) {
-      // // Formatea los datos según JSON:API
-      // const data = {
-      //   usuario_dominio: usuario_dominio.value,
-      //   cif: cif.value,
-      //   codigo_bankworks: codigo_bankworks.value,
-      //   codigo_ejecutivo: codigo_ejecutivo.value,
-      //   nombre: nombre.value,
-      //   apellido: apellido.value,
-      //   email: email.value,
-      //   fecha_labores: fecha_labores.value,
-      //   estado: estado.value,
-      //   password: password.value,
-      //   nuevoPassword: nuevoPassword.value,
-      // }
-      //
-      // Emite la data formateada
+
       emit('emitirDatos', data)
 
-      nextTick(() => {
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
-      })
     }
+
   })
+
 }
 
 </script>
@@ -58,7 +52,6 @@ const onSubmit = () => {
     v-model="isFormValid"
     @submit.prevent="onSubmit"
   >
-
     <VRow>
       {{ inputsFormulario }}
       <VCol cols="12">
@@ -72,7 +65,7 @@ const onSubmit = () => {
           type="reset"
           variant="tonal"
           color="error"
-          to=" {{ directory }} /"
+          to="/{{ directory }}"
         >
           Cancel
         </VBtn>
@@ -80,7 +73,6 @@ const onSubmit = () => {
     </VRow>
 
   </VForm>
-
 
 </template>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import fields from '@/views/pages/{{ model }}/fields.vue'
+import fields from '@/views/pages/{{ modelPlural }}/fields.vue'
 
 import {ref} from "vue";
 

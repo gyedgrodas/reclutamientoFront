@@ -58,12 +58,32 @@ export default function useToast(){
         customClass: cookieRef('tema_color').value === 'dark' ? 'text-white' : 'text-black',
       })
   }
+
+  const preguntaEliminar = async (titulo: string, message: string | null) => {
+    return await Swal.fire({
+      title: titulo ??  '¿Estás seguro?',
+      text: message ?? 'No podrás revertir esto!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Si, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      background: cookieRef('tema_color').value === 'dark' ? '#25293C' : '#fff',
+      customClass: cookieRef('tema_color').value === 'dark' ? 'text-white' : 'text-black',
+    }).then((result) => {
+      return result.isConfirmed;
+    })
+    return false;
+  }
+
   
   return {
     showToastSuccess,
     showToastError,
     showToastWarning,
-    showToastInfo
+    showToastInfo,
+    preguntaEliminar
   }
   
 }

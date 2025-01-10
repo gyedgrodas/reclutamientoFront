@@ -30,7 +30,7 @@ export const useClienteRequest = () => {
 
       console.error(`Error in ${method} request to ${url}:`, e);
 
-      throw e;
+      throw e.response._data;
 
     }
   };
