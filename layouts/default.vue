@@ -41,12 +41,12 @@ const vuetifyTheme = useTheme();
 const loadings = ref(true);
 
 const {user} = useSanctumAuth();
-const cliente = useClienteRequest();
+const cliente = useJsonApiClient();
 
 const getPreferencias = async (): Promise<void> => {
 
   try {
-    const res = await cliente.get<{ data: Preferencias }>("api/user_preferencias");
+    const res = await cliente.Get<{ data: Preferencias }>("api/user_preferencias");
 
     if (!res.data) {
       asigarValorDefectoCookies();
