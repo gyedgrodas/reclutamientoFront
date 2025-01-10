@@ -4,19 +4,23 @@ import fields from '@/views/pages/{{ model }}/fields.vue'
 
 import {ref} from "vue";
 
-const { Post  } = useJsonApiClient();
+const { post  } = useClienteRequest();
+
+const { showToastSuccess, showToastError } = useToast();
 
 const guardar{{ model }} = async ( {{ model }} ) => {
 
   try {
 
-    const respuesta = await Post('{{ url }}', {{ model }}.value );
+    const respuesta = await post('{{ url }}', {{ model }}.value );
 
-    console.log(respuesta);
+    showToastSuccess(respuesta.message);
+
+    navigateTo('/{{ directory }}');
 
   } catch (error) {
 
-    console.error(error.message);
+    showToastError(error.message);
 
   }
 
@@ -33,7 +37,7 @@ const guardar{{ model }} = async ( {{ model }} ) => {
     <VBtn
       class="ml-auto"
       color="secondary"
-      to="{{ directory }}/ "
+      to="/{{ directory }}/"
     >
       Regresar
     </VBtn>

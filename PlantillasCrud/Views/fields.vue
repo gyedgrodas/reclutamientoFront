@@ -39,7 +39,7 @@ const onSubmit = () => {
       // }
       //
       // Emite la data formateada
-      emit('emitirDatos', {data})
+      emit('emitirDatos', data)
 
       nextTick(() => {
         refForm.value?.reset()

@@ -2,7 +2,7 @@
 
 import {ref} from "vue";
 
-const { Get, Delete  } = useJsonApiClient();
+const { get , deleted} = useClienteRequest();
 
 const { showToastSuccess, showToastError } = useToast()
 
@@ -14,9 +14,9 @@ const getItems = async (): Promise<object> => {
 
   try {
 
-    const respuesta = await Get('{{ url }}');
+    const respuesta = await get('{{ url }}');
 
-    items.value = respuesta.data.data;
+    items.value = respuesta.data;
 
   } catch (error) {
 
@@ -38,7 +38,7 @@ const deleteItem = async (id: number) => {
 
     try {
 
-      const respuesta = await Delete('{{ url }}/' + id);
+      const respuesta = await deleted('{{ url }}/' + id);
 
       showToastSuccess(respuesta.data.message);
 
@@ -60,7 +60,7 @@ const deleteItem = async (id: number) => {
     <VBtn
       class="ml-auto"
       color="success"
-      to=" {{ directory }}/create "
+      to="/{{ directory }}/create"
     >
       Nuev@ {{ model }}
     </VBtn>
