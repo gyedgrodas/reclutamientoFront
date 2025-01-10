@@ -33,6 +33,8 @@ interface Preferencias {
   navBar_loyout: string;
   ancho_contenido_aplicacion: string;
   direccion: string;
+  navBar_vertical_tipo: string;
+  navBar_horizontal_tipo: string;
 }
 
 const vuetifyTheme = useTheme();
@@ -51,7 +53,7 @@ const getPreferencias = async (): Promise<void> => {
       return;
     }
 
-    await asignarDataACookies(res.data.attributes);
+    await asignarDataACookies(res.data);
 
     configStore.asignarDataACookiesDefault()
 

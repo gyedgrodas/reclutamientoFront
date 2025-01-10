@@ -44,14 +44,14 @@ const fetchUsers = async () => {
       },
     })
 
-    console.log(response)
+    console.log('data', response)
 
     if (response) {
       // Actualiza los datos de usuarios y la paginación
-      users.value = response.data // Lista de usuarios
-      totalItems.value = response.meta.total // Total de registros en el backend
-      itemsPerPage.value = response.meta.per_page // Elementos por página
-      currentPage.value = response.meta.current_page // Página actual
+      users.value = response?.data?.data // Lista de usuarios
+      totalItems.value = response.data?.meta.total // Total de registros en el backend
+      itemsPerPage.value = response.data?.meta.per_page // Elementos por página
+      currentPage.value = response.data?.meta.current_page // Página actual
     }
   }
   catch (error) {
@@ -74,16 +74,16 @@ fetchUsers()
 // Configuración de los encabezados de la tabla
 const headers = [
   { title: 'ID', value: 'id' },
-  { title: 'USUARIO DOMINIO', value: 'attributes.usuario_dominio' },
-  { title: 'NOMBRE', value: 'attributes.nombre' },
-  { title: 'EMAIL', value: 'attributes.email' },
-  { title: 'CREADO', value: 'attributes.created-at' },
-  { title: 'ACTUALIZADO', value: 'attributes.updated-at' },
+  { title: 'USUARIO DOMINIO', value: 'usuario_dominio' },
+  { title: 'NOMBRE', value: 'nombre' },
+  { title: 'EMAIL', value: 'email' },
+  { title: 'CREADO', value: 'created-at' },
+  { title: 'ACTUALIZADO', value: 'updated-at' },
   { title: 'ACCIONES', value: 'actions', sortable: false },
 ]
 
 const addNuevoUsuario = async (userData: any) => {
-  const response = await cliente.Post('/api/users', userData.data, 'users', userData.relationships)
+  const response = await cliente.Post('/api/users', userData.data)
   if (response)
     fetchUsers()
 }
@@ -179,7 +179,7 @@ const editUser = (user: any) => {
 
     <!-- Cajón para agregar un nuevo usuario -->
     <AddNuevoUsuario
-      v-if="can('crear usuario', 'usuario')"
+      v-if="can('crear usuarios', 'usuarios')"
       v-model:es-visible="agregarUsuario"
       @user-data="addNuevoUsuario"
     />
