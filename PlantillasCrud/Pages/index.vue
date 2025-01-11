@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: 'permissions',
+  action: 'listar {{ modelPlural }}', // Acción requerida
+  subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+});
+
 import {ref} from "vue";
 import {can} from "@layouts/plugins/casl";
 
@@ -67,6 +73,7 @@ const deleteItem = async (id: number) => {
 
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
     <VBtn
+      v-if="can('crear {{ modelPlural }}', '{{ modelPlural }}')"
       class="ml-auto"
       color="success"
       to="/{{ directory }}/create"
@@ -74,7 +81,6 @@ const deleteItem = async (id: number) => {
       Nuev@ {{ model }}
     </VBtn>
   </div>
-
 
   <v-card>
 
@@ -95,6 +101,7 @@ const deleteItem = async (id: number) => {
       >
         <template #item.Acciones="{ item }">
           <VBtn
+            v-if="can('ver {{ modelPlural }}', '{{ modelPlural }}')"
             icon
             variant="text"
             color="primary"
@@ -103,6 +110,7 @@ const deleteItem = async (id: number) => {
             <VIcon icon="tabler-eye" />
           </VBtn>
           <VBtn
+            v-if="can('editar {{ modelPlural }}', '{{ modelPlural }}')"
             icon
             variant="text"
             color="primary"
@@ -111,6 +119,7 @@ const deleteItem = async (id: number) => {
             <VIcon icon="tabler-edit" />
           </VBtn>
           <VBtn
+            v-if="can('eliminar {{ modelPlural }}', '{{ modelPlural }}')"
             icon
             color="error"
             variant="text"
@@ -122,12 +131,9 @@ const deleteItem = async (id: number) => {
         </template>
       </VDataTableServer>
 
-
     </v-card-text>
 
   </v-card>
-
-
 
 </template>
 

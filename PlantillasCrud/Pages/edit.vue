@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: 'permissions',
+  action: 'editar {{ modelPlural }}', // Acción requerida
+  subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+});
+
 import fields from '@/views/pages/{{ modelPlurar }}/fields.vue'
 
 // import { {{ model }} } from '@/pages/{{ modelPlurar }}/Interface.ts';
@@ -75,40 +81,23 @@ get{{ model }}();
     </VBtn>
   </div>
 
+    <AppCardActions
+      v-model:loading="cargando"
+      title="Editar {{ model }}"
+      no-actions
+    >
 
-<!--  <v-card>-->
+      <VCardText>
 
+        <fields :fields="fields"
+                v-if="!cargando"
+                :item="item{{ model }}"
+                @emitirDatos="actualizar{{ model }}"
+        />
 
+      </VCardText>
 
-<!--    <v-card-text>-->
-
-      <AppCardActions
-        v-model:loading="cargando"
-        title="Editar {{ model }}"
-        no-actions
-      >
-
-        <VCardText>
-
-          <fields :fields="fields"
-                  v-if="!cargando"
-                  :item="item{{ model }}"
-                  @emitirDatos="actualizar{{ model }}"
-          />
-
-        </VCardText>
-
-      </AppCardActions>
-
-
-
-
-
-<!--    </v-card-text>-->
-
-<!--  </v-card>-->
-
-
+    </AppCardActions>
 
 </template>
 

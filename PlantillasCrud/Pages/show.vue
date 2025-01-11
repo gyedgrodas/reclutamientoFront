@@ -1,5 +1,12 @@
 <script setup lang="ts">
 
+
+definePageMeta({
+  middleware: 'permissions',
+  action: 'ver {{ modelPlural }}', // Acción requerida
+  subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+});
+
 // import { {{ model }} } from '@/pages/{{ modelPlurar }}/Interface.ts';
 
 import {ref} from "vue";
@@ -60,7 +67,6 @@ get{{ model }}();
   >
 
     <VCardText>
-
 
       <VList class="card-list mt-2">
         {{ camposForm }}

@@ -1,5 +1,12 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: 'permissions',
+  action: 'crear {{ modelPlural }}', // Acción requerida
+  subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+});
+
+
 import fields from '@/views/pages/{{ modelPlural }}/fields.vue'
 
 import {ref} from "vue";
@@ -8,7 +15,16 @@ const { post  } = useClienteRequest();
 
 const { showToastSuccess, showToastError } = useToast();
 
+const requestInProgress = ref(false) // Evitar solicitudes concurrentes
+const cargando = ref(false) // Evitar solicitudes concurrentes
+
 const guardar{{ model }} = async ( {{ model }} ) => {
+
+  if (requestInProgress.value)
+    return
+
+  requestInProgress.value = true // Establecer bandera de solicitud en progreso
+  cargando.value = true // Activar indicador de carga
 
   try {
 
@@ -22,6 +38,9 @@ const guardar{{ model }} = async ( {{ model }} ) => {
 
     showToastError(error.message);
 
+  }  finally {
+    cargando.value = false // Desactivar indicador de carga
+    requestInProgress.value = false // Liberar la bandera
   }
 
 }
@@ -43,24 +62,20 @@ const guardar{{ model }} = async ( {{ model }} ) => {
     </VBtn>
   </div>
 
+  <AppCardActions
+    v-model:loading="cargando"
+    title="Crear {{ model }}"
+    no-actions
+  >
 
-  <v-card>
-
-    <v-card-title>Crear {{ model }} </v-card-title>
-
-    <v-card-text>
-
-
-
+    <VCardText>
       <fields :fields="fields"
               @emitirDatos="guardar{{ model }}"
       />
 
+    </VCardText>
 
-    </v-card-text>
-
-  </v-card>
-
+  </AppCardActions>
 
 
 </template>

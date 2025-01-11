@@ -53,7 +53,7 @@ const onSubmit = () => {
     @submit.prevent="onSubmit"
   >
     <VRow>
-      {{ inputsFormulario }}
+    {{ inputsFormulario }}
       <VCol cols="12">
         <VBtn
           type="submit"
