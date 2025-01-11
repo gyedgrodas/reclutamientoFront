@@ -9,7 +9,7 @@ definePageMeta({
 import {ref} from "vue";
 import {can} from "@layouts/plugins/casl";
 
-const { get , deleted} = useClienteRequest();
+const { get , deleted } = useClienteRequest();
 
 const { showToastSuccess, showToastError, preguntaEliminar } = useToast()
 

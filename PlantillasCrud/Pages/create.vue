@@ -9,6 +9,8 @@ definePageMeta({
 
 import fields from '@/views/pages/{{ modelPlural }}/fields.vue'
 
+import { {{ model }}Interface } from './Types.ts';
+
 import {ref} from "vue";
 
 const { post  } = useClienteRequest();

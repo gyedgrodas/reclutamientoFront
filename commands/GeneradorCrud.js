@@ -35,7 +35,7 @@ const formatearCamposFormCreate = (campos) => {
     const stateText = `{ ${Object.entries(state).map(([key, value]) => `${key}: ${value}`).join(',\n')} }`; // Agrega un salto de línea aquí
     return stateText;
 
-}
+};
 
 const objectSchema = (campos) => {
     let esquema = {};
@@ -46,7 +46,7 @@ const objectSchema = (campos) => {
 
     const schemaText = `object({ ${Object.entries(esquema).map(([key, value]) => `${key}: ${value}`).join(',\n')} })`; // Agrega un salto de línea aquí
     return schemaText;
-}
+};
 
 const askQuestions = async () => {
     try {
@@ -105,11 +105,11 @@ const askQuestions = async () => {
             .replace(/{{ url }}/g, url)
             .replace(/{{ directory }}/g, directory.split('pages/')[1]);
 
-        // const camposInterfaz = formatoCamposInterfaz(campos);
-        //
-        // const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'index.ts'), 'utf-8')
-        //   .replace(/{{ model }}/g, modelo)
-        //   .replace(/{{ fieldsInterfaz }}/g, camposInterfaz);
+        const camposInterfaz = formatoCamposInterfaz(campos);
+
+        const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'index.ts'), 'utf-8')
+            .replace(/{{ model }}/g, modelo)
+            .replace(/{{ fieldsInterfaz }}/g, camposInterfaz);
 
         const editTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'edit.vue'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
@@ -135,7 +135,7 @@ const askQuestions = async () => {
 
         fs.writeFileSync(path.join(directoryViews, 'fields.vue'), Viewfields);
 
-        // fs.writeFileSync(path.join(directory, 'Interface.ts'), interfazTemplate);
+        fs.writeFileSync(path.join(directory, 'Types.ts'), interfazTemplate);
 
         const editDir = path.join(directory, 'edit');
         if (!fs.existsSync(editDir)) {
@@ -212,7 +212,7 @@ const tiposInputFormulario = (campos) => {
     });
 
     return JSON.stringify(tipoInput, null, 2);
-}
+};
 
 
 const formatoHtmlInputsFormulario = (campos) => {
@@ -237,7 +237,7 @@ const formatoHtmlInputsFormulario = (campos) => {
 
     return inputs.join('');
 
-}
+};
 
 const formatoCamposInterfaz = (campos) => {
 
@@ -252,7 +252,7 @@ const formatoCamposInterfaz = (campos) => {
     });
 
     return camposInterfaz.join('');
-}
+};
 
 const formatoShowInputs = (campos) => {
 
@@ -274,4 +274,4 @@ const formatoShowInputs = (campos) => {
     });
 
     return camposInterfaz.join('');
-}
+};

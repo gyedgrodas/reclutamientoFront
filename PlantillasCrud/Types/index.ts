@@ -1,4 +1,4 @@
-export interface {{ model }} {
+export interface {{ model }}Interface {
 
   {{ fieldsInterfaz }}
 

@@ -8,7 +8,7 @@ definePageMeta({
 
 import fields from '@/views/pages/{{ modelPlurar }}/fields.vue'
 
-// import { {{ model }} } from '@/pages/{{ modelPlurar }}/Interface.ts';
+import { {{ model }}Interface } from '../Types.ts';
 
 import {ref} from "vue";
 
