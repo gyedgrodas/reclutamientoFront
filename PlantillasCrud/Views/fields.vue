@@ -6,13 +6,15 @@ const isFormValid = ref(false)
 
 const refForm = ref<VForm>()
 
-// import { {{ model }} } from '@/pages/{{ modelPlural }}/Interface.ts';
+import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/index.ts';
 
-const data = ref({})
+const data = ref( <{{ model }}Interface>
+  {{ camposFormCreate }}
+)
 
 interface Emit {
 
-  (e: 'emitirDatos', value: any): void
+  (e: 'emitirDatos', value: {{ model }}Interface ): void
 
 }
 
@@ -35,7 +37,7 @@ const onSubmit = () => {
 
     if (valid) {
 
-      emit('emitirDatos', data)
+      emit('emitirDatos', data.value)
 
     }
 

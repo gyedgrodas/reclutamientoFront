@@ -6,7 +6,7 @@ definePageMeta({
   subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 });
 
-import fields from '@/views/pages/{{ modelPlurar }}/fields.vue'
+import fields from '@/views/pages/{{ modelPlural }}/fields.vue'
 
 import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/index.ts';
 
@@ -23,26 +23,41 @@ const id = route.params.id;
 const {{ model }} = ref(fields);
 
 const cargando = ref(false);
+const requestInProgress = ref(false); // Evitar solicitudes concurrentes
 
-const actualizar{{ model }} = async ( {{ model }} ) => {
+const actualizar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promise<void> => {
 
-  try {
+  if (!requestInProgress.value) {
 
-    const respuesta = await put('{{ url }}/' + id, {{ model }}.value );
+    cargando.value = true;
+    requestInProgress.value = true;
 
-    showToastSuccess(respuesta.message);
+    try {
 
-    navigateTo('/{{ directory }}');
+      const respuesta = await put('{{ url }}/' + id, {{ model }} );
 
-  } catch (error) {
+      showToastSuccess(respuesta.message);
 
-    showToastError(error.message);
+      navigateTo('/{{ directory }}');
+
+    } catch (error) {
+
+      showToastError(error.message);
+
+    } finally {
+
+      cargando.value = false;
+      requestInProgress.value = false;
+
+    }
 
   }
 
 }
 
-const item{{ model }} = ref({});
+const item{{ model }} = ref( <{{ model }}Interface>
+{{ camposFormCreate }}
+)
 
 const get{{ model }} = async () => {
 
@@ -50,12 +65,11 @@ const get{{ model }} = async () => {
 
     cargando.value = true;
 
-    const respuesta = await get('{{ url }}/' + id );
+    const respuesta: { data: {{ model }}Interface } = await get('{{ url }}/' + id );
 
     item{{ model }}.value = respuesta.data;
 
-
-  } catch (error) {
+  } catch (error: { message: string }) {
 
     showToastError(error.message);
 

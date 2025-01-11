@@ -86,6 +86,8 @@ const askQuestions = async () => {
         const columnas = formatearCamposTable([...campos, 'Acciones']);
         const columnasJSON = JSON.stringify(columnas, null, 2);
 
+        const camposFormCreate = formatoCamposFormCreate(campos);
+
         const modelPlurar = pluralizar(modeloMinusculas);
 
         const listTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'index.vue'), 'utf-8')
@@ -99,16 +101,15 @@ const askQuestions = async () => {
 
         const Viewfields = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Views', 'fields.vue'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
-            .replace(/{{ headers }}/g, columnasJSON)
             .replace(/{{ modelPlural }}/g, modelPlurar)
-            .replace(/{{ url }}/g, url)
+            .replace(/{{ camposFormCreate }}/g, camposFormCreate)
             .replace(/{{ directory }}/g, directory.split('pages/')[1])
             .replace(/{{ inputsFormulario }}/g, inputsFormulario);
 
         const createTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'create.vue'), 'utf-8')
             .replace(/{{ modelPlural }}/g, modelPlurar)
             .replace(/{{ model }}/g, modelo)
-            // .replace(/{{ headers }}/g, columnasJSON)
+            .replace(/{{ camposFormCreate }}/g, camposFormCreate)
             .replace(/{{ url }}/g, url)
             .replace(/{{ directory }}/g, directory.split('pages/')[1]);
 
@@ -122,7 +123,7 @@ const askQuestions = async () => {
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ modelPlural }}/g, modelPlurar)
             .replace(/{{ url }}/g, url)
-            .replace(/{{ modelPlurar }}/g, modelPlurar)
+            .replace(/{{ camposFormCreate }}/g, camposFormCreate)
             .replace(/{{ directory }}/g, directory.split('pages/')[1]);
 
         const camposFormShow = formatoShowInputs(campos);
@@ -130,6 +131,7 @@ const askQuestions = async () => {
         const showTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'show.vue'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ modelPlural }}/g, modelPlurar)
+            .replace(/{{ camposFormCreate }}/g, camposFormCreate)
             .replace(/{{ fields }}/g, columnasJSON)
             .replace(/{{ directory }}/g, directory.split('pages/')[1])
             .replace(/{{ url }}/g, url)
@@ -282,3 +284,18 @@ const formatoShowInputs = (campos) => {
 
     return camposInterfaz.join('');
 };
+
+const formatoCamposFormCreate = (campos) => {
+
+    let state = {};
+
+    campos.forEach(campo => {
+        state[campo] = null;
+    });
+
+    const stateText = `{ ${Object.entries(state).map(([key, value]) => `${key}: ${value}`).join(',\n')} }`; // Agrega un salto de línea aquí
+
+    return stateText;
+
+};
+

@@ -21,7 +21,9 @@ const id = route.params.id;
 
 const cargando = ref(false);
 
-const item = ref({});
+const item = ref( <{{ model }}Interface>
+{{ camposFormCreate }}
+)
 
 const get{{ model }} = async () => {
 
@@ -29,12 +31,12 @@ const get{{ model }} = async () => {
 
     cargando.value = true;
 
-    const respuesta = await get('{{ url }}/' + id );
+    const respuesta: { data: {{ model }}Interface } = await get('{{ url }}/' + id );
 
     item.value = respuesta.data;
 
 
-  } catch (error) {
+  } catch (error: { message: string }) {
 
     showToastError(error.message);
 

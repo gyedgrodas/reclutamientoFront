@@ -20,29 +20,31 @@ const { showToastSuccess, showToastError } = useToast();
 const requestInProgress = ref(false) // Evitar solicitudes concurrentes
 const cargando = ref(false) // Evitar solicitudes concurrentes
 
-const guardar{{ model }} = async ( {{ model }}: { value: {{ model }}Interface} ): Promise<void> => {
+const guardar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promise<void> => {
 
-  if (requestInProgress.value)
-    return
+  if (!requestInProgress.value) {
 
-  requestInProgress.value = true // Establecer bandera de solicitud en progreso
-  cargando.value = true // Activar indicador de carga
+    requestInProgress.value = true // Establecer bandera de solicitud en progreso
+    cargando.value = true // Activar indicador de carga
 
-  try {
+    try {
 
-    const respuesta: { message: string } = await post('{{ url }}', {{ model }}.value );
+      const respuesta: { message: string } = await post('{{ url }}', {{ model }} );
 
-    showToastSuccess(respuesta.message);
+      showToastSuccess(respuesta.message);
 
-    navigateTo('/{{ directory }}');
+      navigateTo('/{{ directory }}');
 
-  } catch (error: any) {
+    } catch (error: any) {
 
-    showToastError(error.message);
+      showToastError(error.message);
 
-  }  finally {
-    cargando.value = false // Desactivar indicador de carga
-    requestInProgress.value = false // Liberar la bandera
+    }  finally {
+
+      cargando.value = false // Desactivar indicador de carga
+      requestInProgress.value = false // Liberar la bandera
+
+    }
   }
 
 }
