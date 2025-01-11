@@ -69,6 +69,8 @@ const askQuestions = async () => {
 
         const directoryViews = `./views/pages/${pluralizar(modeloMinusculas)}`;
 
+        const directoryTypes = `./types/${pluralizar(modeloMinusculas)}`;
+
         if (!fs.existsSync(directory)) {
             fs.mkdirSync(directory, {recursive: true});
         }
@@ -76,6 +78,11 @@ const askQuestions = async () => {
         if (!fs.existsSync(directoryViews)) {
             fs.mkdirSync(directoryViews, {recursive: true});
         }
+
+        if (!fs.existsSync(directoryTypes)) {
+            fs.mkdirSync(directoryTypes, {recursive: true});
+        }
+
         const columnas = formatearCamposTable([...campos, 'Acciones']);
         const columnasJSON = JSON.stringify(columnas, null, 2);
 
@@ -135,7 +142,7 @@ const askQuestions = async () => {
 
         fs.writeFileSync(path.join(directoryViews, 'fields.vue'), Viewfields);
 
-        fs.writeFileSync(path.join(directory, 'Types.ts'), interfazTemplate);
+        fs.writeFileSync(path.join(directoryTypes, 'index.ts'), interfazTemplate);
 
         const editDir = path.join(directory, 'edit');
         if (!fs.existsSync(editDir)) {

@@ -9,7 +9,7 @@ definePageMeta({
 
 import fields from '@/views/pages/{{ modelPlural }}/fields.vue'
 
-import { {{ model }}Interface } from './Types.ts';
+import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/index.ts';
 
 import {ref} from "vue";
 
@@ -20,7 +20,7 @@ const { showToastSuccess, showToastError } = useToast();
 const requestInProgress = ref(false) // Evitar solicitudes concurrentes
 const cargando = ref(false) // Evitar solicitudes concurrentes
 
-const guardar{{ model }} = async ( {{ model }} ) => {
+const guardar{{ model }} = async ( {{ model }}: { value: {{ model }}Interface} ): Promise<void> => {
 
   if (requestInProgress.value)
     return
@@ -30,13 +30,13 @@ const guardar{{ model }} = async ( {{ model }} ) => {
 
   try {
 
-    const respuesta = await post('{{ url }}', {{ model }}.value );
+    const respuesta: { message: string } = await post('{{ url }}', {{ model }}.value );
 
     showToastSuccess(respuesta.message);
 
     navigateTo('/{{ directory }}');
 
-  } catch (error) {
+  } catch (error: any) {
 
     showToastError(error.message);
 
@@ -46,9 +46,6 @@ const guardar{{ model }} = async ( {{ model }} ) => {
   }
 
 }
-
-
-
 
 </script>
 
