@@ -400,7 +400,7 @@ import horizontalLight from '@images/customizer-icons/horizontal-light.svg'
 import {AppContentLayoutNav, ContentWidth} from '@layouts/enums'
 import {cookieRef} from '@layouts/stores/config'
 import {themeConfig} from '@themeConfig'
-import {userPreferencias} from '@core/types'
+import {preferenciasUsuario} from '@core/types'
 
 import borderSkin from '@images/customizer-icons/border-light.svg'
 import collapsed from '@images/customizer-icons/collapsed-light.svg'
@@ -669,7 +669,7 @@ const guardarPreferencias = async (): Promise<void> => {
 
   try {
 
-    const data: userPreferencias = {
+    const data: preferenciasUsuario = {
 
       tema: configStore.theme as 'light' | 'dark' | 'system',
       tema_color: cookieRef('tema_color', 'light').value as 'light' | 'dark',

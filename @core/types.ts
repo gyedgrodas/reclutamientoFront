@@ -51,7 +51,7 @@ export interface Options {
   search: string | undefined
 }
 
-export interface userPreferencias {
+export interface preferenciasUsuario {
   tema: 'dark' | 'light' | 'system'
   tema_color: 'dark' | 'light'
   aspecto: 'default' | 'bordered'
