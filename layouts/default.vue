@@ -3,7 +3,7 @@ import {useConfigStore} from '@core/stores/config'
 import {AppContentLayoutNav} from '@layouts/enums'
 import {switchToVerticalNavOnLtOverlayNavBreakpoint} from '@layouts/utils'
 import {onMounted, ref} from "vue";
-import LoadingSpinner from "@/components/Loading.vue";
+import PaginaCargando from "@/components/PaginaCargando.vue";
 import {useTheme} from "vuetify";
 import {cookieRef} from "@/@layouts/stores/config";
 import type {preferenciasUsuario} from '@core/types'
@@ -157,6 +157,9 @@ const asignarValorDesdeCookies = (): void => {
 
 const tienePreferencias = cookieRef<boolean>("tiene_preferencias", false);
 
+const {paginaEspera, cargandoPagina} = useCargandoPagina();
+
+cargandoPagina.value = true;
 
 if (!tienePreferencias.value) {
 
@@ -168,21 +171,63 @@ if (!tienePreferencias.value) {
 
 }
 onMounted(() => {
-  loadings.value = false;
-});
-</script>
 
+  cargandoPagina.value = false;
+
+});
+
+</script>
 
 <template>
   <Component
     :is="configStore.appContentLayoutNav === AppContentLayoutNav.Vertical ? DefaultLayoutWithVerticalNav : DefaultLayoutWithHorizontalNav"
-    v-if="!loadings"
+    v-if="!cargandoPagina"
     v-bind="layoutAttrs"
   >
     <slot/>
   </Component>
 
-  <loading-spinner v-if="loadings"/>
+  <PaginaCargando v-if="cargandoPagina"/>
+
+  <VOverlay
+    v-model="paginaEspera"
+    class="align-center justify-center"
+    contained
+    persistent
+    scroll-strategy="none"
+  >
+    <div class="overlay-content text-center">
+      <!-- Indicador circular de carga -->
+      <VProgressCircular
+        class="progress-circle"
+        color="primary"
+        indeterminate
+        size="64"
+      />
+      <!-- Texto -->
+      <h1 class="loading-text">Por favor, espera...</h1>
+    </div>
+  </VOverlay>
+
+  <!--  <VOverlay-->
+  <!--    v-model="paginaEspera"-->
+  <!--    class="custom-overlay"-->
+  <!--    contained-->
+  <!--    persistent-->
+  <!--    scroll-strategy="none"-->
+  <!--  >-->
+  <!--    <div class="overlay-content">-->
+  <!--      &lt;!&ndash; Indicador circular de carga &ndash;&gt;-->
+  <!--      <VProgressCircular-->
+  <!--        class="progress-circle"-->
+  <!--        color="primary"-->
+  <!--        indeterminate-->
+  <!--        size="64"-->
+  <!--      />-->
+  <!--      &lt;!&ndash; Texto &ndash;&gt;-->
+  <!--      <span class="loading-text">Por favor, espera...</span>-->
+  <!--    </div>-->
+  <!--  </VOverlay>-->
 
 
 </template>

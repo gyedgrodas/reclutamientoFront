@@ -8,11 +8,10 @@
       <v-card-text->
 
 
+        <v-btn color="primary" @click="activarEsperar">Activar esperar</v-btn>
 
 
       </v-card-text->
-
-
 
 
     </VCard>
@@ -22,16 +21,17 @@
 
 <script setup>
 
-const { user } = useSanctumAuth();
+const {paginaEspera} = useCargandoPagina();
 
-import { useConfigStore } from '@core/stores/config'
+const activarEsperar = () => {
+  paginaEspera.value = true;
 
-const configStore = useConfigStore();
+  setTimeout(() => {
+    paginaEspera.value = false;
+  }, 3000);
 
-const cambiarPrefijo = () => {
 
-  configStore.prefijoCookie = 'nuevoPrefijo_';
+};
 
-}
 
 </script>
