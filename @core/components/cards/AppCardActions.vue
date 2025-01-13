@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 interface Props {
   collapsed?: boolean
   noActions?: boolean
@@ -11,15 +11,19 @@ interface Props {
 
 interface Emit {
   (e: 'collapsed', isContentCollapsed: boolean): void
+
   (e: 'refresh', stopLoading: () => void): void
+
   (e: 'trash'): void
+
   (e: 'initialLoad'): void
+
   (e: 'update:loading', loading: boolean): void
 }
 
 defineOptions({
   inheritAttrs: false,
-})
+});
 
 const props = withDefaults(defineProps<Props>(), {
   collapsed: false,
@@ -29,11 +33,11 @@ const props = withDefaults(defineProps<Props>(), {
   actionRemove: false,
   loading: undefined,
   title: undefined,
-})
+});
 
-const emit = defineEmits<Emit>()
+const emit = defineEmits<Emit>();
 
-const _loading = ref(false)
+const _loading = ref(false);
 
 const $loading = computed({
   get() {
@@ -43,31 +47,31 @@ const $loading = computed({
   set(value: boolean) {
     props.loading !== undefined ? emit('update:loading', value) : _loading.value = value
   },
-})
+});
 
-const isContentCollapsed = ref(props.collapsed)
-const isCardRemoved = ref(false)
+const isContentCollapsed = ref(props.collapsed);
+const isCardRemoved = ref(false);
 
 // stop loading
 const stopLoading = () => {
   $loading.value = false
-}
+};
 
 // trigger collapse
 const triggerCollapse = () => {
-  isContentCollapsed.value = !isContentCollapsed.value
+  isContentCollapsed.value = !isContentCollapsed.value;
   emit('collapsed', isContentCollapsed.value)
-}
+};
 
 // trigger refresh
 const triggerRefresh = () => {
-  $loading.value = true
+  $loading.value = true;
   emit('refresh', stopLoading)
-}
+};
 
 // trigger removal
 const triggeredRemove = () => {
-  isCardRemoved.value = true
+  isCardRemoved.value = true;
   emit('trash')
 }
 </script>
@@ -88,7 +92,7 @@ const triggeredRemove = () => {
           <template #append>
             <!-- 👉 Before actions slot -->
             <div>
-              <slot name="before-actions" />
+              <slot name="before-actions"/>
 
               <!-- SECTION Actions buttons -->
 
@@ -98,9 +102,9 @@ const triggeredRemove = () => {
                 @click="triggerCollapse"
               >
                 <VIcon
-                  size="20"
-                  icon="tabler-chevron-up"
                   :style="{ transform: isContentCollapsed ? 'rotate(-180deg)' : undefined }"
+                  icon="tabler-chevron-up"
+                  size="20"
                   style="transition-duration: 0.28s;"
                 />
               </IconBtn>
@@ -111,8 +115,8 @@ const triggeredRemove = () => {
                 @click="triggerRefresh"
               >
                 <VIcon
-                  size="20"
                   icon="tabler-refresh"
+                  size="20"
                 />
               </IconBtn>
 
@@ -122,12 +126,12 @@ const triggeredRemove = () => {
                 @click="triggeredRemove"
               >
                 <VIcon
-                  size="20"
                   icon="tabler-x"
+                  size="20"
                 />
               </IconBtn>
             </div>
-          <!-- !SECTION -->
+            <!-- !SECTION -->
           </template>
         </VCardItem>
 
@@ -137,19 +141,20 @@ const triggeredRemove = () => {
             v-show="!isContentCollapsed"
             class="v-card-content"
           >
-            <slot />
+            <slot/>
           </div>
         </VExpandTransition>
 
         <!-- 👉 Overlay -->
         <VOverlay
           v-model="$loading"
+          class="align-center justify-center"
           contained
           persistent
           scroll-strategy="none"
-          class="align-center justify-center"
         >
-          <VProgressCircular indeterminate />
+          <!--          <VProgressCircular indeterminate />-->
+
         </VOverlay>
       </VCard>
     </div>
@@ -158,7 +163,7 @@ const triggeredRemove = () => {
 
 <style lang="scss">
 .v-card-item {
-  +.v-card-content {
+  + .v-card-content {
     .v-card-text:first-child {
       padding-block-start: 0;
     }

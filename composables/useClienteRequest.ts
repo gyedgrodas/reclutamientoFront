@@ -30,7 +30,7 @@ export const useClienteRequest = () => {
 
       console.error(`Error in ${method} request to ${url}:`, e);
 
-      throw e;
+      throw e.response._data;
 
     }
   };
@@ -43,7 +43,7 @@ export const useClienteRequest = () => {
 
     put: <T = any>(url: string, body: Body): Promise<RequestResponse<T>> => request<T>(url, 'PUT', body),
 
-    delete: <T = any>(url: string, params: Params = {}): Promise<RequestResponse<T>> => request<T>(url, 'DELETE', null, params),
+    deleted: <T = any>(url: string, params: Params = {}): Promise<RequestResponse<T>> => request<T>(url, 'DELETE', null, params),
 
   };
 };
