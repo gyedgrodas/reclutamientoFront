@@ -29,13 +29,13 @@ const getItems = async (): Promise<object> => {
 
     loading.value = true;
 
-    const respuesta = await get('{{ url }}');
+    const respuesta: {data: []} = await get('{{ url }}');
 
     items.value = respuesta.data;
 
-  } catch (error) {
+  } catch (error: {message: string}) {
 
-    console.error(error.meesage);
+    console.error(error.message);
 
   }
 
