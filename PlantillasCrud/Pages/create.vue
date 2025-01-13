@@ -6,7 +6,6 @@ definePageMeta({
   subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 });
 
-
 import fields from '@/views/pages/{{ modelPlural }}/fields.vue'
 
 import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/index.ts';
@@ -18,14 +17,14 @@ const { post  } = useClienteRequest();
 const { showToastSuccess, showToastError } = useToast();
 
 const requestInProgress = ref(false) // Evitar solicitudes concurrentes
-const cargando = ref(false) // Evitar solicitudes concurrentes
+const { paginaEspera } = useCargandoPagina();
 
 const guardar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promise<void> => {
 
   if (!requestInProgress.value) {
 
     requestInProgress.value = true // Establecer bandera de solicitud en progreso
-    cargando.value = true // Activar indicador de carga
+    paginaEspera.value = true // Activar indicador de carga
 
     try {
 
@@ -41,7 +40,7 @@ const guardar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promise<
 
     }  finally {
 
-      cargando.value = false // Desactivar indicador de carga
+      paginaEspera.value = false // Desactivar indicador de carga
       requestInProgress.value = false // Liberar la bandera
 
     }
@@ -54,6 +53,7 @@ const guardar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promise<
 <template>
 
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+
     <VBtn
       class="ml-auto"
       color="secondary"
@@ -61,23 +61,26 @@ const guardar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promise<
     >
       Regresar
     </VBtn>
+
   </div>
 
-  <AppCardActions
-    v-model:loading="cargando"
-    title="Crear {{ model }}"
-    no-actions
-  >
+  <VCard>
+
+    <VCardItem>
+
+      <VCardTitle>Crear {{ model }}</VCardTitle>
+
+    </VCardItem>
 
     <VCardText>
+
       <fields :fields="fields"
               @emitirDatos="guardar{{ model }}"
       />
 
     </VCardText>
 
-  </AppCardActions>
-
+  </VCard>
 
 </template>
 

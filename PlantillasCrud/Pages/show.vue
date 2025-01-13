@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-
 definePageMeta({
   middleware: 'permissions',
   action: 'ver {{ modelPlural }}', // Acción requerida
@@ -19,7 +18,7 @@ const route = useRoute();
 
 const id = route.params.id;
 
-const cargando = ref(false);
+const { paginaEspera } = useCargandoPagina();
 
 const item = ref( <{{ model }}Interface>
 {{ camposFormCreate }}
@@ -29,7 +28,7 @@ const get{{ model }} = async () => {
 
   try {
 
-    cargando.value = true;
+    paginaEspera.value = true;
 
     const respuesta: { data: {{ model }}Interface } = await get('{{ url }}/' + id );
 
@@ -42,9 +41,15 @@ const get{{ model }} = async () => {
 
   }
 
-  cargando.value = false;
+  paginaEspera.value = false;
 
 }
+
+const puedeMostrarDatos = computed(() => {
+
+  return Object.values(item.value).some(valor => valor !== null && valor !== undefined);
+
+});
 
 get{{ model }}();
 
@@ -62,21 +67,25 @@ get{{ model }}();
     </VBtn>
   </div>
 
-  <AppCardActions
-    v-model:loading="cargando"
-    title="Editar {{ model }}"
-    no-actions
-  >
+  <VCard>
+
+    <VCardItem>
+
+      <VCardTitle>Visualizar {{ model }}</VCardTitle>
+
+    </VCardItem>
 
     <VCardText>
 
-      <VList class="card-list mt-2">
+      <VList class="card-list mt-2" v-if="puedeMostrarDatos">
+
         {{ camposForm }}
+
       </VList>
 
     </VCardText>
 
-  </AppCardActions>
+  </VCard>
 
 </template>
 

@@ -22,14 +22,14 @@ const id = route.params.id;
 
 const {{ model }} = ref(fields);
 
-const cargando = ref(false);
+const { paginaEspera } = useCargandoPagina();
 const requestInProgress = ref(false); // Evitar solicitudes concurrentes
 
 const actualizar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promise<void> => {
 
   if (!requestInProgress.value) {
 
-    cargando.value = true;
+    paginaEspera.value = true;
     requestInProgress.value = true;
 
     try {
@@ -46,7 +46,7 @@ const actualizar{{ model }} = async ( {{ model }}: {{ model }}Interface ): Promi
 
     } finally {
 
-      cargando.value = false;
+      paginaEspera.value = false;
       requestInProgress.value = false;
 
     }
@@ -63,7 +63,7 @@ const get{{ model }} = async () => {
 
   try {
 
-    cargando.value = true;
+    paginaEspera.value = true;
 
     const respuesta: { data: {{ model }}Interface } = await get('{{ url }}/' + id );
 
@@ -75,17 +75,24 @@ const get{{ model }} = async () => {
 
   }
 
-  cargando.value = false;
+  paginaEspera.value = false;
 
 }
 
 get{{ model }}();
+
+const puedeMostrarDatos = computed(() => {
+
+  return Object.values(item{{ model }} .value).some(valor => valor !== null && valor !== undefined);
+
+});
 
 </script>
 
 <template>
 
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+
     <VBtn
       class="ml-auto"
       color="secondary"
@@ -93,25 +100,28 @@ get{{ model }}();
     >
       Regresar
     </VBtn>
+
   </div>
 
-    <AppCardActions
-      v-model:loading="cargando"
-      title="Editar {{ model }}"
-      no-actions
-    >
+  <VCard>
+
+    <VCardItem>
+
+      <VCardTitle>Editar {{ model }}</VCardTitle>
+
+    </VCardItem>
 
       <VCardText>
 
         <fields :fields="fields"
-                v-if="!cargando"
+                v-if="puedeMostrarDatos"
                 :item="item{{ model }}"
                 @emitirDatos="actualizar{{ model }}"
         />
 
       </VCardText>
 
-    </AppCardActions>
+  </VCard>
 
 </template>
 
