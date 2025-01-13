@@ -7,8 +7,8 @@ const { logout } = useSanctumAuth()
 const cerrarSesion = async () => {
   try {
     await logout()
-    //eliminar la cookie de userAbilityRules
-    document.cookie = 'userAbilityRules=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+    //eliminar la Local storage de userAbilityRules
+    localStorage.removeItem('userAbilityRules')
   } catch (error) {
     console.error('An error occurred while logging out:', error)
   }

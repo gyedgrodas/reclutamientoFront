@@ -26,7 +26,7 @@ export default defineAppConfig({
       ) => {
         if (ctx.response?.status === 401) {
           // Elimina las cookies relacionadas con permisos
-          eliminarCookiesPermisos();
+          eliminarPermisosLocalStorage();
         }
         // Mensaje de log para mostrar que el interceptor onResponse ha sido llamado
         logger.debug(`[onResponse] custom interceptor (${ctx.request})`)  // Log de depuración con la solicitud que ha recibido la respuesta
@@ -36,14 +36,15 @@ export default defineAppConfig({
 })
 
 
-// Función para eliminar las cookies relacionadas con permisos
-const eliminarCookiesPermisos = () => {
-  const cookies = document.cookie.split(';');
+// Función para eliminar las localstorage relacionadas con permisos
+const eliminarPermisosLocalStorage = () => {
+  // Itera desde el final hasta el principio para evitar problemas de índice al eliminar elementos
+ for (let i = localStorage.length - 1; i >= 0; i--) {
+   const key = localStorage.key(i)    // Verifica si la clave incluye 'userAbilityRules'
+    if (key && key.includes('userAbilityRules')) {
+      // Elimina el elemento de localStorage
+      localStorage.removeItem(key)    }
+ }}
 
-  cookies.forEach(cookie => {
-    const cookieName = cookie.split('=')[0].trim();
-    if (cookieName.includes('userAbilityRules')) {
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    }
-  });
-};
+
+
