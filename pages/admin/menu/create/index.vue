@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 
 import Fields from '@/views/admin/menuOpciones/fields.vue';
-import type {MenuOpcion} from "@/types/admin/menuOpciones/types";
+import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
 const {post} = useClienteRequest();
 const {paginaEspera} = useCargandoPagina();
 const {showToastError, showToastSuccess} = useToast();
+const menu = useState('menu');
 
 const guardarOpcion = async (data: MenuOpcion) => {
 
@@ -13,7 +14,9 @@ const guardarOpcion = async (data: MenuOpcion) => {
 
   try {
 
-    let res: { message: string } = await post('api/menu_opciones', data);
+    let res: RespuestaRequest = await post('api/menu_opciones', data);
+
+    menu.value = res.data;
 
     showToastSuccess(res.message);
 
