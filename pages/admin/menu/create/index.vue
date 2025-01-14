@@ -1,6 +1,36 @@
 <script lang="ts" setup>
 
 import Fields from '@/views/admin/menuOpciones/fields.vue';
+import type {MenuOpcion} from "@/types/admin/menuOpciones/types";
+
+const {post} = useClienteRequest();
+const {paginaEspera} = useCargandoPagina();
+const {showToastError, showToastSuccess} = useToast();
+
+const guardarOpcion = async (data: MenuOpcion) => {
+
+  paginaEspera.value = true;
+
+  try {
+
+    let res: { message: string } = await post('api/menu_opciones', data);
+
+    showToastSuccess(res.message);
+
+    navigateTo('/admin/menu');
+
+  } catch (error: { message: string }) {
+
+    showToastError(error.message);
+
+  } finally {
+
+    paginaEspera.value = false;
+
+  }
+
+}
+
 </script>
 
 <template>
@@ -15,19 +45,21 @@ import Fields from '@/views/admin/menuOpciones/fields.vue';
     </VBtn>
   </div>
 
-  <v-card>
+  <VCard>
 
-    <v-card-title>Crear una nueva Opcion</v-card-title>
+    <VCardTitle>Crear una nueva Opcion</VCardTitle>
 
-    <v-card-text>
+    <VCardText>
 
-      <fields :mostrar-titulo-seccion="true"
+      <Fields :item="{}"
+              :mostrar-titulo-seccion="true"
               :parentId="null"
+              @Datos="guardarOpcion"
       />
 
-    </v-card-text>
+    </VCardText>
 
-  </v-card>
+  </VCard>
 
 
 </template>

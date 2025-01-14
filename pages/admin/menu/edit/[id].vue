@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 import Fields from '@/views/admin/menuOpciones/fields.vue';
-import type {MenuOpcion} from "@/types/admin/menuOpciones/types";
+import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
 const {put, get} = useClienteRequest();
 
@@ -15,13 +15,17 @@ const id = <number>route.params.id;
 
 const opcion = ref<MenuOpcion>({} as MenuOpcion);
 
+const menu = useState('menu');
+
 const actualizarOpcion = async (opcion: MenuOpcion): Promise<void> => {
 
   try {
 
     paginaEspera.value = true;
 
-    const response = await put(`api/menu_opciones/${id}`, opcion);
+    const response: RespuestaRequest = await put(`api/menu_opciones/${id}`, opcion);
+
+    menu.value = response.data;
 
     showToastSuccess(response.message);
 
