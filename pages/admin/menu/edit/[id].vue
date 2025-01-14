@@ -70,7 +70,7 @@ getOpcion();
     <VCardText>
 
       <Fields :item="opcion"
-              parent-id=""
+              :parent-id="null"
               @datos="actualizarOpcion"
       />
 

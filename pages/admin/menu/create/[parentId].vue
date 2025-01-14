@@ -26,7 +26,9 @@ const parentId = <number>route.params.parentId;
 
     <VCardText>
 
-      <Fields :parentId="parentId"/>
+      <Fields :item="null"
+              :parentId="parentId"
+      />
 
     </VCardText>
 

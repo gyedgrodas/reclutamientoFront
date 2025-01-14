@@ -1,26 +1,26 @@
 <script lang="ts" setup>
-
+// Importaciones necesarias
 import type {VForm} from "vuetify/components/VForm";
 import type {MenuOpcion} from "@/types/admin/menuOpciones/types";
-import {ref} from "vue";
-
-const router = useRouter();
+import {ref, watch} from "vue";
+import {useRouter} from "vue-router";
 
 const props = defineProps<{
   parentId: number | null;
   item: MenuOpcion | null;
 }>();
 
-interface Emit {
-  (e: 'Datos', value: MenuOpcion): void
-}
+const emit = defineEmits<{
+  (event: "Datos", value: MenuOpcion): void;
+}>();
 
-const emit = defineEmits<Emit>();
+// const esTituloSeccion = ref(() => {
+//   return true
+// });
 
-const esTituloSeccion = ref<boolean>(false);
+const esTituloSeccion = ref(false);
 
 const formOpcion = ref<InstanceType<typeof VForm>>();
-
 const formTituloSeccion = ref<InstanceType<typeof VForm>>();
 
 const opcion = ref<MenuOpcion>({
@@ -33,26 +33,19 @@ const opcion = ref<MenuOpcion>({
   subject: null,
 });
 
-const rutasSistema = <object>router.getRoutes();
+const router = useRouter();
+const rutasSistema = router.getRoutes();
 
 const onSubmitFormOpcion = (): void => {
-
   if (formOpcion.value?.validate()) {
-
-    emit('Datos', opcion.value);
-
+    emit("Datos", opcion.value);
   }
-
 };
 
 const onSubmitFormTituloSeccion = (): void => {
-
   if (formTituloSeccion.value?.validate()) {
-
-    emit('Datos', opcion.value);
-
+    emit("Datos", opcion.value);
   }
-
 };
 
 watch(esTituloSeccion, (newVal) => {
@@ -61,32 +54,25 @@ watch(esTituloSeccion, (newVal) => {
       titulo_seccion: opcion.value.titulo_seccion,
       action: opcion.value.action,
       subject: opcion.value.subject,
+      parent_id: props.parentId ?? null,
     };
   } else {
     opcion.value = {
       titulo: opcion.value.titulo,
-      ruta: opcion.value.ruta,
       icono: opcion.value.icono,
+      ruta: opcion.value.ruta,
       action: opcion.value.action,
       subject: opcion.value.subject,
+      parent_id: props.parentId ?? null,
     };
   }
 });
 
 watch(() => props.item, (newVal) => {
   if (newVal) {
-    opcion.value = {
-      titulo: newVal.titulo,
-      icono: newVal.icono,
-      ruta: newVal.ruta,
-      titulo_seccion: newVal.titulo_seccion,
-      parent_id: newVal.parent_id,
-      action: newVal.action,
-      subject: newVal.subject,
-    };
+    opcion.value = {...newVal};
   }
 });
-
 </script>
 
 <template>
@@ -102,46 +88,30 @@ watch(() => props.item, (newVal) => {
   >
     <VCol class="d-flex flex-wrap" cols="12">
       <VCol cols="12" md="6">
-        <AppTextField
-          v-model="opcion.titulo"
-          :rules="[requiredValidator]"
-          label="Titulo"
-        />
+        <AppTextField v-model="opcion.titulo" :rules="[requiredValidator]" label="Título"/>
       </VCol>
 
       <VCol cols="12" md="6">
-
         <AppAutocomplete
           v-model="opcion.ruta"
           :items="rutasSistema"
           item-title="name"
           item-value="name"
-          label="Ruta:"
+          label="Ruta"
           placeholder="Seleccione una ruta"
         />
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField
-          v-model="opcion.icono"
-          label="Icono"
-        />
+        <AppTextField v-model="opcion.icono" label="Icono"/>
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField
-          v-model="opcion.action"
-          :rules="[requiredValidator]"
-          label="Acción"
-        />
+        <AppTextField v-model="opcion.action" :rules="[requiredValidator]" label="Acción"/>
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField
-          v-model="opcion.subject"
-          :rules="[requiredValidator]"
-          label="Subject"
-        />
+        <AppTextField v-model="opcion.subject" :rules="[requiredValidator]" label="Subject"/>
       </VCol>
 
       <VCol class="d-flex gap-4" cols="12">
@@ -160,24 +130,16 @@ watch(() => props.item, (newVal) => {
         <AppTextField
           v-model="opcion.titulo_seccion"
           :rules="[requiredValidator]"
-          label="Titulo Sección"
+          label="Título Sección"
         />
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField
-          v-model="opcion.action"
-          :rules="[requiredValidator]"
-          label="Acción"
-        />
+        <AppTextField v-model="opcion.action" :rules="[requiredValidator]" label="Acción"/>
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField
-          v-model="opcion.subject"
-          :rules="[requiredValidator]"
-          label="Subject"
-        />
+        <AppTextField v-model="opcion.subject" :rules="[requiredValidator]" label="Subject"/>
       </VCol>
     </VCol>
 
