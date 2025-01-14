@@ -30,6 +30,22 @@ const opcion = ref<MenuOpcion>({
   subject: null,
 });
 
+opcion.value = props.item ?? {
+  titulo: null,
+  icono: null,
+  ruta: null,
+  titulo_seccion: null,
+  parent_id: props.parentId ?? null,
+  action: null,
+  subject: null,
+};
+
+if (opcion.value.titulo_seccion) {
+
+  esTituloSeccion.value = true;
+
+}
+
 const router = useRouter();
 const rutasSistema = router.getRoutes();
 
@@ -62,20 +78,6 @@ watch(esTituloSeccion, (newVal) => {
       subject: opcion.value.subject,
       parent_id: props.parentId ?? null,
     };
-  }
-});
-
-watch(() => props.item, (newVal) => {
-  if (newVal) {
-
-    opcion.value = {...newVal};
-
-    if (newVal.titulo_seccion) {
-
-      esTituloSeccion.value = true;
-
-    }
-
   }
 });
 

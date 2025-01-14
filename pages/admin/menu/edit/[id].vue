@@ -7,6 +7,8 @@ const {put, get} = useClienteRequest();
 
 const {showToastSuccess, showToastError} = useToast();
 
+const {paginaEspera} = useCargandoPagina();
+
 const route = useRoute<{ id: number }>();
 
 const id = <number>route.params.id;
@@ -16,6 +18,8 @@ const opcion = ref<MenuOpcion>({} as MenuOpcion);
 const actualizarOpcion = async (opcion: MenuOpcion): Promise<void> => {
 
   try {
+
+    paginaEspera.value = true;
 
     const response = await put(`api/menu_opciones/${id}`, opcion);
 
@@ -27,6 +31,10 @@ const actualizarOpcion = async (opcion: MenuOpcion): Promise<void> => {
 
     showToastError(error.message);
 
+  } finally {
+
+    paginaEspera.value = false;
+
   }
 
 };
@@ -34,6 +42,8 @@ const actualizarOpcion = async (opcion: MenuOpcion): Promise<void> => {
 const getOpcion = async (): Promise<void> => {
 
   try {
+
+    paginaEspera.value = true;
 
     const response: { data: MenuOpcion } = await get(`api/menu_opciones/${id}`);
 
@@ -43,11 +53,22 @@ const getOpcion = async (): Promise<void> => {
 
     showToastError(error.message);
 
+  } finally {
+
+    paginaEspera.value = false;
+
   }
+
 
 };
 
 getOpcion();
+
+const puedeMostrarDatos = computed(() => {
+
+  return Object.values(opcion.value).some(valor => valor !== null && valor !== undefined);
+
+});
 
 </script>
 
@@ -69,7 +90,8 @@ getOpcion();
 
     <VCardText>
 
-      <Fields :item="opcion"
+      <Fields v-if="puedeMostrarDatos"
+              :item="opcion"
               :mostrar-titulo-seccion="false"
               :parent-id="null"
               @datos="actualizarOpcion"
