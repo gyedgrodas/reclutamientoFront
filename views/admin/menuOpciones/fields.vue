@@ -1,69 +1,58 @@
 <script lang="ts" setup>
 
-//Importaciones
-const {post} = useClienteRequest()
-
-const {showToastSuccess, showToastError} = useToast();
+import type {VForm} from "vuetify/components/VForm";
+import type {MenuOpcion} from "@/types/admin/menuOpciones/types";
+import {ref} from "vue";
 
 const router = useRouter();
 
-import {ref} from "vue";
+const props = defineProps<{
+  parentId: number | null;
+  item: MenuOpcion | null;
+}>();
 
-//interfaces
-interface Item {
-  titulo?: string | null;
-  icono?: string | null;
-  ruta?: string | null;
-  titulo_seccion?: string | null;
-  parent_id?: string | null;
-  action?: string | null;
-  subject?: string | null;
+interface Emit {
+  (e: 'Datos', value: MenuOpcion): void
 }
 
-//definir los props
-const props = defineProps<{parentId: string | null}>();
+const emit = defineEmits<Emit>();
 
-//Variables
 const esTituloSeccion = ref<boolean>(false);
 
 const formOpcion = ref<InstanceType<typeof VForm>>();
 
 const formTituloSeccion = ref<InstanceType<typeof VForm>>();
 
-const opcion = ref<Item>({
+const opcion = ref<MenuOpcion>({
   titulo: null,
   icono: null,
   ruta: null,
   titulo_seccion: null,
-  parent_id: props.parentId,
+  parent_id: props.parentId ?? null,
   action: null,
   subject: null,
 });
 
 const rutasSistema = <object>router.getRoutes();
 
-//Funciones
-const submit = async (): Promise<void> => {
-  try {
-    const response = await post("api/menu_opciones", opcion.value);
-    showToastSuccess(response.message);
-    useState('menu').value = response.data;
-    navigateTo("/admin/menu");
-  } catch (error: any) {
-    showToastError(error.message);
-  }
-};
-
 const onSubmitFormOpcion = (): void => {
+
   if (formOpcion.value?.validate()) {
-    submit();
+
+    emit('Datos', opcion.value);
+
   }
+
 };
 
 const onSubmitFormTituloSeccion = (): void => {
+
   if (formTituloSeccion.value?.validate()) {
-    submit();
+
+    emit('Datos', opcion.value);
+
   }
+
 };
 
 watch(esTituloSeccion, (newVal) => {
@@ -84,36 +73,50 @@ watch(esTituloSeccion, (newVal) => {
   }
 });
 
+watch(() => props.item, (newVal) => {
+  if (newVal) {
+    opcion.value = {
+      titulo: newVal.titulo,
+      icono: newVal.icono,
+      ruta: newVal.ruta,
+      titulo_seccion: newVal.titulo_seccion,
+      parent_id: newVal.parent_id,
+      action: newVal.action,
+      subject: newVal.subject,
+    };
+  }
+});
+
 </script>
 
 <template>
 
-  <VCol cols="12" class="d-flex flex-wrap" v-if="!props.parentId" >
+  <VCol v-if="!props.parentId" class="d-flex flex-wrap" cols="12">
     <p class="text-h6 mt-3 ml-2 mr-2">¿Es un título de sección?</p>
     <VSwitch v-model="esTituloSeccion"/>
   </VCol>
 
   <VForm v-if="!esTituloSeccion"
-    ref="formOpcion"
-    @submit.prevent="onSubmitFormOpcion"
+         ref="formOpcion"
+         @submit.prevent="onSubmitFormOpcion"
   >
-    <VCol cols="12" class="d-flex flex-wrap">
+    <VCol class="d-flex flex-wrap" cols="12">
       <VCol cols="12" md="6">
         <AppTextField
           v-model="opcion.titulo"
-          label="Titulo"
           :rules="[requiredValidator]"
+          label="Titulo"
         />
       </VCol>
 
       <VCol cols="12" md="6">
 
         <AppAutocomplete
-          label="Ruta:"
+          v-model="opcion.ruta"
           :items="rutasSistema"
           item-title="name"
           item-value="name"
-          v-model="opcion.ruta"
+          label="Ruta:"
           placeholder="Seleccione una ruta"
         />
       </VCol>
@@ -128,59 +131,59 @@ watch(esTituloSeccion, (newVal) => {
       <VCol cols="12" md="6">
         <AppTextField
           v-model="opcion.action"
-          label="Acción"
           :rules="[requiredValidator]"
+          label="Acción"
         />
       </VCol>
 
       <VCol cols="12" md="6">
         <AppTextField
           v-model="opcion.subject"
-          label="Subject"
           :rules="[requiredValidator]"
+          label="Subject"
         />
       </VCol>
 
-      <VCol cols="12" class="d-flex gap-4">
+      <VCol class="d-flex gap-4" cols="12">
         <VBtn type="submit">Submit</VBtn>
-        <VBtn type="reset" color="secondary" variant="tonal">Reset</VBtn>
+        <VBtn color="secondary" type="reset" variant="tonal">Reset</VBtn>
       </VCol>
     </VCol>
   </VForm>
 
   <VForm v-else
-    ref="formTituloSeccion"
-    @submit.prevent="onSubmitFormTituloSeccion"
+         ref="formTituloSeccion"
+         @submit.prevent="onSubmitFormTituloSeccion"
   >
-    <VCol cols="12" class="d-flex flex-wrap">
+    <VCol class="d-flex flex-wrap" cols="12">
       <VCol cols="12" md="6">
         <AppTextField
           v-model="opcion.titulo_seccion"
-          label="Titulo Sección"
           :rules="[requiredValidator]"
+          label="Titulo Sección"
         />
       </VCol>
 
       <VCol cols="12" md="6">
         <AppTextField
           v-model="opcion.action"
-          label="Acción"
           :rules="[requiredValidator]"
+          label="Acción"
         />
       </VCol>
 
       <VCol cols="12" md="6">
         <AppTextField
           v-model="opcion.subject"
-          label="Subject"
           :rules="[requiredValidator]"
+          label="Subject"
         />
       </VCol>
     </VCol>
 
-    <VCol cols="12" class="d-flex gap-4">
+    <VCol class="d-flex gap-4" cols="12">
       <VBtn type="submit">Submit</VBtn>
-      <VBtn type="reset" color="secondary" variant="tonal">Reset</VBtn>
+      <VBtn color="secondary" type="reset" variant="tonal">Reset</VBtn>
     </VCol>
   </VForm>
 

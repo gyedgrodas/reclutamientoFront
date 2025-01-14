@@ -1,31 +1,32 @@
 <template>
   <div>
 
-      <VBtn
-        icon="tabler-plus"
-        variant="tonal"
-        color="success"
-        size="extra-small"
-        @click="performAction"
-        v-if="!esTituloSeccion"
-        :to="`/admin/menu/create/${id}`"
-      />
+    <VBtn
+      v-if="!esTituloSeccion"
+      :to="`/admin/menu/create/${id}`"
+      color="success"
+      icon="tabler-plus"
+      size="extra-small"
+      variant="tonal"
+      @click="performAction"
+    />
 
-      <VBtn
-        icon="tabler-edit"
-        variant="tonal"
-        size="extra-small"
-        color="warning"
-        @click="performAction"
-      />
+    <VBtn
+      :to="`/admin/menu/edit/${id}`"
+      color="warning"
+      icon="tabler-edit"
+      size="extra-small"
+      variant="tonal"
+      @click="performAction"
+    />
 
-      <VBtn
-        icon="tabler-trash"
-        variant="tonal"
-        size="extra-small"
-        color="error"
-        @click="performAction"
-      />
+    <VBtn
+      color="error"
+      icon="tabler-trash"
+      size="extra-small"
+      variant="tonal"
+      @click="performAction"
+    />
 
   </div>
 </template>

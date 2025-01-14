@@ -5,7 +5,6 @@ import Fields from '@/views/admin/menuOpciones/fields.vue';
 
 <template>
 
-
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
     <VBtn
       class="ml-auto"

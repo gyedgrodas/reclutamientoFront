@@ -1,11 +1,85 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+
+import Fields from '@/views/admin/menuOpciones/fields.vue';
+import type {MenuOpcion} from "@/types/admin/menuOpciones/types";
+
+const {put, get} = useClienteRequest();
+
+const {showToastSuccess, showToastError} = useToast();
+
+const route = useRoute<{ id: number }>();
+
+const id = <number>route.params.id;
+
+const opcion = ref<MenuOpcion>({} as MenuOpcion);
+
+const actualizarOpcion = async (opcion: MenuOpcion): Promise<void> => {
+
+  try {
+
+    const response = await put(`api/menu_opciones/${id}`, opcion);
+
+    showToastSuccess(response.message);
+
+    navigateTo("/admin/menu");
+
+  } catch (error: any) {
+
+    showToastError(error.message);
+
+  }
+
+};
+
+const getOpcion = async (): Promise<void> => {
+
+  try {
+
+    const response: { data: MenuOpcion } = await get(`api/menu_opciones/${id}`);
+
+    opcion.value = response.data;
+
+  } catch (error: { message: string }) {
+
+    showToastError(error.message);
+
+  }
+
+};
+
+getOpcion();
 
 </script>
 
 <template>
 
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+    <VBtn
+      class="ml-auto"
+      color="secondary"
+      to="/admin/menu"
+    >
+      Regresar
+    </VBtn>
+  </div>
+
+  <VCard>
+
+    <VCardTitle>Editar Opción</VCardTitle>
+
+    <VCardText>
+
+      <Fields :item="opcion"
+              parent-id=""
+              @datos="actualizarOpcion"
+      />
+
+    </VCardText>
+
+  </VCard>
+
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 
 </style>

@@ -1,11 +1,10 @@
 <script lang="ts" setup>
+
 import Fields from '@/views/admin/menuOpciones/fields.vue';
 
-const route = useRoute();
-const parentId = route.params.parentId;
+const route = useRoute<{ parentId: number }>();
 
-console.log('uuuu');
-console.log(parentId);
+const parentId = <number>route.params.parentId;
 
 </script>
 
@@ -21,17 +20,17 @@ console.log(parentId);
     </VBtn>
   </div>
 
-  <v-card>
+  <VCard>
 
-    <v-card-title>Crear opcion Hija</v-card-title>
+    <VCardTitle>Crear opcion Hija</VCardTitle>
 
-    <v-card-text>
+    <VCardText>
 
-      <fields :parentId="parentId"/>
+      <Fields :parentId="parentId"/>
 
-    </v-card-text>
+    </VCardText>
 
-  </v-card>
+  </VCard>
 
 
 </template>
