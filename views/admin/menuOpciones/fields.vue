@@ -8,15 +8,12 @@ import {useRouter} from "vue-router";
 const props = defineProps<{
   parentId: number | null;
   item: MenuOpcion | null;
+  mostrarTituloSeccion: boolean;
 }>();
 
 const emit = defineEmits<{
   (event: "Datos", value: MenuOpcion): void;
 }>();
-
-// const esTituloSeccion = ref(() => {
-//   return true
-// });
 
 const esTituloSeccion = ref(false);
 
@@ -70,14 +67,24 @@ watch(esTituloSeccion, (newVal) => {
 
 watch(() => props.item, (newVal) => {
   if (newVal) {
+
     opcion.value = {...newVal};
+
+    if (newVal.titulo_seccion) {
+
+      esTituloSeccion.value = true;
+
+    }
+
   }
 });
+
 </script>
 
 <template>
 
-  <VCol v-if="!props.parentId" class="d-flex flex-wrap" cols="12">
+  <VCol v-if="props.mostrarTituloSeccion"
+        class="d-flex flex-wrap" cols="12">
     <p class="text-h6 mt-3 ml-2 mr-2">¿Es un título de sección?</p>
     <VSwitch v-model="esTituloSeccion"/>
   </VCol>

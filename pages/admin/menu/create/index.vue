@@ -21,7 +21,9 @@ import Fields from '@/views/admin/menuOpciones/fields.vue';
 
     <v-card-text>
 
-      <fields :parentId="null"/>
+      <fields :mostrar-titulo-seccion="true"
+              :parentId="null"
+      />
 
     </v-card-text>
 

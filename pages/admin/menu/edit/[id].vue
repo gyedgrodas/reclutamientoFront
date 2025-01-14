@@ -55,9 +55,9 @@ getOpcion();
 
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
     <VBtn
-      class="ml-auto"
-      color="secondary"
-      to="/admin/menu"
+        class="ml-auto"
+        color="secondary"
+        to="/admin/menu"
     >
       Regresar
     </VBtn>
@@ -70,6 +70,7 @@ getOpcion();
     <VCardText>
 
       <Fields :item="opcion"
+              :mostrar-titulo-seccion="false"
               :parent-id="null"
               @datos="actualizarOpcion"
       />
