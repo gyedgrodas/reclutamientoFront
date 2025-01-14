@@ -2,7 +2,7 @@
 import {useConfigStore} from '@core/stores/config'
 import {AppContentLayoutNav} from '@layouts/enums'
 import {switchToVerticalNavOnLtOverlayNavBreakpoint} from '@layouts/utils'
-import {onMounted, ref} from "vue";
+import {ref} from "vue";
 import PaginaCargando from "@/components/PaginaCargando.vue";
 import {useTheme} from "vuetify";
 import {cookieRef} from "@/@layouts/stores/config";
@@ -19,7 +19,7 @@ switchToVerticalNavOnLtOverlayNavBreakpoint();
 
 const {layoutAttrs, injectSkinClasses} = useSkins();
 
-const {showToastError} = useToast();
+const menu = useState('menu', () => []);
 
 injectSkinClasses();
 
@@ -30,22 +30,69 @@ const {user} = useSanctumAuth();
 
 const {get} = useClienteRequest();
 
-const getPreferencias = async (): Promise<void> => {
+const {showToastError} = useToast();
+
+const {cargandoPagina, paginaEspera} = useCargandoPagina();
+
+const getOpcionesMenu = async (): Promise<void> => {
 
   try {
+
+    const res = await get("api/menu_opciones");
+
+    menu.value = res.data;
+
+    return res;
+
+  } catch (error) {
+
+    throw error;
+
+  }
+};
+
+const getConfiguraciones = async (): Promise<void> => {
+
+  cargandoPagina.value = true;
+
+  try {
+
+    await getOpcionesMenu();
+
+    await getPreferencias();
+
+    // showToastSuccess("Configuraciones obtenidas con éxito");
+
+  } catch (error) {
+
+    showToastError("Error al cargar las configuraciones");
+
+  } finally {
+
+    cargandoPagina.value = false;
+  }
+
+};
+
+getConfiguraciones();
+
+const getPreferencias = async (): Promise<void> => {
+
+  if (tienePreferencias.value)
+    return asignarValorDesdeCookies();
+
+  try {
+
     const res = await get<{ data: preferenciasUsuario }>("api/user_preferencias");
 
-    if (res.data) {
-
-      await asignarDataACookies(res.data);
-
-      configStore.asignarDataACookiesDefault()
-
-    } else {
-
+    if (!res.data) {
       asigarValorDefectoCookies();
-
+      return;
     }
+
+    await asignarDataACookies(res.data);
+
+    configStore.asignarDataACookiesDefault()
 
   } catch (error: { message: string }) {
 
@@ -77,10 +124,10 @@ const asignarDataACookies = (data: preferenciasUsuario): void => {
   configStore.skin = data.aspecto;
 
   cookieRef("esta_navBar_vertical_colapsada", false).value = data.esta_navBar_vertical_colapsada;
-  configStore.isVerticalNavCollapsed = data.esta_navBar_vertical_colapsada;
+  configStore.isVerticalNavCollapsed = data.esta_navBar_vertical_colapsada == true;
 
   cookieRef("es_navBar_vertical_semioscura", false).value = data.es_navBar_vertical_semioscura;
-  configStore.isVerticalNavSemiDark = data.es_navBar_vertical_semioscura;
+  configStore.isVerticalNavSemiDark = data.es_navBar_vertical_semioscura === true;
 
   cookieRef('navBar_loyout', 'vertical').value = data.navBar_loyout;
   configStore.appContentLayoutNav = data.navBar_loyout;
@@ -157,26 +204,8 @@ const asignarValorDesdeCookies = (): void => {
 
 const tienePreferencias = cookieRef<boolean>("tiene_preferencias", false);
 
-const {paginaEspera, cargandoPagina} = useCargandoPagina();
-
-cargandoPagina.value = true;
-
-if (!tienePreferencias.value) {
-
-  getPreferencias();
-
-} else {
-
-  asignarValorDesdeCookies();
-
-}
-onMounted(() => {
-
-  cargandoPagina.value = false;
-
-});
-
 </script>
+
 
 <template>
   <Component
