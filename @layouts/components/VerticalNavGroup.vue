@@ -1,34 +1,34 @@
 <script lang="ts" setup>
-import { TransitionGroup } from 'vue'
-import { layoutConfig } from '@layouts'
-import { TransitionExpand, VerticalNavLink } from '@layouts/components'
-import { canViewNavMenuGroup } from '@layouts/plugins/casl'
-import { useLayoutConfigStore } from '@layouts/stores/config'
-import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
-import type { NavGroup } from '@layouts/types'
-import { getDynamicI18nProps, isNavGroupActive, openGroups } from '@layouts/utils'
+import {TransitionGroup} from 'vue'
+import {layoutConfig} from '@layouts'
+import {TransitionExpand, VerticalNavLink} from '@layouts/components'
+import {canViewNavMenuGroup} from '@layouts/plugins/casl'
+import {useLayoutConfigStore} from '@layouts/stores/config'
+import {injectionKeyIsVerticalNavHovered} from '@layouts/symbols'
+import type {NavGroup} from '@layouts/types'
+import {getDynamicI18nProps, isNavGroupActive, openGroups} from '@layouts/utils'
 
 defineOptions({
   name: 'VerticalNavGroup',
-})
+});
 
 const props = defineProps<{
   item: NavGroup
-}>()
+}>();
 
-const route = useRoute()
-const router = useRouter()
-const configStore = useLayoutConfigStore()
-const hideTitleAndBadge = configStore.isVerticalNavMini()
+const route = useRoute();
+const router = useRouter();
+const configStore = useLayoutConfigStore();
+const hideTitleAndBadge = configStore.isVerticalNavMini();
 
 /*
   ℹ️ We provided default value `ref(false)` because inject will return `T | undefined`
   Docs: https://vuejs.org/api/composition-api-dependency-injection.html#inject
 */
-const isVerticalNavHovered = inject(injectionKeyIsVerticalNavHovered, ref(false))
+const isVerticalNavHovered = inject(injectionKeyIsVerticalNavHovered, ref(false));
 
-const isGroupActive = ref(false)
-const isGroupOpen = ref(false)
+const isGroupActive = ref(false);
+const isGroupOpen = ref(false);
 
 /**
  * Checks if any of children group is open or not.
@@ -39,23 +39,23 @@ const isGroupOpen = ref(false)
  */
 const isAnyChildOpen = (children: NavGroup['children']): boolean => {
   return children.some(child => {
-    let result = openGroups.value.includes(child.title)
+    let result = openGroups.value.includes(child.titulo);
 
     if (child.children.length > 0)
-      result = isAnyChildOpen(child.children) || result
+      result = isAnyChildOpen(child.children) || result;
 
     return result
   })
-}
+};
 
 const collapseChildren = (children: NavGroup['children']) => {
   children.forEach(child => {
     if (child.children.length > 0)
-      collapseChildren(child.children)
+      collapseChildren(child.children);
 
-    openGroups.value = openGroups.value.filter(group => group !== child.title)
+    openGroups.value = openGroups.value.filter(group => group !== child.titulo)
   })
-}
+};
 
 /*
   Watch for route changes, more specifically route path. Do note that this won't trigger if route's query is updated.
@@ -65,14 +65,14 @@ const collapseChildren = (children: NavGroup['children']) => {
 watch(
   () => route.path,
   () => {
-    const isActive = isNavGroupActive(props.item.children, router)
+    const isActive = isNavGroupActive(props.item.children, router);
 
     // Don't open group if vertical nav is collapsed and window size is more than overlay nav breakpoint
-    isGroupOpen.value = isActive && !configStore.isVerticalNavMini(isVerticalNavHovered).value
+    isGroupOpen.value = isActive && !configStore.isVerticalNavMini(isVerticalNavHovered).value;
     isGroupActive.value = isActive
   },
-  { immediate: true },
-)
+  {immediate: true},
+);
 
 /*
   Watch for isGroupOpen
@@ -84,7 +84,7 @@ watch(
 */
 watch(isGroupOpen, (val: boolean) => {
   // Find group index for adding/removing group from openGroups array
-  const grpIndex = openGroups.value.indexOf(props.item.titulo)
+  const grpIndex = openGroups.value.indexOf(props.item.titulo);
 
   // update openGroups array for addition/removal of current group
 
@@ -95,10 +95,10 @@ watch(isGroupOpen, (val: boolean) => {
 
   // If group is closed remove itself and its children from the `openGroups`
   else if (!val && grpIndex !== -1) {
-    openGroups.value.splice(grpIndex, 1)
+    openGroups.value.splice(grpIndex, 1);
     collapseChildren(props.item.children)
   }
-}, { immediate: true })
+}, {immediate: true});
 
 /*
   Watch for openGroups
@@ -114,23 +114,23 @@ watch(isGroupOpen, (val: boolean) => {
 */
 watch(openGroups, val => {
   // Prevent closing recently opened inactive group.
-  const lastOpenedGroup = val.at(-1)
+  const lastOpenedGroup = val.at(-1);
   if (lastOpenedGroup === props.item.titulo)
-    return
+    return;
 
-  const isActive = isNavGroupActive(props.item.children, router)
+  const isActive = isNavGroupActive(props.item.children, router);
 
   // Goal of this watcher is to close inactive groups. So don't do anything for active groups.
   if (isActive)
-    return
+    return;
 
   // We won't close group if any of child group is open in current group
   if (isAnyChildOpen(props.item.children))
-    return
+    return;
 
-  isGroupOpen.value = isActive
+  isGroupOpen.value = isActive;
   isGroupActive.value = isActive
-}, { deep: true })
+}, {deep: true});
 
 // ℹ️ Previously instead of below watcher we were using two individual watcher for `isVerticalNavHovered`, `isVerticalNavCollapsed` & `isLessThanOverlayNavBreakpoint`
 watch(
@@ -144,7 +144,6 @@ watch(
 <template>
   <li
     v-if="canViewNavMenuGroup(item)"
-    class="nav-group"
     :class="[
       {
         active: isGroupActive,
@@ -152,6 +151,7 @@ watch(
         disabled: item.disable,
       },
     ]"
+    class="nav-group"
   >
     <div
       class="nav-group-label"
@@ -159,8 +159,8 @@ watch(
     >
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
-        v-bind="item.icono ? { class: item.icono } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
         class="nav-item-icon"
+        v-bind="item.icono ? { class: item.icono } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
       />
 
       <Component
@@ -170,10 +170,10 @@ watch(
         <!-- 👉 Title -->
         <Component
           :is=" layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
-          v-bind="getDynamicI18nProps(item.titulo, 'span')"
           v-show="!hideTitleAndBadge"
           key="title"
           class="nav-item-title"
+          v-bind="getDynamicI18nProps(item.titulo, 'span')"
         >
           {{ item.titulo }}
         </Component>
@@ -181,21 +181,21 @@ watch(
         <!-- 👉 Badge -->
         <Component
           :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
-          v-bind="getDynamicI18nProps(item.badgeContent, 'span')"
-          v-show="!hideTitleAndBadge"
           v-if="item.badgeContent"
+          v-show="!hideTitleAndBadge"
           key="badge"
-          class="nav-item-badge"
           :class="item.badgeClass"
+          class="nav-item-badge"
+          v-bind="getDynamicI18nProps(item.badgeContent, 'span')"
         >
           {{ item.badgeContent }}
         </Component>
         <Component
           :is="layoutConfig.app.iconRenderer || 'div'"
           v-show="!hideTitleAndBadge"
-          v-bind="layoutConfig.icons.chevronRight"
           key="arrow"
           class="nav-group-arrow"
+          v-bind="layoutConfig.icons.chevronRight"
         />
       </Component>
     </div>
