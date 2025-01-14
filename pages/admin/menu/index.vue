@@ -1,7 +1,5 @@
 <style scoped>
-.tabular {
-  margin-left: 10px;
-}
+
 </style>
 
 <template>
@@ -16,17 +14,17 @@
     </VBtn>
   </div>
 
-  <v-card>
+  <VCard>
 
-    <v-card-title>Configurar Menu</v-card-title>
+    <VCardTitle>Configurar Menu</VCardTitle>
 
-    <v-card-text>
+    <VCardText>
 
-      <lista-opciones :opciones="opcionesMenu"/>
+      <ListaOpciones :opciones="opcionesMenu"/>
 
-    </v-card-text>
+    </VCardText>
 
-  </v-card>
+  </VCard>
 
 </template>
 
