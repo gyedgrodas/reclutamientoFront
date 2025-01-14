@@ -65,18 +65,11 @@ const onSubmit = () => {
           estado: estado.value,
           password: password.value,
           nuevoPassword: nuevoPassword.value,
+          puesto_id: puesto.value,
         }
 
-      // Incluye relaciones en la estructura JSON:API si las necesitas
-      const relationships = {
-        puesto: { data: { id: String(puesto.value), type: 'puesto' } },
-
-        // region: { data: { id: regionId.value, type: 'regiones' } },
-        // gerencia: { data: { id: gerenciaId.value, type: 'gerencias' } },
-      }
-
       // Emite la data formateada
-      emit('userData', { data, relationships })
+      emit('userData', { data })
 
       // Cierra el formulario y resetea
       emit('update:esVisible', false)

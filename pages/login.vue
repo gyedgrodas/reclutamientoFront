@@ -55,14 +55,15 @@ const onSubmit = async () => {
       // Extraer datos de manera sencilla
       const abilityRules = toRaw(user?.value?.abilityRules) || [] // Elimina el Proxy reactivo
 
-      // Guardar los datos en la cookie
-      useCookie('userAbilityRules').value = abilityRules
+      // Guardar los datos en la localStorage
+      localStorage.setItem('userAbilityRules', JSON.stringify(abilityRules))
 
       // Actualizar las habilidades en CASE
       ability.update(abilityRules)
     }
     catch (error) {
-      msgError.value = error?.response?._data.errors[0].title || 'Error desconocido'
+      msgError.value =  error?.response?._data?.message || 'Ocurrió un error inesperado.'
+
     }
   }
 }
