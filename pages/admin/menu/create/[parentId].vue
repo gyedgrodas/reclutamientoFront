@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import formulario from './Form.vue';
+import Fields from '@/views/admin/menuOpciones/fields.vue';
 
 const route = useRoute();
 const parentId = route.params.parentId;
@@ -21,17 +21,17 @@ console.log(parentId);
     </VBtn>
   </div>
 
-    <v-card>
+  <v-card>
 
-      <v-card-title>Crear opcion Hija</v-card-title>
+    <v-card-title>Crear opcion Hija</v-card-title>
 
-      <v-card-text>
+    <v-card-text>
 
-        <formulario :parentId="parentId" />
+      <fields :parentId="parentId"/>
 
-      </v-card-text>
+    </v-card-text>
 
-    </v-card>
+  </v-card>
 
 
 </template>

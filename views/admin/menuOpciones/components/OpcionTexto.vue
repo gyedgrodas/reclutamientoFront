@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import Actions from './OpcionBotones.vue';
+<script lang="ts" setup>
+import OptionBotones from './OpcionBotones.vue';
 import {computed} from 'vue';
 
 interface Item {
@@ -26,11 +26,11 @@ const iconClass = computed(() => {
   <div>
     <template v-if="esTituloSeccion">
       <div style="display: flex">
-        <span v-text="props.item.titulo_seccion"
-              class="heading">
+        <span class="heading"
+              v-text="props.item.titulo_seccion">
         </span>
-        <Actions :id="props.item.id"
-                 :esTituloSeccion="true"
+        <OptionBotones :id="props.item.id"
+                       :esTituloSeccion="true"
         />
       </div>
 
@@ -44,13 +44,13 @@ const iconClass = computed(() => {
           class="item-icon">
         </i>
         <span v-text="props.item.titulo"></span>
-        <Actions :id="props.item.id"/>
+        <OptionBotones :id="props.item.id"/>
       </div>
     </template>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .heading {
   font-weight: bold;
   font-size: 1.2em;

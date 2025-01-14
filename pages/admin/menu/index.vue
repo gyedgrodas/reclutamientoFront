@@ -1,5 +1,5 @@
 <style scoped>
-.tabular{
+.tabular {
   margin-left: 10px;
 }
 </style>
@@ -22,7 +22,7 @@
 
     <v-card-text>
 
-      <options-item :opciones="opcionesMenu" />
+      <lista-opciones :opciones="opcionesMenu"/>
 
     </v-card-text>
 
@@ -30,9 +30,9 @@
 
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 
-import OptionsItem from '@/pages/admin/menu/opciones/ListaOpciones.vue';
+import ListaOpciones from '@/views/admin/menuOpciones/components/ListaOpciones.vue';
 
 const opcionesMenu = <[]>useState('menu')
 
