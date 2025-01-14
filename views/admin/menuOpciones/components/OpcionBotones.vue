@@ -8,7 +8,6 @@
       icon="tabler-plus"
       size="extra-small"
       variant="tonal"
-      @click="performAction"
     />
 
     <VBtn
@@ -17,7 +16,6 @@
       icon="tabler-edit"
       size="extra-small"
       variant="tonal"
-      @click="performAction"
     />
 
     <VBtn
@@ -25,29 +23,51 @@
       icon="tabler-trash"
       size="extra-small"
       variant="tonal"
-      @click="performAction"
+      @click="eliminar"
     />
 
   </div>
 </template>
 
-<script>
-export default {
-  // name: 'Actions',
-  props: {
-    id: {
-      type: [String, Number],
-      required: true,
-    },
-    esTituloSeccion: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  methods: {
-    performAction() {
-      console.log(`Acción ejecutada para ID: ${this.id}`);
-    },
-  },
+<script lang="ts" setup>
+
+interface Props {
+  id: string | number;
+  esTituloSeccion: boolean;
+}
+
+const {showToastSuccess, showToastError, preguntaEliminar} = useToast();
+
+const {id, esTituloSeccion} = defineProps<Props>();
+
+const {deleted} = useClienteRequest();
+
+import type {RespuestaRequest} from "@/types/admin/menuOpciones/types";
+
+const menu = <object>useState('menu');
+
+const eliminar = async (): Promise<void> => {
+
+  const confirmar = <boolean>await preguntaEliminar('¿Estás seguro de eliminar esta opción?');
+
+  if (confirmar) {
+
+    try {
+
+      let res: RespuestaRequest = await deleted(`api/menu_opciones/${id}`);
+
+      showToastSuccess(res.message);
+
+      menu.value = res.data;
+
+    } catch (error: { message: string }) {
+
+      showToastError(error.message);
+
+    }
+
+  }
+
 };
+
 </script>
