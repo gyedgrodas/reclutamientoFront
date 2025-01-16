@@ -55,14 +55,12 @@ const guardarOpcion = async (data: MenuOpcion) => {
 
   <VCard>
 
-    <VCardTitle>Crear una nueva Opcion</VCardTitle>
-
     <VCardText>
 
       <Fields :item="{}"
               :mostrar-titulo-seccion="true"
               :parentId="null"
-              @Datos="guardarOpcion"
+              @datos="guardarOpcion"
       />
 
     </VCardText>

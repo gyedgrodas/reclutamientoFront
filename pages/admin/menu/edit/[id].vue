@@ -95,8 +95,6 @@ const puedeMostrarDatos = computed(() => {
 
   <VCard>
 
-    <VCardTitle>Editar Opción</VCardTitle>
-
     <VCardText>
 
       <Fields v-if="puedeMostrarDatos"

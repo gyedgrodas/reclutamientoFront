@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (event: "Datos", value: MenuOpcion): void;
+  (event: "datos", value: MenuOpcion): void;
 }>();
 
 const esTituloSeccion = ref(false);
@@ -50,14 +50,15 @@ const router = useRouter();
 const rutasSistema = router.getRoutes();
 
 const onSubmitFormOpcion = (): void => {
+  console.log(formOpcion.value?.validate());
   if (formOpcion.value?.validate()) {
-    emit("Datos", opcion.value);
+    emit("datos", opcion.value);
   }
 };
 
 const onSubmitFormTituloSeccion = (): void => {
   if (formTituloSeccion.value?.validate()) {
-    emit("Datos", opcion.value);
+    emit("datos", opcion.value);
   }
 };
 
@@ -124,8 +125,8 @@ watch(esTituloSeccion, (newVal) => {
       </VCol>
 
       <VCol class="d-flex gap-4" cols="12">
-        <VBtn type="submit">Submit</VBtn>
-        <VBtn color="secondary" type="reset" variant="tonal">Reset</VBtn>
+        <VBtn type="submit">Guardar</VBtn>
+        <VBtn color="secondary" type="reset" variant="tonal">Limpiar</VBtn>
       </VCol>
     </VCol>
   </VForm>
@@ -153,8 +154,8 @@ watch(esTituloSeccion, (newVal) => {
     </VCol>
 
     <VCol class="d-flex gap-4" cols="12">
-      <VBtn type="submit">Submit</VBtn>
-      <VBtn color="secondary" type="reset" variant="tonal">Reset</VBtn>
+      <VBtn type="submit">Guardar</VBtn>
+      <VBtn color="secondary" type="reset" variant="tonal">Limpiar</VBtn>
     </VCol>
   </VForm>
 
