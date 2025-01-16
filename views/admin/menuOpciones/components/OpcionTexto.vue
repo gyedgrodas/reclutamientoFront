@@ -44,7 +44,9 @@ const iconClass = computed(() => {
           class="item-icon">
         </i>
         <span v-text="props.item.titulo"></span>
-        <OptionBotones :id="props.item.id"/>
+        <OptionBotones :id="props.item.id"
+                       :esTituloSeccion="false"
+        />
       </div>
     </template>
   </div>

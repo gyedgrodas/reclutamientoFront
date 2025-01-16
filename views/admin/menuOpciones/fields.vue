@@ -50,16 +50,21 @@ const router = useRouter();
 const rutasSistema = router.getRoutes();
 
 const onSubmitFormOpcion = (): void => {
-  console.log(formOpcion.value?.validate());
-  if (formOpcion.value?.validate()) {
-    emit("datos", opcion.value);
-  }
+
+  formOpcion.value?.validate().then(({valid}) => {
+    if (valid) {
+      emit("datos", opcion.value);
+    }
+  });
+
 };
 
 const onSubmitFormTituloSeccion = (): void => {
-  if (formTituloSeccion.value?.validate()) {
-    emit("datos", opcion.value);
-  }
+  formTituloSeccion.value?.validate().then(({valid}) => {
+    if (valid) {
+      emit("datos", opcion.value);
+    }
+  });
 };
 
 watch(esTituloSeccion, (newVal) => {
