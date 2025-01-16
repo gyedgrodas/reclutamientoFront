@@ -55,11 +55,11 @@ const permisoSeleccionado = ref<string | null>(null);
 
 const permisoActualSeleccionado = props.permisos?.find(permiso => permiso.name === props.item.action && permiso.subject === props.item.subject) ?? null;
 
-permisoSeleccionado.value = permisoActualSeleccionado?.name + " - " + permisoActualSeleccionado?.subject;
+if (permisoActualSeleccionado !== null) {
 
-console.log(props.item);
-console.log(props.item);
+  permisoSeleccionado.value = permisoActualSeleccionado?.name + " - " + permisoActualSeleccionado?.subject;
 
+}
 
 const onSubmitFormOpcion = (): void => {
 
@@ -144,7 +144,13 @@ watch(permisoSeleccionado, (id) => {
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField v-model="opcion.icono" label="Icono"/>
+        <VLabel
+          class="mb-1 text-body-2 text-wrap"
+          style="line-height: 15px;"
+        >Icono:
+          <NuxtLink class="ml-2" target="_blank" to="https://tablericons.com/">Ver iconos</NuxtLink>
+        </VLabel>
+        <AppTextField v-model="opcion.icono"/>
       </VCol>
 
       <VCol cols="12" md="6">
