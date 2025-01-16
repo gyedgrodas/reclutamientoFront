@@ -6,7 +6,7 @@ import {ref, watch} from "vue";
 import {useRouter} from "vue-router";
 
 const props = defineProps<{
-  parentId: number | null;
+  parentId: string | null;
   item: MenuOpcion | null;
   mostrarTituloSeccion: boolean;
 }>();

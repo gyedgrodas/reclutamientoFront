@@ -3,9 +3,9 @@
 import Fields from '@/views/admin/menuOpciones/fields.vue';
 import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
-const route = useRoute<{ parentId: number }>();
+const route = useRoute<{ parentId: string }>();
 
-const parentId = <number>route.params.parentId;
+const parentId = <string>route.params.parentId;
 
 const {post} = useClienteRequest();
 const {paginaEspera} = useCargandoPagina();
