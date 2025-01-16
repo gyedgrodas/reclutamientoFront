@@ -48,7 +48,12 @@ const guardarOpcion = async (data: MenuOpcion) => {
 
 <template>
 
-  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6">
+
+    <p class="text-2xl">
+      Editar Menu
+    </p>
+
     <VBtn
       class="ml-auto"
       color="secondary"

@@ -4,7 +4,12 @@
 
 <template>
 
-  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 ">
+
+    <p class="text-2xl">
+      Administrar Menu
+    </p>
+
     <VBtn
       class="ml-auto"
       color="success"
@@ -15,8 +20,6 @@
   </div>
 
   <VCard>
-
-    <VCardTitle>Configurar Menu</VCardTitle>
 
     <VCardText>
 
