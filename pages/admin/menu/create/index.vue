@@ -2,8 +2,9 @@
 
 import Fields from '@/views/admin/menuOpciones/fields.vue';
 import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
+import type {Permission} from "@/types/admin/permisos/types";
 
-const {post} = useClienteRequest();
+const {post, get} = useClienteRequest();
 const {paginaEspera} = useCargandoPagina();
 const {showToastError, showToastSuccess} = useToast();
 const menu = useState('menu');
@@ -32,7 +33,43 @@ const guardarOpcion = async (data: MenuOpcion) => {
 
   }
 
-}
+};
+
+const permisos = ref<Permission>({} as Permission);
+
+const getPermisos = async (): Promise<void> => {
+
+  try {
+
+    paginaEspera.value = true;
+
+    const response: { data: Permission } = await get('api/permisos');
+
+    permisos.value = response.data;
+
+    console.log('El valor de los permisos: ', permisos.value);
+
+  } catch (error: { message: string }) {
+
+    showToastError(error.message);
+
+  } finally {
+
+    paginaEspera.value = false;
+
+  }
+
+};
+
+getPermisos();
+
+
+const puedeMostrarDatos = computed(() => {
+
+
+  return Array.isArray(permisos.value) && permisos.value.length > 0
+
+});
 
 </script>
 
@@ -57,9 +94,11 @@ const guardarOpcion = async (data: MenuOpcion) => {
 
     <VCardText>
 
-      <Fields :item="{}"
+      <Fields v-if="puedeMostrarDatos"
+              :item="{}"
               :mostrar-titulo-seccion="true"
               :parentId="null"
+              :permisos="permisos"
               @datos="guardarOpcion"
       />
 

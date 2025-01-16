@@ -2,6 +2,7 @@
 // Importaciones necesarias
 import type {VForm} from "vuetify/components/VForm";
 import type {MenuOpcion} from "@/types/admin/menuOpciones/types";
+import type {Permission} from "@/types/admin/permisos/types";
 import {ref, watch} from "vue";
 import {useRouter} from "vue-router";
 
@@ -9,6 +10,7 @@ const props = defineProps<{
   parentId: string | null;
   item: MenuOpcion | null;
   mostrarTituloSeccion: boolean;
+  permisos: Permission | null;
 }>();
 
 const emit = defineEmits<{
@@ -49,6 +51,16 @@ if (opcion.value.titulo_seccion) {
 const router = useRouter();
 const rutasSistema = router.getRoutes();
 
+const permisoSeleccionado = ref<string | null>(null);
+
+const permisoActualSeleccionado = props.permisos?.find(permiso => permiso.name === props.item.action && permiso.subject === props.item.subject) ?? null;
+
+permisoSeleccionado.value = permisoActualSeleccionado?.name + " - " + permisoActualSeleccionado?.subject;
+
+console.log(props.item);
+console.log(props.item);
+
+
 const onSubmitFormOpcion = (): void => {
 
   formOpcion.value?.validate().then(({valid}) => {
@@ -87,6 +99,20 @@ watch(esTituloSeccion, (newVal) => {
   }
 });
 
+watch(permisoSeleccionado, (id) => {
+
+  if (id) {
+    let permiso = props.permisos?.find(permiso => permiso.id === id);
+    opcion.value = {
+      ...opcion.value,
+      action: permiso?.name,
+      subject: permiso?.subject,
+    };
+  }
+
+});
+
+
 </script>
 
 <template>
@@ -122,11 +148,15 @@ watch(esTituloSeccion, (newVal) => {
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField v-model="opcion.action" :rules="[requiredValidator]" label="Acción"/>
-      </VCol>
-
-      <VCol cols="12" md="6">
-        <AppTextField v-model="opcion.subject" :rules="[requiredValidator]" label="Subject"/>
+        <AppAutocomplete
+          v-model="permisoSeleccionado"
+          :items="props.permisos"
+          :rules="[requiredValidator]"
+          item-title="name_y_subject"
+          item-value="id"
+          label="Permiso:"
+          placeholder="Seleccione un permiso"
+        />
       </VCol>
 
       <VCol class="d-flex gap-4" cols="12">
@@ -150,11 +180,15 @@ watch(esTituloSeccion, (newVal) => {
       </VCol>
 
       <VCol cols="12" md="6">
-        <AppTextField v-model="opcion.action" :rules="[requiredValidator]" label="Acción"/>
-      </VCol>
-
-      <VCol cols="12" md="6">
-        <AppTextField v-model="opcion.subject" :rules="[requiredValidator]" label="Subject"/>
+        <AppAutocomplete
+          v-model="permisoSeleccionado"
+          :items="props.permisos"
+          :rules="[requiredValidator]"
+          item-title="name_y_subject"
+          item-value="id"
+          label="Permiso:"
+          placeholder="Seleccione un permiso"
+        />
       </VCol>
     </VCol>
 

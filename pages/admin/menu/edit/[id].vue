@@ -3,6 +3,8 @@
 import Fields from '@/views/admin/menuOpciones/fields.vue';
 import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
+import type {Permission} from "@/types/admin/permisos/types";
+
 const {put, get} = useClienteRequest();
 
 const {showToastSuccess, showToastError} = useToast();
@@ -14,6 +16,8 @@ const route = useRoute<{ id: number }>();
 const id = <number>route.params.id;
 
 const opcion = ref<MenuOpcion>({} as MenuOpcion);
+
+const permisos = ref<Permission>({} as Permission);
 
 const menu = useState('menu');
 
@@ -66,11 +70,35 @@ const getOpcion = async (): Promise<void> => {
 
 };
 
+const getPermisos = async (): Promise<void> => {
+
+  try {
+
+    paginaEspera.value = true;
+
+    const response: { data: Permission } = await get('api/permisos');
+
+    permisos.value = response.data;
+
+  } catch (error: { message: string }) {
+
+    showToastError(error.message);
+
+  } finally {
+
+    paginaEspera.value = false;
+
+  }
+
+};
+
 getOpcion();
+
+getPermisos();
 
 const puedeMostrarDatos = computed(() => {
 
-  return Object.values(opcion.value).some(valor => valor !== null && valor !== undefined);
+  return Object.values(opcion.value).some(valor => valor !== null && valor !== undefined) && Object.values(permisos.value).some(valor => valor !== null && valor !== undefined);
 
 });
 
@@ -101,6 +129,7 @@ const puedeMostrarDatos = computed(() => {
               :item="opcion"
               :mostrar-titulo-seccion="false"
               :parent-id="null"
+              :permisos="permisos"
               @datos="actualizarOpcion"
       />
 
