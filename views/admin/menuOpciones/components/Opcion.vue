@@ -1,7 +1,7 @@
 <template>
   <li
     :id="props.item.id"
-    style="margin-bottom: 10px; list-style-type: none;"
+    style="margin-bottom: 10px; list-style-type: none; "
   >
     <option-text :item="props.item"/>
 

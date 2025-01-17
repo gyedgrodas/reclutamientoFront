@@ -44,9 +44,9 @@ import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/type
 
 const opcionesMenu = <[]>useState('menu');
 
-const actualizarOpciones = async (opciones): Promise<void> => {
+const actualizarOpciones = async (opciones: MenuOpcion[]): Promise<void> => {
 
-  let opcionesAplanadas = flattenOptions(opciones);
+  let opcionesAplanadas: MenuOpcion[] = flattenOptions(opciones);
 
   try {
 
@@ -62,7 +62,7 @@ const actualizarOpciones = async (opciones): Promise<void> => {
 
     showToastSuccess(respuesta.message);
 
-  } catch (error) {
+  } catch (error: { message: string }) {
 
     showToastError(error.message);
 
@@ -72,9 +72,7 @@ const actualizarOpciones = async (opciones): Promise<void> => {
 
   }
 
-
 };
-
 
 function flattenOptions(options: MenuOpcion[]): MenuOpcion[] {
 

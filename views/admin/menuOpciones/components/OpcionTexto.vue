@@ -25,8 +25,9 @@ const iconClass = computed(() => {
 <template>
   <div>
     <template v-if="esTituloSeccion">
-      <div style="display: flex">
+      <div style="display: flex; ">
         <span class="heading"
+              style="cursor: pointer"
               v-text="props.item.titulo_seccion">
         </span>
         <OptionBotones :id="props.item.id"
@@ -43,7 +44,7 @@ const iconClass = computed(() => {
           :class="iconClass"
           class="item-icon">
         </i>
-        <span v-text="props.item.titulo"></span>
+        <span style="cursor: pointer" v-text="props.item.titulo"></span>
         <OptionBotones :id="props.item.id"
                        :esTituloSeccion="false"
         />
