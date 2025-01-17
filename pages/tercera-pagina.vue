@@ -7,7 +7,7 @@
   <selector-buscador
     title="Buscar Asociado"
     placeholder="Ingrese el nombre del asociado "
-    Endpoint="/api/asociados/buscar/select2/nueva"
+    Endpoint="/api/asociados/buscar/select2/"
     requerido
   ></selector-buscador>
 
