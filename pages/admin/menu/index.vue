@@ -23,7 +23,9 @@
 
     <VCardText>
 
-      <ListaOpciones :opciones="opcionesMenu"/>
+      <ListaOpciones :opciones="opcionesMenu"
+                     @ItemsActualizadas="actualizarOpciones"
+      />
 
     </VCardText>
 
@@ -35,6 +37,12 @@
 
 import ListaOpciones from '@/views/admin/menuOpciones/components/ListaOpciones.vue';
 
-const opcionesMenu = <[]>useState('menu')
+const opcionesMenu = <[]>useState('menu');
+
+const actualizarOpciones = (opciones) => {
+
+  console.log("Opciones actualizadas:", opciones);
+
+}
 
 </script>
