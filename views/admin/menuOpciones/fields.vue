@@ -51,6 +51,10 @@ if (opcion.value.titulo_seccion) {
 const router = useRouter();
 const rutasSistema = router.getRoutes();
 
+const RutasFiltradas = rutasSistema.filter(ruta => {
+  return !ruta.path.includes(":");
+});
+
 const permisoSeleccionado = ref<string | null>(null);
 
 const permisoActualSeleccionado = props.permisos?.find(permiso => permiso.name === props.item.action && permiso.subject === props.item.subject) ?? null;
@@ -135,7 +139,7 @@ watch(permisoSeleccionado, (id) => {
       <VCol cols="12" md="6">
         <AppAutocomplete
           v-model="opcion.ruta"
-          :items="rutasSistema"
+          :items="RutasFiltradas"
           item-title="name"
           item-value="name"
           label="Ruta"
