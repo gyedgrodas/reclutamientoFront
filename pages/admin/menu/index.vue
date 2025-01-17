@@ -35,13 +35,62 @@
 
 <script lang="ts" setup>
 
+const {post} = useClienteRequest();
+const {showToastSuccess, showToastError} = useToast();
+const {paginaEspera} = useCargandoPagina();
+
 import ListaOpciones from '@/views/admin/menuOpciones/components/ListaOpciones.vue';
+import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
 const opcionesMenu = <[]>useState('menu');
 
-const actualizarOpciones = (opciones) => {
+const actualizarOpciones = async (opciones): Promise<void> => {
 
-  console.log("Opciones actualizadas:", opciones);
+  let opcionesAplanadas = flattenOptions(opciones);
+
+  try {
+
+    let data = {
+      opciones: opcionesAplanadas
+    };
+
+    paginaEspera.value = true;
+
+    const respuesta: RespuestaRequest = await post('api/menu_opciones/actualizar/orden', data);
+
+    opcionesMenu.value = respuesta.data;
+
+    showToastSuccess(respuesta.message);
+
+  } catch (error) {
+
+    showToastError(error.message);
+
+  } finally {
+
+    paginaEspera.value = false;
+
+  }
+
+
+};
+
+
+function flattenOptions(options: MenuOpcion[]): MenuOpcion[] {
+
+  let flattened: MenuOpcion[] = [];
+
+  for (const option of options) {
+
+    const {children, ...currentOption} = option;
+    flattened.push(currentOption as MenuOpcion);
+
+    if (children && Array.isArray(children)) {
+      flattened = flattened.concat(flattenOptions(children));
+    }
+  }
+
+  return flattened;
 
 }
 
