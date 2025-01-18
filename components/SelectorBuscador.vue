@@ -3,7 +3,7 @@ import { defineProps, nextTick, ref, watch } from 'vue';
 
 const { showToastError } = useToast();
 const clienteApi = useClienteRequestSigua();
-
+const emit = defineEmits();
 const props = withDefaults(
   defineProps<{
     requerido?: boolean;
@@ -84,6 +84,7 @@ const eventoBuscar = (newValue: string) => {
 watch(opcion, (newValue) => {
   if (newValue) {
     loading.value = false;
+    emit('data', newValue);
     // Si el valor seleccionado no tiene `id`, limpia el select
     if (!newValue.id) {
       opcion.value = null;
