@@ -35,7 +35,7 @@ const activarPaginaCargando = () => {
 
 <template>
 
-  <VCard class="mb-3">
+  <VCard class="mb-5">
     <VCardTitle>Toast</VCardTitle>
     <VCardText class="d-flex justify-space-between v-col-sm-10 offset-1">
       <VBtn border="border"
@@ -64,16 +64,17 @@ const activarPaginaCargando = () => {
   </VCard>
 
   <VCard>
-    <VCardTitle>Pagina Cargando</VCardTitle>
+    <VCardTitle>Página Cargando</VCardTitle>
     <VCardText class="d-flex justify-space-between v-col-sm-5 offset-3">
 
-      <VBtn border="border"
+      <VBtn color="info"
             @click="activarPaginaEspera">
         Pagina Espera
       </VBtn>
 
-      <VBtn color="error"
-            @click="activarPaginaCargando">
+      <VBtn color="warning"
+            @click="activarPaginaCargando"
+      >
         Pagina Cargando
       </VBtn>
 
