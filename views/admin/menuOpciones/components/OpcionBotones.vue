@@ -38,9 +38,11 @@ interface Props {
 
 const {showToastSuccess, showToastError, preguntaEliminar} = useToast();
 
+const {paginaEspera} = useCargandoPagina();
+
 const {id, esTituloSeccion} = defineProps<Props>();
 
-const {deleted} = useClienteRequest();
+const {deleted, get} = useClienteRequest();
 
 import type {RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
@@ -54,20 +56,41 @@ const eliminar = async (): Promise<void> => {
 
     try {
 
+      paginaEspera.value = true;
+
       let res: RespuestaRequest = await deleted(`api/menu_opciones/${id}`);
 
+      await getOpcionesMenu();
+
       showToastSuccess(res.message);
-
-      menu.value = res.data;
-
+      
     } catch (error: { message: string }) {
 
       showToastError(error.message);
+
+    } finally {
+
+      paginaEspera.value = false;
 
     }
 
   }
 
+};
+
+const getOpcionesMenu = async (): Promise<void> => {
+
+  try {
+
+    const res = await get("api/menu_opciones");
+
+    menu.value = res.data;
+
+  } catch (error) {
+
+    throw error;
+
+  }
 };
 
 </script>
