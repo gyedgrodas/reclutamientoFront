@@ -1,37 +1,24 @@
 <template>
+
   <div>
 
+    <VCard>
 
-    <VCard title="Want to integrate JWT? 🔒">
+      <VCardText>
 
+        <H1>Bienvenido {{ user?.nombre }}</H1>
 
-      <v-card-text->
-
-
-        <v-btn color="primary" @click="activarEsperar">Activar esperar</v-btn>
-
-
-      </v-card-text->
-
+      </VCardText>
 
     </VCard>
-  </div>
-</template>
 
+  </div>
+
+</template>
 
 <script setup>
 
-const {paginaEspera} = useCargandoPagina();
-
-const activarEsperar = () => {
-  paginaEspera.value = true;
-
-  setTimeout(() => {
-    paginaEspera.value = false;
-  }, 3000);
-
-
-};
-
+const {user} = useSanctumAuth();
 
 </script>
+
