@@ -225,16 +225,16 @@ const tienePreferencias = cookieRef<boolean>("tiene_preferencias", false);
     persistent
     scroll-strategy="none"
   >
-    <div class="overlay-content text-center">
+    <div class="overlay-content text-center align-center">
       <!-- Indicador circular de carga -->
-      <VProgressCircular
-        class="progress-circle"
-        color="primary"
-        indeterminate
-        size="64"
-      />
-      <!-- Texto -->
-      <h1 class="loading-text">Por favor, espera...</h1>
+      <!--      <VProgressCircular-->
+      <!--        class="progress-circle"-->
+      <!--        color="primary"-->
+      <!--        indeterminate-->
+      <!--        size="64"-->
+      <!--      />-->
+      <img alt="" src="../assets/guayacan_logo.svg" style="width: 400px">
+      <h1 class="loading-text" style="margin-left: 20px">Por favor, espera...</h1>
     </div>
   </VOverlay>
 

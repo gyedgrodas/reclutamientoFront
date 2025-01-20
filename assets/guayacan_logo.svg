@@ -1,6 +1,7 @@
 <!--<?xml version="1.0" encoding="utf-8" ?>-->
-<svg baseProfile="tiny" height="100%" version="1.2" width="100%" xmlns="http://www.w3.org/2000/svg"
->
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="40 0 600 310"
+     preserveAspectRatio="xMidYMid meet">
+    >
 
     <style>
         .leaf {
@@ -69,7 +70,7 @@
     <!--            d="M 554,241 L 554,242 L 552,244 L 552,245 L 551,246 L 551,247 L 550,248 L 550,249 L 548,251 L 549,252 L 550,251 L 551,252 L 552,251 L 553,251 L 554,252 L 556,250 L 557,250 L 557,249 L 564,242 L 563,241 Z"-->
     <!--            fill="#0d0d70"/>-->
 
-    <text x="22.5%" y="31%" class="title-text">GUAYACÁN</text>
+    <text x="58%" y="99%" class="title-text">GUAYACÁN</text>
     <!--Aca empiezan las hojas del arbol-->
 
 
