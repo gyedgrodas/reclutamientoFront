@@ -3,9 +3,7 @@ import { defineProps, nextTick, ref, watch } from 'vue';
 
 const { showToastError } = useToast();
 const clienteApi = useClienteRequestSigua();
-
 const emit = defineEmits();
-
 const props = withDefaults(
   defineProps<{
     requerido?: boolean;

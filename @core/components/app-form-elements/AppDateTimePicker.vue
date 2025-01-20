@@ -75,6 +75,7 @@ compAttrs.config = {
   ...compAttrs.config,
   prevArrow: '<i class="tabler-chevron-left v-icon" style="font-size: 20px; height: 20px; width: 20px;"></i>',
   nextArrow: '<i class="tabler-chevron-right v-icon" style="font-size: 20px; height: 20px; width: 20px;"></i>',
+  dateFormat: 'd-m-Y',
 }
 
 // v-field clear prop
