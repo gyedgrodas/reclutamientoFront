@@ -233,8 +233,8 @@ const tienePreferencias = cookieRef<boolean>("tiene_preferencias", false);
       <!--        indeterminate-->
       <!--        size="64"-->
       <!--      />-->
-      <img alt="" src="../assets/guayacan_logo.svg" style="width: 400px">
-      <h1 class="loading-text" style="margin-left: 20px">Por favor, espera...</h1>
+      <img alt="" src="../assets/guayacan_logo.svg" style="width: 250px">
+      <h3 class="loading-text" style="margin-left: 17px">Por favor, espera...</h3>
     </div>
   </VOverlay>
 
