@@ -1,18 +1,18 @@
 <template>
   <div :class="`loading-container ${color}`">
-    <div class="spinner"></div>
-    <p class="loading-text">Cargando...</p>
+    <img alt="" src="../assets/guayacan_logo.svg" style="width: 250px">
+    <h3 class="loading-text" style="margin-left: 17px">Por favor, espera...</h3>
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed } from "vue";
+<script lang="ts" setup>
+import {computed} from "vue";
 
 interface User {
   id: string;
 }
 
-const { user } = useSanctumAuth() as { user: User };
+const {user} = useSanctumAuth() as { user: User };
 
 const color = computed<string>(() => {
 
