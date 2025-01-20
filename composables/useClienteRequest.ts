@@ -26,7 +26,7 @@ export const useClienteRequest = () => {
 
       return res as RequestResponse<T>;
 
-    } catch (e) {
+    } catch (e: any) {
 
       console.error(`Error in ${method} request to ${url}:`, e);
 

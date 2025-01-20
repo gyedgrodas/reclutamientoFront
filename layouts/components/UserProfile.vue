@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import avatar1 from '@images/avatars/avatar-1.png'
+import {useCargandoPagina} from "@/composables/useCargandoPagina";
 
 const { logout } = useSanctumAuth()
+
 
 //crear un funcion para cerrar sesion y eliminar la cookie
 const cerrarSesion = async () => {
@@ -72,7 +74,10 @@ const user = useSanctumUser()
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link>
+          <VListItem
+            link
+            :to="{ name: 'perfil-usuario-tab', params: { tab: 'perfil' } }"
+          >
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -81,7 +86,7 @@ const user = useSanctumUser()
               />
             </template>
 
-            <VListItemTitle>Profile</VListItemTitle>
+            <VListItemTitle>Perfil</VListItemTitle>
           </VListItem>
 
           <!-- 👉 Settings -->
