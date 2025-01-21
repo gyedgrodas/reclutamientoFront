@@ -7,32 +7,17 @@ const props = defineProps<{
 }>()
 
 // Simula una llamada para obtener los catálogos
-const cliente = useJsonApiClient()
-const catalogos = await cliente.Get('/api/data/all')
+const {get} = useClienteRequest()
+const catalogos = await get('/api/data/all')
 console.log('catalogos', catalogos)
 
 // Datos estáticos
 const estados = ['Activo', 'Inactivo', 'Cancelado']
-const radios = ref('home')
-const deliveryOption = ref('standard')
-const paymentMethod = ref('credit-debit-card')
 const panel = ref(0)
 
-const paymentMethods = [
-  {
-    radioValue: 'credit-debit-card',
-    radioLabel: 'Credit/Debit/ATM Card',
-    icon: 'tabler-credit-card',
-  },
-  {
-    radioValue: 'cash-on-delivery',
-    radioLabel: 'Cash On Delivery',
-    icon: 'tabler-help',
-  },
-]
+
 
 // crear funcion llenarData
-
 const llenarData = (data: any) => {
   console.log('llenardata', data.cif)
   props.formData.nombre = data.primer_nombre + ' ' + data.segundo_nombre + ' ' + data.tercer_nombre
@@ -42,7 +27,7 @@ const llenarData = (data: any) => {
   props.formData.email = props.formData.usuario_dominio + '@micoopeguayacan.gt';
   props.formData.cif = data.cif
   props.formData.asociado_id = data.id
-  props.formData.isDisabled = true;
+  props.formData.isDisabled = true
 }
 
 console.log('props.formData', props.formData)
@@ -50,92 +35,90 @@ console.log('props.formData', props.formData)
 </script>
 
 <template>
-  <selector-buscador
-    title="Buscar Asociado"
-    placeholder="Ingrese el nombre del asociado "
-    Endpoint="/api/asociados/buscar/select2/"
-    requerido
-    @data="llenarData"
-  ></selector-buscador>
+  <v-card >
+    <v-card-text>
+      <selector-buscador
+          title="Buscar Asociado"
+          placeholder="Ingrese el nombre del asociado"
+          Endpoint="/api/asociados/buscar/select2/"
+          requerido
+          @data="llenarData"
+      >
+      </selector-buscador>
+    </v-card-text>
+  </v-card>
   <VExpansionPanels v-model="panel">
     <!-- SECTION INFORMACION PERSONAL -->
     <VExpansionPanel>
       <VExpansionPanelTitle>Información Personal</VExpansionPanelTitle>
-
       <VExpansionPanelText>
-        <VForm
-          class="pt-4 pb-2"
-          @submit.prevent="() => {}"
-        >
-          <VRow>
-
-            <VCol
+        <VRow>
+          <VCol
               cols="12"
               md="6"
-            >
-              <AppTextField
+          >
+            <AppTextField
                 v-model="props.formData.codigo_bankworks"
                 :rules="[requiredValidator]"
                 label="Codigo Bankworks"
                 placeholder="Ingrese Codigo Bankworks"
                 :disabled="props.formData.isDisabledEdit"
-              />
-            </VCol>
+            />
+          </VCol>
 
-            <VCol
+          <VCol
               cols="12"
               md="6"
-            >
-              <AppTextField
+          >
+            <AppTextField
                 v-model="props.formData.usuario_dominio"
                 :rules="[requiredValidator]"
                 label="Usuario Dominio"
                 placeholder="Ingrese Usuario Dominio"
                 :disabled="props.formData.isDisabled || props.formData.isDisabledEdit"
-              />
-            </VCol>
+            />
+          </VCol>
 
-            <VCol
+          <VCol
               cols="12"
               md="6"
-            >
-              <AppTextField
+          >
+            <AppTextField
                 v-model="props.formData.codigo_ejecutivo"
                 :rules="[requiredValidator]"
                 label="Codigo Ejecutivo"
                 placeholder="Ingrese Codigo Ejecutivo"
                 :disabled=" props.formData.isDisabledEdit"
-              />
-            </VCol>
+            />
+          </VCol>
 
-            <VCol
+          <VCol
               cols="12"
               md="6"
-            >
-              <AppTextField
+          >
+            <AppTextField
                 v-model="props.formData.email"
                 :rules="[requiredValidator]"
                 label="Email"
                 placeholder="Ingrese Email"
                 :disabled="props.formData.isDisabled || props.formData.isDisabledEdit"
-              />
-            </VCol>
+            />
+          </VCol>
 
-            <VCol
+          <VCol
               cols="12"
               md="6"
-            >
-              <AppAutocomplete
+          >
+            <AppAutocomplete
                 v-model="props.formData.estado"
                 :items="estados"
                 :rules="[requiredValidator]"
                 label="Estado"
                 placeholder="Seleccione Estado"
-              />
-            </VCol>
+            />
+          </VCol>
 
-          </VRow>
-        </VForm>
+        </VRow>
       </VExpansionPanelText>
     </VExpansionPanel>
     <!-- !SECTION Delivery Address -->
@@ -143,12 +126,7 @@ console.log('props.formData', props.formData)
     <!-- SECTION INFORMACION LABORAL-->
     <VExpansionPanel>
       <VExpansionPanelTitle>Información Laboral</VExpansionPanelTitle>
-
       <VExpansionPanelText>
-        <VForm
-          class="pt-4 pb-2"
-          @submit.prevent="() => {}"
-        >
           <VRow>
 
 
@@ -242,7 +220,6 @@ console.log('props.formData', props.formData)
 
 
           </VRow>
-        </VForm>
       </VExpansionPanelText>
     </VExpansionPanel>
     <!-- !SECTION Delivery Options -->

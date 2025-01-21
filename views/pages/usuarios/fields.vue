@@ -12,8 +12,6 @@ const items = ['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming
 
 const data = ref( <UsuarioInterface>
   {
-
-
     usuario_dominio: null,
     cif: null,
     asociado_id: null,
@@ -97,9 +95,9 @@ const onSubmit = () => {
 
       <VCol cols="12">
         <!-- 👉 Collapsible Section -->
-        <h6 class="text-h6 mb-6">
-          Crear Usuario
-        </h6>
+<!--        <h6 class="text-h6 mb-6">-->
+<!--          Crear Usuario-->
+<!--        </h6>-->
 
         <FormularioColapsable :formData="data" />
       </VCol>

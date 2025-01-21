@@ -62,7 +62,11 @@ const guardarUsuario = async (Usuario: UsuarioInterface): Promise<void> => {
   <VCard>
 
 
+    <VCardItem>
 
+      <VCardTitle>Crear Usuario</VCardTitle>
+
+    </VCardItem>
     <VCardText>
 
       <fields :fields="fields"

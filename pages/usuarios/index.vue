@@ -8,8 +8,8 @@ definePageMeta({
   subject: 'usuarios', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 })
 
-// const { get, deleted } = useClienteRequest()
-const cliente = useJsonApiClient()
+const { get, deleted } = useClienteRequest()
+
 const { showToastSuccess, showToastError, preguntaEliminar } = useToast()
 
 const currentPage = ref(1) // Página actual
@@ -65,11 +65,9 @@ const getItems = async function (): Promise<void> {
   try {
     loading.value = true
 
-    const respuesta = await cliente.Get('/api/users', {
-      params: {
+    const respuesta = await get('/api/users', {
         'page[number]': currentPage.value,
         'page[size]': itemsPerPage.value,
-      },
     })
 
 
@@ -121,7 +119,7 @@ const deleteItem = async (id: number) => {
       color="success"
       to="/usuarios/create"
     >
-      Nuev@ Usuario
+      Nuevo Usuario
     </VBtn>
   </div>
 
