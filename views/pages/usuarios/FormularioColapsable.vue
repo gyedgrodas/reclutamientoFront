@@ -35,7 +35,7 @@ console.log('props.formData', props.formData)
 </script>
 
 <template>
-  <v-card >
+  <v-card v-if="props.formData.isDisabled">
     <v-card-text>
       <selector-buscador
           title="Buscar Asociado"
