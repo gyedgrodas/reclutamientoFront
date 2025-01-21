@@ -63,7 +63,7 @@ const activarPaginaCargando = () => {
     </VCardText>
   </VCard>
 
-  <VCard>
+  <VCard class="mb-5">
     <VCardTitle>Página Cargando</VCardTitle>
     <VCardText class="d-flex justify-space-between v-col-sm-5 offset-3">
 
@@ -78,6 +78,20 @@ const activarPaginaCargando = () => {
         Pagina Cargando
       </VBtn>
 
+    </VCardText>
+  </VCard>
+
+
+
+  <VCard class="mb-12">
+    <VCardTitle>Buscador General</VCardTitle>
+    <VCardText>
+      <selector-buscador
+        title="Buscar Asociado"
+        placeholder="Ingrese el nombre del asociado "
+        Endpoint="/api/asociados/buscar/select2/"
+        requerido
+      ></selector-buscador>
     </VCardText>
   </VCard>
 
