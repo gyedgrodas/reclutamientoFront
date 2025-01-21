@@ -26,16 +26,18 @@ const llenarData = (data: any) => {
   props.formData.usuario_dominio = 'gy'+ data.primer_nombre.substring(0, 3).toLowerCase() + data.primer_apellido.toLowerCase();
   props.formData.email = props.formData.usuario_dominio + '@micoopeguayacan.gt';
   props.formData.cif = data.cif
-  props.formData.asociado_id = data.id
+  props.formData.asociado_id = data.asociado_id
   props.formData.isDisabled = true
 }
+
+
 
 console.log('props.formData', props.formData)
 
 </script>
 
 <template>
-  <v-card v-if="props.formData.isDisabled">
+  <v-card v-if="!props.formData.isDisabledEdit">
     <v-card-text>
       <selector-buscador
           title="Buscar Asociado"
