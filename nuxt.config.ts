@@ -1,4 +1,4 @@
-import { fileURLToPath } from 'node:url'
+import {fileURLToPath} from 'node:url'
 import svgLoader from 'vite-svg-loader'
 import vuetify from 'vite-plugin-vuetify'
 
@@ -84,7 +84,7 @@ export default defineNuxtConfig({
     }],
   },
 
-  plugins: ['@/plugins/vuetify/index.ts', '@/plugins/iconify/index.ts' , '@/plugins/casl/index.client.ts'],
+  plugins: ['@/plugins/vuetify/index.ts', '@/plugins/iconify/index.ts', '@/plugins/casl/index.ts'],
 
   imports: {
     dirs: ['./@core/utils', './@core/composable/', './plugins/*/composables/*'],
@@ -129,7 +129,7 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    define: { 'process.env': {} },
+    define: {'process.env': {}},
 
     resolve: {
       alias: {
