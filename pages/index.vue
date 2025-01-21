@@ -1,24 +1,25 @@
+<script lang="ts">
+import {defineComponent} from 'vue'
+
+export default defineComponent({
+  name: "index",
+  data() {
+    return {
+      user: null as unknown
+    }
+  },
+  mounted() {
+    const userRef = useSanctumUser()
+    this.user = userRef.value // Acceder al valor del ref
+  }
+})
+</script>
 <template>
-  <div>
-    <p>Permisos del usuario:</p>
-    <ul>
-      <li v-for="permiso in permisos" :key="permiso">{{ permiso }}</li>
-    </ul>
-    <button v-if="hasCreatePermission" @click="crearRecurso">Crear Recurso</button>
-  </div>
+
+  <h1>Bienvenidos a Go Credit {{ user?.nombre+' '+user?.apellido }} </h1>
+
 </template>
 
-<script setup>
-import {usePermisoStore} from '@/stores/permisos';
+<style scoped lang="scss">
 
-const permisoStore = usePermisoStore();
-const {permisos} = permisoStore;
-
-// Ejemplo: Verificar si el usuario tiene un permiso específico
-const hasCreatePermission = permisos.includes('crear_recurso');
-
-// Acción de ejemplo
-const crearRecurso = () => {
-  console.log('Recurso creado');
-};
-</script>
+</style>
