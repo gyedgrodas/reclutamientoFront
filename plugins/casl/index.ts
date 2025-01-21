@@ -1,25 +1,33 @@
-import { createMongoAbility } from '@casl/ability'
-import { abilitiesPlugin } from '@casl/vue'
-import type { Rule } from './ability'
+import {createMongoAbility} from '@casl/ability';
+import {abilitiesPlugin} from '@casl/vue';
+import type {Rule} from './ability';
+import {usePermisoStore} from '@/stores/permisos';
 
-export default defineNuxtPlugin(nuxtApp => {
 
+export default defineNuxtPlugin((nuxtApp) => {
+  // Instancia inicial de habilidad con reglas vacías
+  const ability = createMongoAbility<Rule[]>([]);
 
-  const getUserAbilityRules = (): Rule[] => {
-    if (process?.useClient) {
-      const rules = localStorage.getItem('userAbilityRules')
-      return rules ? JSON.parse(rules) : []
-    }
-    return []
-  }
+  const permisoStore = usePermisoStore();
+  const {permisos} = permisoStore;
 
-  // Instancia de habilidad con reglas de usuario
-  const initialAbility = createMongoAbility(getUserAbilityRules())
+  // // Obtiene las reglas del localStorage en el cliente
+  // const getUserAbilityRules = (): Rule[] => {
+  //   try {
+  //     const rules = localStorage.getItem('userAbilityRules');
+  //     return rules ? JSON.parse(rules) : [];
+  //   } catch (error) {
+  //     console.error('Error parsing userAbilityRules:', error);
+  //     return [];
+  //   }
+  // };
 
-  nuxtApp.vueApp.use(abilitiesPlugin, initialAbility, {
+  // const rules = getUserAbilityRules();
+
+  ability.update(permisos);
+  // ability.update(rules);
+
+  nuxtApp.vueApp.use(abilitiesPlugin, ability, {
     useGlobalProperties: true,
-  })
-})
-
-
-
+  });
+});
