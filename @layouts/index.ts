@@ -25,19 +25,18 @@ export const createLayouts = (userConfig: PartialDeep<LayoutConfig>): Plugin => 
     layoutConfig.icons.verticalNavPinned = userConfig.icons?.verticalNavPinned ?? layoutConfig.icons.verticalNavPinned
     layoutConfig.icons.verticalNavUnPinned = userConfig.icons?.verticalNavUnPinned ?? layoutConfig.icons.verticalNavUnPinned
     layoutConfig.icons.sectionTitlePlaceholder = userConfig.icons?.sectionTitlePlaceholder ?? layoutConfig.icons.sectionTitlePlaceholder
-
-    // Reactive Values (Store)
+    
     configStore.$patch({
-      appContentLayoutNav: cookieRef('appContentLayoutNav', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
-      appContentWidth: cookieRef('appContentWidth', userConfig.app?.contentWidth ?? layoutConfig.app.contentWidth).value,
-      footerType: cookieRef('footerType', userConfig.footer?.type ?? layoutConfig.footer.type).value,
-      navbarType: cookieRef('navbarType', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,
-      isNavbarBlurEnabled: cookieRef('isNavbarBlurEnabled', userConfig.navbar?.navbarBlur ?? layoutConfig.navbar.navbarBlur).value,
-      isVerticalNavCollapsed: cookieRef('isVerticalNavCollapsed', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
-
+      appContentLayoutNav: cookieRef('navBar_loyout', null).value = null ?? userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav,
+      appContentWidth: cookieRef('ancho_contenido_aplicacion', userConfig.app?.contentWidth ?? layoutConfig.app.contentWidth).value,
+      footerType: cookieRef('tipo_footer', userConfig.footer?.type ?? layoutConfig.footer.type).value,
+      navbarType: cookieRef('navBar_vertical_tipo', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,
+      isNavbarBlurEnabled: cookieRef('desenfoque_habilitado_barra_navegacion', userConfig.navbar?.navbarBlur ?? layoutConfig.navbar.navbarBlur).value,
+      isVerticalNavCollapsed: cookieRef('esta_navBar_vertical_colapsada', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
+      
       // isAppRTL: userConfig.app?.isRTL ?? config.app.isRTL,
       // isLessThanOverlayNavBreakpoint: false,
-      horizontalNavType: cookieRef('horizontalNavType', userConfig.horizontalNav?.type ?? layoutConfig.horizontalNav.type).value,
+      horizontalNavType: cookieRef('navBar_horizontal_tipo', userConfig.horizontalNav?.type ?? layoutConfig.horizontalNav.type).value,
     })
 
     // _setDirAttr(config.app.isRTL ? 'rtl' : 'ltr')

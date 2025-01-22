@@ -7,25 +7,54 @@ import { themeConfig } from '@themeConfig'
 export const useConfigStore = defineStore('config', () => {
   // 👉 Theme
   const userPreferredColorScheme = usePreferredColorScheme()
-  const cookieColorScheme = cookieRef<'light' | 'dark'>('color-scheme', 'light')
-
+  const tema_color = ref(cookieRef<'light' | 'dark'>('tema_color', 'light').value);
   watch(
     userPreferredColorScheme,
     val => {
+      console.log('Este es el watch que se debe ejecutar cuando cambia el tema del sistema')
       if (val !== 'no-preference')
-        cookieColorScheme.value = val
+        tema_color.value = val
     },
-    { immediate: true },
+    // { immediate: true },
   )
 
-  const theme = cookieRef('theme', themeConfig.app.theme)
+  const theme = ref(cookieRef('tema', themeConfig.app.theme).value);
 
   // 👉 isVerticalNavSemiDark
-  const isVerticalNavSemiDark = cookieRef('isVerticalNavSemiDark', themeConfig.verticalNav.isVerticalNavSemiDark)
+  const isVerticalNavSemiDark = cookieRef('es_navegacion_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark)
 
   // 👉 isVerticalNavSemiDark
-  const skin = cookieRef('skin', themeConfig.app.skin)
-
+  const skin = cookieRef('aspecto', themeConfig.app.skin)
+  
+  
+  function reset(): void {
+    theme.value = cookieRef('tema').value
+    isVerticalNavSemiDark.value = cookieRef('es_navegacion_vertical_semioscura', themeConfig.verticalNav.isVerticalNavSemiDark).value
+    skin.value = cookieRef('aspecto', themeConfig.app.skin).value
+    
+    useLayoutConfigStore().resetLayoutConfig()
+    
+  }
+  
+  function asignarDataACookiesDefault(): void {
+    
+    useCookie("default_color_primario_tema_light").value = cookieRef("color_primario_tema_light").value;
+    useCookie("default_color_oscurecimiento_primario_tema_light").value = cookieRef("color_oscurecimiento_primario_tema_light").value;
+    useCookie("default_color_primario_tema_dark").value = cookieRef("color_primario_tema_dark").value;
+    useCookie("default_color_oscurecimiento_primario_tema_dark").value = cookieRef("color_oscurecimiento_primario_tema_dark").value;
+    useCookie("default_tema").value = cookieRef("tema").value;
+    useCookie("default_tema_color").value = cookieRef("tema_color").value;
+    useCookie("default_aspecto").value = cookieRef("aspecto").value;
+    useCookie("default_esta_navBar_vertical_colapsada").value = cookieRef("esta_navBar_vertical_colapsada").value;
+    useCookie("default_es_navBar_vertical_semioscura").value = cookieRef("es_navBar_vertical_semioscura").value;
+    useCookie("default_navBar_loyout").value = cookieRef("navBar_loyout").value;
+    useCookie("default_ancho_contenido_aplicacion").value = cookieRef("ancho_contenido_aplicacion").value;
+    useCookie("default_orientacion").value = cookieRef("orientacion").value;
+    useCookie("default_navBar_vertical_tipo").value = cookieRef("navBar_vertical_tipo").value;
+    useCookie("default_navBar_horizontal_tipo").value = cookieRef("navBar_horizontal_tipo").value;
+    
+  }
+  
   // ℹ️ We need to use `storeToRefs` to forward the state
   const {
     isLessThanOverlayNavBreakpoint,
@@ -36,13 +65,16 @@ export const useConfigStore = defineStore('config', () => {
     isVerticalNavCollapsed,
     footerType,
     isAppRTL,
+    prefijoCookie,
+    horizontalNavType
   } = storeToRefs(useLayoutConfigStore())
 
   return {
     theme,
     isVerticalNavSemiDark,
     skin,
-
+    horizontalNavType,
+    prefijoCookie,
     // @layouts exports
     isLessThanOverlayNavBreakpoint,
     appContentWidth,
@@ -52,6 +84,10 @@ export const useConfigStore = defineStore('config', () => {
     isVerticalNavCollapsed,
     footerType,
     isAppRTL,
+    tema_color,
+    // methods
+    reset,
+    asignarDataACookiesDefault
   }
 })
 // !SECTION
@@ -66,11 +102,14 @@ export const initConfigStore = () => {
   watch(
     [() => configStore.theme, userPreferredColorScheme],
     () => {
+      console.log('Este es el watch que se debe ejecutar cuando cambia el tema')
       vuetifyTheme.global.name.value = configStore.theme === 'system'
         ? userPreferredColorScheme.value === 'dark'
           ? 'dark'
           : 'light'
         : configStore.theme
+      
+      configStore.tema_color = vuetifyTheme.global.name.value
     })
 
   onMounted(() => {

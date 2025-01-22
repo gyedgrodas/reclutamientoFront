@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <li
-    v-if="can(item.action, item.subject)"
+    v-if="can(item.action, item.subject) && item.titulo_seccion === null"
     class="nav-link"
     :class="[{
       'sub-item': props.isSubItem,
@@ -28,21 +28,21 @@ const props = withDefaults(defineProps<Props>(), {
     }]"
   >
     <Component
-      :is="item.to ? NuxtLink : 'a'"
+      :is="item.ruta ? NuxtLink : 'a'"
       v-bind="getComputedNavLinkToProp(item)"
       :class="{ 'router-link-active router-link-exact-active': isNavLinkActive(item, $router) }"
     >
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
         class="nav-item-icon"
-        v-bind="item.icon || layoutConfig.verticalNav.defaultNavItemIconProps"
+        v-bind="item.icono ? { class: item.icono } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
       />
       <Component
         :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
         class="nav-item-title"
         v-bind="getDynamicI18nProps(item.title, 'span')"
       >
-        {{ item.title }}
+        {{ item.titulo }}
       </Component>
     </Component>
   </li>

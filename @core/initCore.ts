@@ -1,7 +1,7 @@
 import { useStorage } from '@vueuse/core'
 import { useTheme } from 'vuetify'
 import { useConfigStore } from '@core/stores/config'
-import { cookieRef, namespaceConfig } from '@layouts/stores/config'
+import { cookieRef} from '@layouts/stores/config'
 import { themeConfig } from '@themeConfig'
 
 const _syncAppRtl = () => {
@@ -74,8 +74,8 @@ const _syncInitialLoaderTheme = () => {
     () => useConfigStore().theme,
     () => {
       // ℹ️ We are not using theme.current.colors.surface because watcher is independent and when this watcher is ran `theme` computed is not updated
-      useStorage<string | null>(namespaceConfig('initial-loader-bg'), null).value = vuetifyTheme.current.value.colors.surface
-      useStorage<string | null>(namespaceConfig('initial-loader-color'), null).value = vuetifyTheme.current.value.colors.primary
+      useStorage<string | null>('initial-loader-bg', null).value = vuetifyTheme.current.value.colors.surface
+      useStorage<string | null>('initial-loader-color', null).value = vuetifyTheme.current.value.colors.primary
     },
     { immediate: true },
   )

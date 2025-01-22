@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import navItems from '@/navigation/horizontal'
+const navItems = useState('menu')
 
 import { themeConfig } from '@themeConfig'
 
@@ -46,6 +46,6 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
     </template>
 
     <!-- 👉 Customizer -->
-    <!-- <TheCustomizer /> -->
+     <TheCustomizer />
   </HorizontalNavLayout>
 </template>

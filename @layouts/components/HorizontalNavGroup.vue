@@ -60,14 +60,14 @@ watch(() => route.path, () => {
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
         class="nav-item-icon"
-        v-bind="item.icon || layoutConfig.verticalNav.defaultNavItemIconProps"
+        v-bind="item.icono ? { class: item.icono } : { class: layoutConfig.verticalNav.defaultNavItemIconProps.icon }"
       />
       <Component
         :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
-        v-bind="getDynamicI18nProps(item.title, 'span')"
+        v-bind="getDynamicI18nProps(item.titulo, 'span')"
         class="nav-item-title"
       >
-        {{ item.title }}
+        {{ item.titulo }}
       </Component>
       <Component
         v-bind="layoutConfig.icons.chevronDown"
@@ -78,9 +78,9 @@ watch(() => route.path, () => {
 
     <template #content>
       <Component
-        :is="'children' in child ? 'HorizontalNavGroup' : HorizontalNavLink"
+        :is="child.children.length > 0 ? 'HorizontalNavGroup' : HorizontalNavLink"
         v-for="child in item.children"
-        :key="child.title"
+        :key="child.titulo"
         :item="child"
         children-at-end
         is-sub-item

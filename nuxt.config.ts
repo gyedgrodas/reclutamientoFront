@@ -1,4 +1,4 @@
-import { fileURLToPath } from 'node:url'
+import {fileURLToPath} from 'node:url'
 import svgLoader from 'vite-svg-loader'
 import vuetify from 'vite-plugin-vuetify'
 
@@ -18,6 +18,17 @@ export default defineNuxtConfig({
   },
 
   // ssr: false,
+  runtimeConfig: {
+    // Private keys are only available on the server
+    AUTH_ORIGIN: process.env.AUTH_ORIGIN,
+    AUTH_SECRET: process.env.AUTH_SECRET,
+
+    // Public keys that are exposed to the client.
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
+      apiBaseUrlSigua: process.env.NUXT_PUBLIC_API_BASE_URL_SIGUA || '/api',
+    },
+  },
 
   sanctum: {
     mode: 'token',
@@ -27,8 +38,8 @@ export default defineNuxtConfig({
     redirectIfUnauthenticated: true,
     endpoints: {
       csrf: '/sanctum/csrf-cookie',
-      login: 'api/auth/login',
-      logout: 'api/auth/logout',
+      login: '/api/auth/login',
+      logout: '/api/auth/logout',
       user: '/api/user',
     },
     csrf: {
@@ -73,7 +84,7 @@ export default defineNuxtConfig({
     }],
   },
 
-  plugins: ['@/plugins/vuetify/index.ts', '@/plugins/iconify/index.ts'],
+  plugins: ['@/plugins/vuetify/index.ts', '@/plugins/iconify/index.ts', '@/plugins/casl/index.ts'],
 
   imports: {
     dirs: ['./@core/utils', './@core/composable/', './plugins/*/composables/*'],
@@ -118,7 +129,7 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    define: { 'process.env': {} },
+    define: {'process.env': {}},
 
     resolve: {
       alias: {

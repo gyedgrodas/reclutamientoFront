@@ -1,6 +1,6 @@
-import type { OffsetOptions } from '@floating-ui/dom'
-import type { RouteLocationRaw } from 'vue-router'
-import type { AppContentLayoutNav, ContentWidth, FooterType, HorizontalNavType, NavbarType } from '@layouts/enums'
+import type {OffsetOptions} from '@floating-ui/dom'
+import type {RouteLocationRaw} from 'vue-router'
+import type {AppContentLayoutNav, ContentWidth, FooterType, HorizontalNavType, NavbarType} from '@layouts/enums'
 
 export interface LayoutConfig {
   app: {
@@ -49,7 +49,7 @@ export interface AclProperties {
 
 // 👉 Vertical nav section title
 export interface NavSectionTitle extends Partial<AclProperties> {
-  heading: string
+  titulo_seccion: string
 }
 
 // 👉 Vertical nav link
@@ -70,15 +70,15 @@ declare type ATagRelAttrValues =
   | 'tag'
 
 export interface NavLinkProps {
-  to?: RouteLocationRaw | string | null
+  ruta?: RouteLocationRaw | string | null
   href?: string
   target?: ATagTargetAttrValues
   rel?: ATagRelAttrValues
 }
 
 export interface NavLink extends NavLinkProps, Partial<AclProperties> {
-  title: string
-  icon?: unknown
+  titulo: string
+  icono?: unknown
   badgeContent?: string
   badgeClass?: string
   disable?: boolean
@@ -86,8 +86,8 @@ export interface NavLink extends NavLinkProps, Partial<AclProperties> {
 
 // 👉 Vertical nav group
 export interface NavGroup extends Partial<AclProperties> {
-  title: string
-  icon?: unknown
+  titulo: string
+  icono?: unknown
   badgeContent?: string
   badgeClass?: string
   children: (NavLink | NavGroup)[]
@@ -118,7 +118,7 @@ export type Notification = {
   | { img: string; text?: never; icon?: never }
   | { img?: never; text: string; icon?: never }
   | { img?: never; text?: never; icon: string }
-)
+  )
 
 export interface ThemeSwitcherTheme {
   name: string

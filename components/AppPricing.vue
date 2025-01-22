@@ -44,7 +44,7 @@ const pricingPlans = [
     features: [
       'Unlimited responses',
       'Unlimited forms and surveys',
-      'Instagram profile page',
+      'Instagram perfil page',
       'Google Docs integration',
       'Custom “Thank you” page',
     ],

@@ -9,7 +9,8 @@
     "lint": "eslint . -c .eslintrc.cjs --fix --ext .ts,.js,.cjs,.vue,.tsx,.jsx",
     "build:icons": "tsx plugins/iconify/build-icons.ts",
     "postinstall": "nuxt prepare && npm run build:icons ",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "generarCrud": "node commands/GeneradorCrud.js"
   },
   "dependencies": {
     "@casl/ability": "6.7.1",
@@ -28,9 +29,11 @@
     "@vueuse/core": "10.11.0",
     "@vueuse/math": "10.11.0",
     "apexcharts": "3.51.0",
+    "axios": "^1.7.9",
     "chart.js": "4.4.3",
     "cookie-es": "1.2.2",
     "eslint-plugin-regexp": "2.6.0",
+    "js-cookie": "^3.0.5",
     "jwt-decode": "4.0.0",
     "mapbox-gl": "3.5.2",
     "next-auth": "4.21.1",
@@ -40,6 +43,8 @@
     "prismjs": "1.29.0",
     "roboto-fontface": "0.10.0",
     "shepherd.js": "13.0.1",
+    "sortablejs": "^1.15.6",
+    "sweetalert2": "^11.15.3",
     "swiper": "11.1.9",
     "ufo": "1.5.4",
     "unplugin-vue-define-options": "1.4.6",
@@ -78,6 +83,7 @@
     "@tiptap/extension-underline": "^2.5.8",
     "@types/mapbox-gl": "3.4.0",
     "@types/node": "22.0.0",
+    "@types/sortablejs": "^1.15.8",
     "@types/webfontloader": "1.6.38",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
