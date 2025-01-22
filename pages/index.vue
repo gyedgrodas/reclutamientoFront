@@ -1,13 +1,13 @@
 <template>
   <DataTableSsr
     :headers="[
-      { text: 'ID', value: 'id' },
-      { text: 'Nombre', value: 'nombre' },
-      { text: 'Email', value: 'email' },
-      { text: 'Acciones', value: 'Acciones' }
+      { title: 'ID', value: 'id' },
+      { title: 'titulo', value: 'titulo' },
+      { title: 'titulo Seccion', value: 'titulo_seccion' },
+      { title: 'Acciones', value: 'Acciones' }
     ]"
 
-    endpoint="/api/users"
+    endpoint="/api/menu_opciones"
 
   >
 

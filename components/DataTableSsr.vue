@@ -1,9 +1,6 @@
 <script lang="ts" setup>
 
-import {toRefs} from 'vue';
-
 const {get} = useClienteRequest();
-
 const {showToastError} = useToast();
 
 interface DataTableProps {
@@ -13,47 +10,45 @@ interface DataTableProps {
 
 const props = defineProps<DataTableProps>();
 
-//Props reactivos
-const {endpoint} = toRefs(props);
+// const {endpoint} = toRefs(props);
 
-//Props no reactivos
-const {headers} = props;
+const {headers, endpoint} = props;
 
 const items = ref([]);
 const currentPage = ref(1);
-const itemsPerPage = ref(5);
+const itemsPerPage = ref(2);
 const totalItems = ref(0);
 const loading = ref(false);
 const search = ref('');
 
 const getItems = async () => {
-
   try {
     loading.value = true;
 
-    const res = await get(endpoint.value, {
-      'page[number]': currentPage.value,
-      'page[size]': itemsPerPage.value,
+    const res = await get(endpoint, {
+      page: currentPage.value,
+      per_page: itemsPerPage.value,
     });
 
-    items.value = res.data.data; // Aquí deberías obtener la lista de usuarios
-    totalItems.value = res.data?.meta.total; // Total de registros en el backend
-    itemsPerPage.value = res.data?.meta.per_page; // Elementos por página
-    currentPage.value = res.data?.meta.current_page // Página actual
+    items.value = res.data.data;
+    totalItems.value = res.data?.total;
+    itemsPerPage.value = res.data?.per_page;
+    currentPage.value = res.data?.current_page;
 
   } catch (error) {
-
-    showToastError(error.message);
-
+    showToastError(error.response?.data?.message || error.message);
   } finally {
-
     loading.value = false;
-
   }
-
 };
 
 onMounted(getItems);
+
+watch([currentPage, itemsPerPage], () => {
+
+  console.log('currentPage:', currentPage.value);
+  getItems()
+})
 
 </script>
 
