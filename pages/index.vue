@@ -1,24 +1,37 @@
 <template>
-  <div>
-    <p>Permisos del usuario:</p>
-    <ul>
-      <li v-for="permiso in permisos" :key="permiso">{{ permiso }}</li>
-    </ul>
-    <button v-if="hasCreatePermission" @click="crearRecurso">Crear Recurso</button>
-  </div>
+  <DataTableSsr>
+    <template #item.Acciones="{ item }">
+      <VBtn
+        :to="`/usuarios/show/${item.id}`"
+        color="primary"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-eye"/>
+      </VBtn>
+      <VBtn
+        :to="`/usuarios/edit/${item.id}`"
+        color="primary"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-edit"/>
+      </VBtn>
+      <VBtn
+        color="error"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-trash"/>
+      </VBtn>
+    </template>
+
+    <template #item.usuario_dominio="{ item }">
+      <span class="text-primary">{{ item.usuario_dominio }}</span>
+    </template>
+  </DataTableSsr>
 </template>
 
 <script setup>
-import {usePermisoStore} from '@/stores/permisos';
 
-const permisoStore = usePermisoStore();
-const {permisos} = permisoStore;
-
-// Ejemplo: Verificar si el usuario tiene un permiso específico
-const hasCreatePermission = permisos.includes('crear_recurso');
-
-// Acción de ejemplo
-const crearRecurso = () => {
-  console.log('Recurso creado');
-};
 </script>
