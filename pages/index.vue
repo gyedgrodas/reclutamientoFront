@@ -1,5 +1,16 @@
 <template>
-  <DataTableSsr>
+  <DataTableSsr
+    :headers="[
+      { text: 'ID', value: 'id' },
+      { text: 'Nombre', value: 'nombre' },
+      { text: 'Email', value: 'email' },
+      { text: 'Acciones', value: 'Acciones' }
+    ]"
+
+    endpoint="/api/users"
+
+  >
+
     <template #item.Acciones="{ item }">
       <VBtn
         :to="`/usuarios/show/${item.id}`"
