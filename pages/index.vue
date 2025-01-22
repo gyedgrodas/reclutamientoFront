@@ -26,9 +26,6 @@
       </VBtn>
     </template>
 
-    <template #item.usuario_dominio="{ item }">
-      <span class="text-primary">{{ item.usuario_dominio }}</span>
-    </template>
   </DataTableSsr>
 </template>
 

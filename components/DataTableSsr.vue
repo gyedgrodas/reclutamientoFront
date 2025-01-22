@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, useSlots} from 'vue';
+import {ref} from 'vue';
 
 // Datos y configuración de la tabla
 const items = ref([
@@ -34,31 +34,29 @@ const headers = [
   },
 ];
 
-// Obtener los slots del componente padre
-const slots = useSlots();
 </script>
 
 <template>
   <VDataTableServer
-    v-model:items-per-page="itemsPerPage"
-    v-model:page="currentPage"
-    :headers="headers"
-    :items="items"
-    :items-length="totalItems"
-    :items-per-page-options="[2, 5, 10, 50, -1]"
-    :loading="loading"
-    :search="search"
-    item-value="id"
+      v-model:items-per-page="itemsPerPage"
+      v-model:page="currentPage"
+      :headers="headers"
+      :items="items"
+      :items-length="totalItems"
+      :items-per-page-options="[2, 5, 10, 50, -1]"
+      :loading="loading"
+      :search="search"
+      item-value="id"
   >
-    <!-- Iterar sobre los headers para renderizar los slots -->
-    <!--    <template v-for="header in headers" :key="header.value">-->
-    <!--      <template-->
-    <!--        v-if="slots[`item.${header.value}`]"-->
-    <!--        v-slot:[`item.${header.value}`]="{ item }"-->
-    <!--      >-->
-    <!--        <slot :item="item" :name="`item.${header.value}`"/>-->
-    <!--      </template>-->
-    <!--    </template>-->
+
+    <template
+        v-for="(slot, name) in $slots"
+        :key="name"
+        v-slot:[name]="slotProps"
+    >
+      <slot :name="name" v-bind="slotProps"></slot>
+    </template>
+
   </VDataTableServer>
 </template>
 
