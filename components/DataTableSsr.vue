@@ -10,8 +10,6 @@ interface DataTableProps {
 
 const props = defineProps<DataTableProps>();
 
-// const {endpoint} = toRefs(props);
-
 const {headers, endpoint} = props;
 
 const items = ref([]);
