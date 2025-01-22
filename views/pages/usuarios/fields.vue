@@ -4,6 +4,7 @@ import type {VForm} from "vuetify/lib/components/VForm";
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
+const { getCatalogos, catalogos } = useCatalogo()
 
 import type { UsuarioInterface } from '@/types/usuarios/index.ts';
 import {ref} from "vue";
@@ -81,8 +82,15 @@ const puedeMostrarDatos = computed(() => {
 
 
 
-const {get} = useClienteRequest()
-const catalogos = await get('/api/data/all')
+const loadCatalogs = async () => {
+  try {
+    await getCatalogos(['puestos', 'unidades', 'regiones', 'gerencias'])
+  }
+  catch (error) {
+    showToastError(error.message)
+  }
+}
+loadCatalogs()
 
 
 // Datos estáticos
@@ -238,7 +246,7 @@ const nombreBoton = computed(() => {
                   >
                     <AppAutocomplete
                         v-model="data.puesto_id"
-                        :items="catalogos.data.puestos"
+                        :items="catalogos.puestos"
                         :rules="[requiredValidator]"
                         label="Puesto"
                         placeholder="Seleccione una opción..."
@@ -268,7 +276,7 @@ const nombreBoton = computed(() => {
                   >
                     <AppAutocomplete
                         v-model="data.unidad_id"
-                        :items="catalogos.data.unidads"
+                        :items="catalogos.unidades"
                         :rules="[requiredValidator]"
                         label="Unidad"
                         placeholder="Seleccione una opción..."
@@ -283,7 +291,7 @@ const nombreBoton = computed(() => {
                   >
                     <AppAutocomplete
                         v-model="data.region_id"
-                        :items="catalogos.data.regiones"
+                        :items="catalogos.regiones"
                         :rules="[requiredValidator]"
                         label="Region"
                         placeholder="Seleccione una opción..."
@@ -298,7 +306,7 @@ const nombreBoton = computed(() => {
                   >
                     <AppAutocomplete
                         v-model="data.gerencia_id"
-                        :items="catalogos.data.gerencias"
+                        :items="catalogos.gerencias"
                         :rules="[requiredValidator]"
                         label="Gerencia"
                         placeholder="Seleccione una opción..."
