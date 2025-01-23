@@ -1,7 +1,8 @@
 <template>
 
   <DataTableSsr
-    :cantidadPorPagina="7"
+    :cantidadPorPagina="1"
+    :cantidadPorPaginaOpciones="[1,2,3]"
     :headers="[
       { title: 'ID', value: 'id' },
       { title: 'titulo', value: 'titulo' },
