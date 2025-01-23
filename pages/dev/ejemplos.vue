@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+
 const {showToastInfo, showToastSuccess, showToastWarning, showToastError} = useToast();
 const {paginaEspera, cargandoPagina} = useCargandoPagina();
 
@@ -30,6 +31,12 @@ const activarPaginaCargando = () => {
   }, 1500);
 };
 
+const headers = [
+  {title: 'ID', value: 'id'},
+  {title: 'titulo', value: 'titulo'},
+  {title: 'titulo Seccion', value: 'titulo_seccion'},
+  {title: 'Acciones', value: 'Acciones'}
+];
 
 </script>
 
@@ -81,19 +88,66 @@ const activarPaginaCargando = () => {
     </VCardText>
   </VCard>
 
-
-
-  <VCard class="mb-12">
+  <VCard class="mb-5">
     <VCardTitle>Buscador General</VCardTitle>
     <VCardText>
       <selector-buscador
-        title="Buscar Asociado"
-        placeholder="Ingrese el nombre del asociado "
         Endpoint="/api/asociados/buscar/select2/"
+        placeholder="Ingrese el nombre del asociado "
         requerido
+        title="Buscar Asociado"
       ></selector-buscador>
     </VCardText>
   </VCard>
+
+  <VCard class="mb-5">
+
+    <VCardTitle>Componente DataTable</VCardTitle>
+
+    <VCardText>
+
+      <DataTableSsr
+        :cantidadPorPagina="10"
+        :cantidadPorPaginaOpciones="[10,20,30]"
+        :headers="headers"
+        endpoint="/api/menu_opciones"
+      >
+
+        <template #item.Acciones="{ item }">
+
+          <VBtn
+            color="primary"
+            icon
+            variant="text"
+          >
+            <VIcon icon="tabler-eye"/>
+          </VBtn>
+
+          <VBtn
+            color="primary"
+            icon
+            variant="text"
+          >
+            <VIcon icon="tabler-edit"/>
+          </VBtn>
+
+          <VBtn
+            color="error"
+            icon
+            variant="text"
+          >
+            <VIcon icon="tabler-trash"/>
+          </VBtn>
+
+
+        </template>
+
+      </DataTableSsr>
+
+    </VCardText>
+
+  </VCard>
+
 
 </template>
 

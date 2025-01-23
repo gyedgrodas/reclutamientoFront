@@ -70,6 +70,7 @@ watch([currentPage, itemsbyPage], getItems);
 </script>
 
 <template>
+
   <VDataTableServer
     v-model:items-per-page="itemsbyPage"
     v-model:page="currentPage"
@@ -83,7 +84,7 @@ watch([currentPage, itemsbyPage], getItems);
   >
 
     <template
-      v-for="(name) in $slots"
+      v-for="(slot,name) in $slots"
       :key="name"
       v-slot:[name]="slotProps"
     >
