@@ -6,32 +6,41 @@ const {showToastError} = useToast();
 interface DataTableProps {
   endpoint: string;
   headers: [{ text: string; value: string }];
+  cantidadPorPagina?: number;
+}
+
+interface PaginatedResponse {
+  current_page: number;
+  data: [];
+  last_page: number;
+  per_page: number;
+  total: number;
 }
 
 const props = defineProps<DataTableProps>();
 
-const {headers, endpoint} = props;
+let {headers, endpoint, cantidadPorPagina = 10} = props;
 
-const items = ref([]);
-const currentPage = ref(1);
-const itemsPerPage = ref(2);
-const totalItems = ref(0);
-const loading = ref(false);
-const search = ref('');
+const items = ref<[]>([]);
+const currentPage = ref<number>(1);
+const totalItems = ref<number>(0);
+const loading = ref<boolean>(false);
+const search = ref<string>('');
+let itemsbyPage = ref<number>(cantidadPorPagina);
 
-const getItems = async () => {
+const getItems = async (): Promise<void> => {
   try {
     loading.value = true;
 
-    const res = await get(endpoint, {
+    const respuesta: { data: PaginatedResponse } = await get(endpoint, {
       page: currentPage.value,
-      per_page: itemsPerPage.value,
+      per_page: itemsbyPage.value,
     });
 
-    items.value = res.data.data;
-    totalItems.value = res.data?.total;
-    itemsPerPage.value = res.data?.per_page;
-    currentPage.value = res.data?.current_page;
+    items.value = respuesta.data.data;
+    totalItems.value = respuesta.data.total;
+    itemsbyPage.value = respuesta.data.per_page;
+    currentPage.value = respuesta.data.current_page;
 
   } catch (error) {
     showToastError(error.response?.data?.message || error.message);
@@ -42,32 +51,31 @@ const getItems = async () => {
 
 onMounted(getItems);
 
-watch([currentPage, itemsPerPage], () => {
+watch([currentPage, itemsbyPage], () => {
 
-  console.log('currentPage:', currentPage.value);
   getItems()
+
 })
 
 </script>
 
-
 <template>
   <VDataTableServer
-      v-model:items-per-page="itemsPerPage"
-      v-model:page="currentPage"
-      :headers="headers"
-      :items="items"
-      :items-length="totalItems"
-      :items-per-page-options="[2, 5, 10, 50, -1]"
-      :loading="loading"
-      :search="search"
-      item-value="id"
+    v-model:items-per-page="itemsbyPage"
+    v-model:page="currentPage"
+    :headers="headers"
+    :items="items"
+    :items-length="totalItems"
+    :items-per-page-options="[2, 5, 10, 50, -1]"
+    :loading="loading"
+    :search="search"
+    item-value="id"
   >
 
     <template
-        v-for="(slot, name) in $slots"
-        :key="name"
-        v-slot:[name]="slotProps"
+      v-for="(slot, name) in $slots"
+      :key="name"
+      v-slot:[name]="slotProps"
     >
       <slot :name="name" v-bind="slotProps"></slot>
     </template>
