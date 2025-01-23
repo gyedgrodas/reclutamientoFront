@@ -4,7 +4,7 @@ const {get} = useClienteRequest();
 const {showToastError} = useToast();
 
 interface Header {
-  text: string;
+  title: string;
   value: string;
 }
 
@@ -12,7 +12,7 @@ interface DataTableProps {
   endpoint: string;
   headers: Header[];
   cantidadPorPagina?: number;
-  cantidadPorPaginaOpciones?: [];
+  cantidadPorPaginaOpciones?: number[];
 }
 
 interface PaginatedResponse {
@@ -25,7 +25,9 @@ interface PaginatedResponse {
 
 const props = defineProps<DataTableProps>();
 
-let {headers, endpoint, cantidadPorPagina = 10, cantidadPorPaginaOpciones = [2, 5, 10]} = props;
+const cantidadPorPaginaValorDefault: number[] = [10, 20, 30];
+
+let {headers, endpoint, cantidadPorPagina = 10, cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault} = props;
 
 const items = ref<[]>([]);
 const currentPage = ref<number>(1);
@@ -63,9 +65,7 @@ const getItems = async (): Promise<void> => {
 
 onMounted(getItems);
 
-watch([currentPage, itemsbyPage], () => {
-  getItems();
-});
+watch([currentPage, itemsbyPage], getItems);
 
 </script>
 
@@ -83,7 +83,7 @@ watch([currentPage, itemsbyPage], () => {
   >
 
     <template
-      v-for="(slot, name) in $slots"
+      v-for="(name) in $slots"
       :key="name"
       v-slot:[name]="slotProps"
     >
