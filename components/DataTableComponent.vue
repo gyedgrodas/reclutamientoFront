@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 
+import {exportarDataFormatoCSV, exportarDataFormatoXLSX} from "@/utils/exports";
+
 const {get} = useClienteRequest();
 const {showToastError} = useToast();
 
@@ -70,6 +72,60 @@ watch([currentPage, itemsbyPage], getItems);
 </script>
 
 <template>
+
+  <VBtn
+    class="mr-2"
+    icon
+    @click="exportarDataFormatoCSV(items, 'NuevoNombre')"
+  >
+
+    <VTooltip
+      activator="parent"
+      location="top"
+      start
+    >
+      <span>Exportar a CSV</span>
+    </VTooltip>
+
+    <VIcon
+      icon="tabler-file-type-csv"
+    />
+  </VBtn>
+
+  <VBtn
+    class="mr-2"
+    icon
+    @click="exportarDataFormatoXLSX(items, 'NuevoNombre')"
+  >
+    <VTooltip
+      activator="parent"
+      location="top"
+      start
+    >
+      <span>Exportar a XLS</span>
+    </VTooltip>
+
+    <VIcon
+      icon="tabler-file-type-xls"
+    />
+  </VBtn>
+
+  <VBtn
+    icon
+    @click="exportarDataFormatoXLSX(items, 'NuevoNombre')"
+  >
+    <VTooltip
+      activator="parent"
+      location="top"
+      start
+    >
+      <span>Exportar a PDF</span>
+    </VTooltip>
+
+    <VIcon
+      icon="tabler-file-type-pdf"
+    />
+  </VBtn>
 
   <VDataTableServer
     v-model:items-per-page="itemsbyPage"
