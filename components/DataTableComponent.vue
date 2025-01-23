@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import {exportarDataFormatoCSV, exportarDataFormatoXLSX} from "@/utils/exports";
+import {exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX} from "@/utils/exports";
 
 const {get} = useClienteRequest();
 const {showToastError} = useToast();
@@ -112,7 +112,7 @@ watch([currentPage, itemsbyPage], getItems);
 
   <VBtn
     icon
-    @click="exportarDataFormatoXLSX(items, 'NuevoNombre')"
+    @click="exportarDataFormatoPDF(items, 'NuevoNombre')"
   >
     <VTooltip
       activator="parent"

@@ -54,3 +54,47 @@ export function exportarDataFormatoCSV(data, filename = 'archivo.csv') {
 
 }
 
+
+/**
+ * Exporta un array de objetos a un archivo PDF
+ * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
+ * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.csv')
+ */
+
+export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf') {
+
+  try {
+
+    const response = await fetch('/api/pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({data}),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al generar el PDF');
+    }
+
+    if (filename.indexOf('.pdf') === -1) {
+      filename += '.pdf';
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+
+  } catch (error) {
+
+    console.error('Error al generar el PDF:', error);
+
+  }
+
+}
+
+

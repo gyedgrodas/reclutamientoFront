@@ -34,7 +34,7 @@ const activarPaginaCargando = () => {
 };
 
 const headers = [
-  {title: 'ID', value: 'id'},
+  {title: 'ID', value: 'id', sortable: true},
   {title: 'titulo', value: 'titulo'},
   {title: 'titulo Seccion', value: 'titulo_seccion'},
   {title: 'Acciones', value: 'Acciones'}
@@ -149,8 +149,7 @@ const headers = [
     </VCardText>
 
   </VCard>
-
-
+  
 </template>
 
 <style lang="scss" scoped>

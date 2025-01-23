@@ -1,23 +1,47 @@
 <template>
-
-  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 ">
-
-    <p class="text-2xl">
-      Inicio
-    </p>
-
+  <div>
+    <h1>Generar PDF de Usuarios</h1>
+    <button @click="generarPDF">Generar PDF</button>
   </div>
-
-  <VCard>
-    <VCardText>
-      <h3>Bienvenido, {{ user.nombre + ' ' + user.apellido }}</h3>
-    </VCardText>
-  </VCard>
-
 </template>
 
-<script setup>
+<script>
+export default {
+  methods: {
+    async generarPDF() {
+      // Array de objetos de ejemplo
+      const data = [
+        {nombre: 'Juan', edad: 25, ciudad: 'Madrid'},
+        {nombre: 'Ana', edad: 30, ciudad: 'Barcelona'},
+        {nombre: 'Luis', edad: 35, ciudad: 'Valencia'},
+      ];
 
-const {user} = useSanctumAuth();
+      try {
+        // Enviar datos al backend para generar el PDF
+        const response = await fetch('/api/pdf', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({data}),
+        });
 
+        if (!response.ok) {
+          throw new Error('Error al generar el PDF');
+        }
+
+        // Descargar el PDF generado
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'reporte.pdf';
+        link.click();
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error al generar el PDF:', error);
+      }
+    },
+  },
+};
 </script>
