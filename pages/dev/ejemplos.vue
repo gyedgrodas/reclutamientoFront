@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 
+import DataTableComponent from "@/components/DataTableComponent.vue";
+
 const {showToastInfo, showToastSuccess, showToastWarning, showToastError} = useToast();
 const {paginaEspera, cargandoPagina} = useCargandoPagina();
 
@@ -106,7 +108,7 @@ const headers = [
 
     <VCardText>
 
-      <DataTableSsr
+      <DataTableComponent
         :cantidadPorPagina="10"
         :cantidadPorPaginaOpciones="[10,20,30]"
         :headers="headers"
@@ -142,7 +144,7 @@ const headers = [
 
         </template>
 
-      </DataTableSsr>
+      </DataTableComponent>
 
     </VCardText>
 

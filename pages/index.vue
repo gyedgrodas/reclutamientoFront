@@ -1,23 +1,23 @@
 <template>
 
-  <DataTableSsr
-    :cantidadPorPagina="10"
-    :cantidadPorPaginaOpciones="[10,10,10]"
-    :headers="headers"
-    endpoint="/api/menu_opciones"
-  >
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 ">
 
-  </DataTableSsr>
+    <p class="text-2xl">
+      Inicio
+    </p>
+
+  </div>
+
+  <VCard>
+    <VCardText>
+      <h3>Bienvenido, {{ user.nombre + ' ' + user.apellido }}</h3>
+    </VCardText>
+  </VCard>
 
 </template>
 
 <script setup>
 
-const headers = [
-  {title: 'ID', value: 'id'},
-  {title: 'titulo', value: 'titulo'},
-  {title: 'titulo Seccion', value: 'titulo_seccion'},
-  {title: 'Acciones', value: 'Acciones'}
-];
+const {user} = useSanctumAuth();
 
 </script>
