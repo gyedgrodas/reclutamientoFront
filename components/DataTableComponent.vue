@@ -25,6 +25,13 @@ interface PaginatedResponse {
   total: number;
 }
 
+interface QueryParams {
+  page: number;
+  per_page: number;
+  campoAOrdenar?: string;
+  ordenCampo?: string;
+}
+
 const props = defineProps<DataTableProps>();
 
 const cantidadPorPaginaValorDefault: number[] = [10, 20, 30];
@@ -44,7 +51,7 @@ const ordenCampoOrdenar = ref<string>('');
 
 const getItems = async (): Promise<void> => {
 
-  let data = {
+  let data: QueryParams = {
     page: currentPage.value,
     per_page: itemsbyPage.value,
   };
@@ -91,6 +98,17 @@ const ordenarItems = (data) => {
 
 };
 
+const reiniciar = () => {
+
+  currentPage.value = 1;
+  itemsbyPage.value = cantidadPorPagina;
+  ordenCampoOrdenar.value = '';
+  nombreCampoOrdenar.value = '';
+
+  getItems();
+
+};
+
 </script>
 
 <template>
@@ -103,12 +121,12 @@ const ordenarItems = (data) => {
 
         <VCol
           cols="12"
-          md="4"
+          md="5"
         >
 
           <VBtn
             class="mr-2"
-
+            color="secondary"
             @click="exportarDataFormatoCSV(items, 'NuevoNombre')"
           >
 
@@ -129,6 +147,7 @@ const ordenarItems = (data) => {
 
           <VBtn
             class="mr-2"
+            color="secondary"
             @click="exportarDataFormatoXLSX(items, 'NuevoNombre')"
           >
             <VTooltip
@@ -146,6 +165,8 @@ const ordenarItems = (data) => {
           </VBtn>
 
           <VBtn
+            class="mr-2"
+            color="secondary"
             @click="exportarDataFormatoPDF(items, 'NuevoNombre')"
           >
             <VTooltip
@@ -160,6 +181,24 @@ const ordenarItems = (data) => {
               icon="tabler-file-type-pdf"
             />
             Pdf
+          </VBtn>
+
+          <VBtn
+            color="secondary"
+            @click="reiniciar"
+          >
+            <VTooltip
+              activator="parent"
+              location="top"
+              start
+            >
+              <span>Exportar a PDF</span>
+            </VTooltip>
+
+            <VIcon
+              icon="tabler-refresh"
+            />
+            Recargar
           </VBtn>
 
         </VCol>

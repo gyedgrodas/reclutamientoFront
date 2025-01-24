@@ -34,7 +34,7 @@ const activarPaginaCargando = () => {
 };
 
 const headers = [
-  {title: 'ID', key: 'id', sortable: true},
+  {title: 'ID', key: 'id', sortable: true,},
   {title: 'titulo', key: 'titulo', sortable: false},
   {title: 'titulo Seccion', key: 'titulo_seccion'},
   {title: 'Acciones', key: 'Acciones'}
