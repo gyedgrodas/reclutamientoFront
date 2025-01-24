@@ -1,32 +1,6 @@
 import * as XLSX from 'xlsx';
 
 /**
- * Exporta un array de objetos a un archivo XLSX
- * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
- * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.xlsx')
- */
-export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx') {
-
-  if (Array.isArray(data) || data.length > 0) {
-
-    const worksheet = XLSX.utils.json_to_sheet(data);
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
-
-    if (filename.indexOf('.xlsx') === -1) {
-      filename += '.xlsx';
-    }
-
-    XLSX.writeFile(workbook, filename);
-
-  }
-
-  console.error('El array de datos está vacío o no es válido.');
-
-}
-
-/**
  * Exporta un array de objetos a un archivo CSV
  * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
  * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.csv')
@@ -51,6 +25,47 @@ export function exportarDataFormatoCSV(data, filename = 'archivo.csv') {
   }
 
   console.error('El array de datos está vacío o no es válido.');
+
+}
+
+/**
+ * Exporta un array de objetos a un archivo XLSX
+ * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
+ * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.xlsx')
+ * @param {Array} headers - Array con los nombres de las columnas (e.g., ['Nombre', 'Edad'])
+ */
+export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx', headers = []) {
+
+  const columnasAExportar = headers.filter(header => header.exportable === true);
+
+  console.log('columnasAExportar:', columnasAExportar);
+
+  if (Array.isArray(data) || data.length > 0) {
+
+    const dataExportable = data.map(item => {
+      const newItem = {};
+      columnasAExportar.forEach(columna => {
+        newItem[columna.key] = item[columna.key];
+      });
+      return newItem;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataExportable);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
+
+    if (filename.indexOf('.xlsx') === -1) {
+      filename += '.xlsx';
+    }
+
+    XLSX.writeFile(workbook, filename);
+
+  } else {
+
+    console.error('El array de datos está vacío o no es válido.');
+
+  }
 
 }
 

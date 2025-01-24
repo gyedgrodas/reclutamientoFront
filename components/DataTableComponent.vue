@@ -144,11 +144,10 @@ const reiniciar = () => {
             CSV
           </VBtn>
 
-
           <VBtn
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoXLSX(items, 'NuevoNombre')"
+            @click="exportarDataFormatoXLSX(items, 'NuevoNombre', headers)"
           >
             <VTooltip
               activator="parent"
