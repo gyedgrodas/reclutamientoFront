@@ -24,7 +24,6 @@ export default {
 
       let data = {
         data: datos,
-        user: user.value,
       };
 
       try {

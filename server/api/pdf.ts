@@ -4,14 +4,8 @@ import path from 'path';
 import {H3Event} from 'h3';
 
 // Tipos personalizados
-interface User {
-  nombre: string;
-  apellido: string;
-}
-
 interface RequestBody {
   data: Record<string, any>[];
-  user: User;
 }
 
 interface ErrorResponse {
@@ -26,10 +20,9 @@ export default defineEventHandler(async (event: H3Event): Promise<Buffer | Error
 
     const body = (await readBody(event)) as RequestBody;
     const data = body.data || [];
-    const user = body.user || {};
 
-    if (!data.length || !user.nombre) {
-      throw new Error('Faltan datos o información del usuario para generar el PDF.');
+    if (!data.length) {
+      throw new Error('Faltan datos para generar el PDF');
     }
 
     const logoPath: string = path.resolve(process.cwd(), 'public', 'guayacan_logo.svg');
@@ -49,7 +42,6 @@ export default defineEventHandler(async (event: H3Event): Promise<Buffer | Error
 
     const dynamicHtml: string = htmlContent
       .replace('{{ tableRows }}', tableRows)
-      .replace('{{ user }}', `${user.nombre} ${user.apellido}`)
       .replace('{{ imagen }}', logoSrc)
       .replace('{{ fechaActual }}', `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`)
       .replace('{{ tableHeaders }}', tableHeaders);
