@@ -15,6 +15,7 @@ interface DataTableProps {
   headers: Header[];
   cantidadPorPagina?: number;
   cantidadPorPaginaOpciones?: number[];
+  botones?: string[];
 }
 
 interface PaginatedResponse {
@@ -36,7 +37,15 @@ const props = defineProps<DataTableProps>();
 
 const cantidadPorPaginaValorDefault: number[] = [10, 20, 30];
 
-let {headers, endpoint, cantidadPorPagina = 10, cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault} = props;
+const botonesDefault: string[] = ['xlsx', 'pdf', 'csv', 'reiniciar'];
+
+let {
+  headers,
+  endpoint,
+  cantidadPorPagina = 10,
+  cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault,
+  botones = botonesDefault
+} = props;
 
 const items = ref<[]>([]);
 const currentPage = ref<number>(1);
@@ -125,6 +134,7 @@ const reiniciar = () => {
         >
 
           <VBtn
+            v-if="botones.includes('csv')"
             class="mr-2"
             color="secondary"
             @click="exportarDataFormatoCSV(items, 'NuevoNombre', headers)"
@@ -145,6 +155,7 @@ const reiniciar = () => {
           </VBtn>
 
           <VBtn
+            v-if="botones.includes('xlsx')"
             class="mr-2"
             color="secondary"
             @click="exportarDataFormatoXLSX(items, 'NuevoNombre', headers)"
@@ -164,6 +175,7 @@ const reiniciar = () => {
           </VBtn>
 
           <VBtn
+            v-if="botones.includes('pdf')"
             class="mr-2"
             color="secondary"
             @click="exportarDataFormatoPDF(items, 'NuevoNombre', headers)"
@@ -183,6 +195,7 @@ const reiniciar = () => {
           </VBtn>
 
           <VBtn
+            v-if="botones.includes('reiniciar')"
             color="secondary"
             @click="reiniciar"
           >

@@ -109,6 +109,7 @@ const headers = [
     <VCardText>
 
       <DataTableComponent
+        :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
         :cantidadPorPagina="3"
         :cantidadPorPaginaOpciones="[10,20,30]"
         :headers="headers"
