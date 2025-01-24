@@ -4,12 +4,15 @@ import * as XLSX from 'xlsx';
  * Exporta un array de objetos a un archivo CSV
  * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
  * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.csv')
+ * @param {Array} headers - Array con los nombres de las columnas (e.g., ['Nombre', 'Edad'])
  */
-export function exportarDataFormatoCSV(data, filename = 'archivo.csv') {
+export function exportarDataFormatoCSV(data, filename = 'archivo.csv', headers) {
 
   if (Array.isArray(data) || data.length > 0) {
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const dataExportable = filtrarDataExportable(data, headers);
+
+    const worksheet = XLSX.utils.json_to_sheet(dataExportable);
 
     const csvData = XLSX.utils.sheet_to_csv(worksheet);
 
@@ -36,19 +39,9 @@ export function exportarDataFormatoCSV(data, filename = 'archivo.csv') {
  */
 export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx', headers = []) {
 
-  const columnasAExportar = headers.filter(header => header.exportable === true);
-
-  console.log('columnasAExportar:', columnasAExportar);
-
   if (Array.isArray(data) || data.length > 0) {
 
-    const dataExportable = data.map(item => {
-      const newItem = {};
-      columnasAExportar.forEach(columna => {
-        newItem[columna.key] = item[columna.key];
-      });
-      return newItem;
-    });
+    const dataExportable = filtrarDataExportable(data, headers);
 
     const worksheet = XLSX.utils.json_to_sheet(dataExportable);
 
@@ -74,7 +67,9 @@ export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx', headers
  * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
  * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.csv')
  */
-export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf') {
+export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf', headers) {
+
+  const dataExportable = filtrarDataExportable(data, headers);
 
   try {
 
@@ -111,4 +106,22 @@ export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf') {
 
 }
 
+/**
+ * Filtra un array de objetos según las columnas exportables
+ * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
+ * @param {Array} headers - Array con los nombres de las columnas (e.g., ['Nombre', 'Edad'])
+ */
+function filtrarDataExportable(data, headers) {
+
+  const columnasAExportar = headers.filter(header => header.exportable === true);
+
+  return data.map(item => {
+    const newItem = {};
+    columnasAExportar.forEach(columna => {
+      newItem[columna.key] = item[columna.key];
+    });
+    return newItem;
+  });
+
+}
 

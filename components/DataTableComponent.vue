@@ -127,7 +127,7 @@ const reiniciar = () => {
           <VBtn
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoCSV(items, 'NuevoNombre')"
+            @click="exportarDataFormatoCSV(items, 'NuevoNombre', headers)"
           >
 
             <VTooltip
@@ -166,7 +166,7 @@ const reiniciar = () => {
           <VBtn
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoPDF(items, 'NuevoNombre')"
+            @click="exportarDataFormatoPDF(items, 'NuevoNombre', headers)"
           >
             <VTooltip
               activator="parent"

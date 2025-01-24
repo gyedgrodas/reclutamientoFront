@@ -35,8 +35,8 @@ const activarPaginaCargando = () => {
 
 const headers = [
   {title: 'ID', key: 'id', sortable: true, exportable: true},
-  {title: 'titulo', key: 'titulo', sortable: false, exportable: true},
-  {title: 'titulo Seccion', key: 'titulo_seccion', exportable: true},
+  {title: 'titulo', key: 'titulo', sortable: false,},
+  {title: 'titulo Seccion', key: 'titulo_seccion', exportable: false},
   {title: 'Acciones', key: 'Acciones'},
 ];
 
