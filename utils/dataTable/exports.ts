@@ -26,7 +26,6 @@ export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx') {
 
 }
 
-
 /**
  * Exporta un array de objetos a un archivo CSV
  * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
@@ -42,6 +41,7 @@ export function exportarDataFormatoCSV(data, filename = 'archivo.csv') {
 
     const blob = new Blob([csvData], {type: 'text/csv;charset=utf-8;'});
     const link = document.createElement('a');
+
     link.href = URL.createObjectURL(blob);
     link.setAttribute('download', filename);
     document.body.appendChild(link);
@@ -54,18 +54,16 @@ export function exportarDataFormatoCSV(data, filename = 'archivo.csv') {
 
 }
 
-
 /**
  * Exporta un array de objetos a un archivo PDF
  * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
  * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.csv')
  */
-
 export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf') {
 
   try {
 
-    const response = await fetch('/api/pdf', {
+    const response = await fetch('/api/generaPdf/exportDataTable', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,6 +82,7 @@ export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf') {
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+
     link.href = url;
     link.download = filename;
     link.click();

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import {exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX} from "@/utils/exports";
+import {exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX} from "@/utils/dataTable/exports";
 
 const {get} = useClienteRequest();
 const {showToastError} = useToast();
