@@ -12,8 +12,9 @@ export default defineNuxtPlugin((nuxtApp) => {
   watch(
     user,
     () => {
-      console.log('Detectango los cambios del usuario y asignando los nuevos permisos: ', user.value?.abilityRules);
+
       ability.update(user.value?.abilityRules || []);
+
     },
     {immediate: true, deep: true}
   );
