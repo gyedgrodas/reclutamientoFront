@@ -215,7 +215,7 @@ const reiniciar = () => {
 
         </VCol>
 
-        <VDataTable
+        <VDataTableServer
           v-model:items-per-page="itemsbyPage"
           v-model:page="currentPage"
           :headers="columnas"
@@ -236,7 +236,7 @@ const reiniciar = () => {
             <slot :name="name" v-bind="slotProps"></slot>
           </template>
 
-        </VDataTable>
+        </VDataTableServer>
 
       </VRow>
 
