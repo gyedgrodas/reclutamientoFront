@@ -66,6 +66,7 @@ export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx', headers
  * Exporta un array de objetos a un archivo PDF
  * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
  * @param {string} filename - Nombre del archivo de salida (e.g., 'datos.csv')
+ * @param {Array} headers - Array con los nombres de las columnas (e.g., ['Nombre', 'Edad'])
  */
 export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf', headers) {
 
@@ -78,7 +79,7 @@ export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf', hea
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({data}),
+      body: JSON.stringify({dataExportable}),
     });
 
     if (!response.ok) {

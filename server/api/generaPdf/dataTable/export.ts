@@ -18,10 +18,14 @@ interface ErrorResponse {
 export default defineEventHandler(async (event: H3Event): Promise<Buffer | ErrorResponse> => {
   let browser: puppeteer.Browser | null = null;
 
+
   try {
     // Leer el cuerpo de la solicitud
     const body = (await readBody(event)) as RequestBody;
-    const data = Array.isArray(body.data) ? body.data : [];
+
+    console.log(body.dataExportable);
+
+    const data = Array.isArray(body.dataExportable) ? body.dataExportable : [];
 
     if (!data.length) {
       throw new Error('Faltan datos para generar el PDF');
