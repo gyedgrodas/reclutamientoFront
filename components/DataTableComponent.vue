@@ -73,81 +73,102 @@ watch([currentPage, itemsbyPage], getItems);
 
 <template>
 
-  <VBtn
-    class="mr-2"
-    icon
-    @click="exportarDataFormatoCSV(items, 'NuevoNombre')"
-  >
+  <VCard>
 
-    <VTooltip
-      activator="parent"
-      location="top"
-      start
-    >
-      <span>Exportar a CSV</span>
-    </VTooltip>
+    <VCardText>
 
-    <VIcon
-      icon="tabler-file-type-csv"
-    />
-  </VBtn>
+      <VRow>
 
-  <VBtn
-    class="mr-2"
-    icon
-    @click="exportarDataFormatoXLSX(items, 'NuevoNombre')"
-  >
-    <VTooltip
-      activator="parent"
-      location="top"
-      start
-    >
-      <span>Exportar a XLS</span>
-    </VTooltip>
+        <VCol
+          cols="12"
+          md="4"
+        >
 
-    <VIcon
-      icon="tabler-file-type-xls"
-    />
-  </VBtn>
+          <VBtn
+            class="mr-2"
 
-  <VBtn
-    icon
-    @click="exportarDataFormatoPDF(items, 'NuevoNombre')"
-  >
-    <VTooltip
-      activator="parent"
-      location="top"
-      start
-    >
-      <span>Exportar a PDF</span>
-    </VTooltip>
+            @click="exportarDataFormatoCSV(items, 'NuevoNombre')"
+          >
 
-    <VIcon
-      icon="tabler-file-type-pdf"
-    />
-  </VBtn>
+            <VTooltip
+              activator="parent"
+              location="top"
+              start
+            >
+              <span>Exportar a CSV</span>
+            </VTooltip>
+            <VIcon
+              icon="tabler-file-type-csv"
+              start
+            />
+            CSV
+          </VBtn>
 
-  <VDataTableServer
-    v-model:items-per-page="itemsbyPage"
-    v-model:page="currentPage"
-    :headers="headers"
-    :items="items"
-    :items-length="totalItems"
-    :items-per-page-options="itemsbyPageOptions"
-    :loading="loading"
-    :search="search"
-    item-value="id"
-  >
 
-    <template
-      v-for="(slot,name) in $slots"
-      :key="name"
-      v-slot:[name]="slotProps"
-    >
-      <slot :name="name" v-bind="slotProps"></slot>
-    </template>
+          <VBtn
+            class="mr-2"
+            @click="exportarDataFormatoXLSX(items, 'NuevoNombre')"
+          >
+            <VTooltip
+              activator="parent"
+              location="top"
+              start
+            >
+              <span>Exportar a XLS</span>
+            </VTooltip>
 
-  </VDataTableServer>
+            <VIcon
+              icon="tabler-file-type-xls"
+            />
+            Excel
+          </VBtn>
+
+          <VBtn
+            @click="exportarDataFormatoPDF(items, 'NuevoNombre')"
+          >
+            <VTooltip
+              activator="parent"
+              location="top"
+              start
+            >
+              <span>Exportar a PDF</span>
+            </VTooltip>
+
+            <VIcon
+              icon="tabler-file-type-pdf"
+            />
+            Pdf
+          </VBtn>
+
+        </VCol>
+
+        <VDataTableServer
+          v-model:items-per-page="itemsbyPage"
+          v-model:page="currentPage"
+          :headers="headers"
+          :items="items"
+          :items-length="totalItems"
+          :items-per-page-options="itemsbyPageOptions"
+          :loading="loading"
+          :search="search"
+          item-value="id"
+        >
+
+          <template
+            v-for="(slot,name) in $slots"
+            :key="name"
+            v-slot:[name]="slotProps"
+          >
+            <slot :name="name" v-bind="slotProps"></slot>
+          </template>
+
+        </VDataTableServer>
+
+      </VRow>
+
+    </VCardText>
+
+  </VCard>
 
 </template>
 
