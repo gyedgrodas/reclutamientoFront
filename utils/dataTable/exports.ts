@@ -63,7 +63,7 @@ export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf') {
 
   try {
 
-    const response = await fetch('/api/generaPdf/exportDataTable', {
+    const response = await fetch('/api/generaPdf/dataTable/export', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
