@@ -16,6 +16,7 @@ interface DataTableProps {
   cantidadPorPagina?: number;
   cantidadPorPaginaOpciones?: number[];
   botones?: string[];
+  titulo?: string;
 }
 
 interface PaginatedResponse {
@@ -44,7 +45,9 @@ let {
   endpoint,
   cantidadPorPagina = 10,
   cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault,
-  botones = botonesDefault
+  botones = botonesDefault,
+  titulo = '',
+
 } = props;
 
 const items = ref<[]>([]);
@@ -122,13 +125,14 @@ const reiniciar = () => {
 
 <template>
 
-  <VCard>
+  <VCard :title="titulo">
 
     <VCardText>
 
       <VRow>
 
         <VCol
+          class="mb-3"
           cols="12"
           md="5"
         >

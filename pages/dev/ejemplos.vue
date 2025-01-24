@@ -102,54 +102,46 @@ const columnas = [
     </VCardText>
   </VCard>
 
-  <VCard class="mb-5">
+  <DataTableComponent
+    :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
+    :cantidadPorPagina="3"
+    :cantidadPorPaginaOpciones="[2,3,5]"
+    :columnas="columnas"
+    endpoint="/api/menu_opciones"
+    titulo="Ejemplo de DataTable"
+  >
 
-    <VCardTitle>Componente DataTable</VCardTitle>
+    <template #item.Acciones="{ item }">
 
-    <VCardText>
-
-      <DataTableComponent
-        :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
-        :cantidadPorPagina="3"
-        :cantidadPorPaginaOpciones="[2,3,5]"
-        :columnas="columnas"
-        endpoint="/api/menu_opciones"
+      <VBtn
+        color="primary"
+        icon
+        variant="text"
       >
+        <VIcon icon="tabler-eye"/>
+      </VBtn>
 
-        <template #item.Acciones="{ item }">
+      <VBtn
+        color="primary"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-edit"/>
+      </VBtn>
 
-          <VBtn
-            color="primary"
-            icon
-            variant="text"
-          >
-            <VIcon icon="tabler-eye"/>
-          </VBtn>
-
-          <VBtn
-            color="primary"
-            icon
-            variant="text"
-          >
-            <VIcon icon="tabler-edit"/>
-          </VBtn>
-
-          <VBtn
-            color="error"
-            icon
-            variant="text"
-          >
-            <VIcon icon="tabler-trash"/>
-          </VBtn>
+      <VBtn
+        color="error"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-trash"/>
+      </VBtn>
 
 
-        </template>
+    </template>
 
-      </DataTableComponent>
+  </DataTableComponent>
 
-    </VCardText>
-
-  </VCard>
 
 </template>
 
