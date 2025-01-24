@@ -5,14 +5,14 @@ import {exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX}
 const {get} = useClienteRequest();
 const {showToastError} = useToast();
 
-interface Header {
+interface Columna {
   title: string;
   key: string;
 }
 
 interface DataTableProps {
   endpoint: string;
-  headers: Header[];
+  columnas: Columna[];
   cantidadPorPagina?: number;
   cantidadPorPaginaOpciones?: number[];
   botones?: string[];
@@ -40,7 +40,7 @@ const cantidadPorPaginaValorDefault: number[] = [10, 20, 30];
 const botonesDefault: string[] = ['xlsx', 'pdf', 'csv', 'reiniciar'];
 
 let {
-  headers,
+  columnas,
   endpoint,
   cantidadPorPagina = 10,
   cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault,
@@ -137,7 +137,7 @@ const reiniciar = () => {
             v-if="botones.includes('csv')"
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoCSV(items, 'NuevoNombre', headers)"
+            @click="exportarDataFormatoCSV(items, 'NuevoNombre', columnas)"
           >
 
             <VTooltip
@@ -158,7 +158,7 @@ const reiniciar = () => {
             v-if="botones.includes('xlsx')"
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoXLSX(items, 'NuevoNombre', headers)"
+            @click="exportarDataFormatoXLSX(items, 'NuevoNombre', columnas)"
           >
             <VTooltip
               activator="parent"
@@ -178,7 +178,7 @@ const reiniciar = () => {
             v-if="botones.includes('pdf')"
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoPDF(items, 'NuevoNombre', headers)"
+            @click="exportarDataFormatoPDF(items, 'NuevoNombre', columnas)"
           >
             <VTooltip
               activator="parent"
@@ -218,7 +218,7 @@ const reiniciar = () => {
         <VDataTable
           v-model:items-per-page="itemsbyPage"
           v-model:page="currentPage"
-          :headers="headers"
+          :headers="columnas"
           :items="items"
           :items-length="totalItems"
           :items-per-page-options="itemsbyPageOptions"

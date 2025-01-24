@@ -33,7 +33,7 @@ const activarPaginaCargando = () => {
   }, 1500);
 };
 
-const headers = [
+const columnas = [
   {title: 'ID', key: 'id', sortable: true, exportable: true},
   {title: 'titulo', key: 'titulo', sortable: false,},
   {title: 'titulo Seccion', key: 'titulo_seccion', exportable: false},
@@ -111,8 +111,8 @@ const headers = [
       <DataTableComponent
         :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
         :cantidadPorPagina="3"
-        :cantidadPorPaginaOpciones="[10,20,30]"
-        :headers="headers"
+        :cantidadPorPaginaOpciones="[2,3,5]"
+        :columnas="columnas"
         endpoint="/api/menu_opciones"
       >
 
