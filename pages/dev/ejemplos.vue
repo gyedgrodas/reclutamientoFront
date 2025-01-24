@@ -34,10 +34,10 @@ const activarPaginaCargando = () => {
 };
 
 const headers = [
-  {title: 'ID', value: 'id', sortable: true},
-  {title: 'titulo', value: 'titulo'},
-  {title: 'titulo Seccion', value: 'titulo_seccion'},
-  {title: 'Acciones', value: 'Acciones'}
+  {title: 'ID', key: 'id', sortable: true},
+  {title: 'titulo', key: 'titulo', sortable: false},
+  {title: 'titulo Seccion', key: 'titulo_seccion'},
+  {title: 'Acciones', key: 'Acciones'}
 ];
 
 </script>
@@ -109,7 +109,7 @@ const headers = [
     <VCardText>
 
       <DataTableComponent
-        :cantidadPorPagina="10"
+        :cantidadPorPagina="3"
         :cantidadPorPaginaOpciones="[10,20,30]"
         :headers="headers"
         endpoint="/api/menu_opciones"
@@ -149,7 +149,7 @@ const headers = [
     </VCardText>
 
   </VCard>
-  
+
 </template>
 
 <style lang="scss" scoped>

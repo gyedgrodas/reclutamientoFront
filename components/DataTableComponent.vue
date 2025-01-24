@@ -7,7 +7,7 @@ const {showToastError} = useToast();
 
 interface Header {
   title: string;
-  value: string;
+  key: string;
 }
 
 interface DataTableProps {
@@ -39,15 +39,25 @@ const search = ref<string>('');
 let itemsbyPage = ref<number>(cantidadPorPagina);
 let itemsbyPageOptions = ref<number[]>(cantidadPorPaginaOpciones);
 
+const nombreCampoOrdenar = ref<string>('');
+const ordenCampoOrdenar = ref<string>('');
+
 const getItems = async (): Promise<void> => {
+
+  let data = {
+    page: currentPage.value,
+    per_page: itemsbyPage.value,
+  };
+
+  if (ordenCampoOrdenar.value && nombreCampoOrdenar.value) {
+    data.campoAOrdenar = nombreCampoOrdenar.value;
+    data.ordenCampo = ordenCampoOrdenar.value;
+  }
 
   try {
     loading.value = true;
 
-    const respuesta: { data: PaginatedResponse } = await get(endpoint, {
-      page: currentPage.value,
-      per_page: itemsbyPage.value,
-    });
+    const respuesta: { data: PaginatedResponse } = await get(endpoint, data);
 
     items.value = respuesta.data.data;
     totalItems.value = respuesta.data.total;
@@ -65,9 +75,21 @@ const getItems = async (): Promise<void> => {
   }
 };
 
-onMounted(getItems);
+// onMounted(getItems);
 
 watch([currentPage, itemsbyPage], getItems);
+
+const ordenarItems = (data) => {
+
+  let campo = data?.sortBy[0]?.key;
+  let orden = data?.sortBy[0]?.order;
+
+  nombreCampoOrdenar.value = campo;
+  ordenCampoOrdenar.value = orden;
+
+  getItems();
+
+};
 
 </script>
 
@@ -142,7 +164,7 @@ watch([currentPage, itemsbyPage], getItems);
 
         </VCol>
 
-        <VDataTableServer
+        <VDataTable
           v-model:items-per-page="itemsbyPage"
           v-model:page="currentPage"
           :headers="headers"
@@ -152,6 +174,7 @@ watch([currentPage, itemsbyPage], getItems);
           :loading="loading"
           :search="search"
           item-value="id"
+          @update:options="ordenarItems"
         >
 
           <template
@@ -162,7 +185,7 @@ watch([currentPage, itemsbyPage], getItems);
             <slot :name="name" v-bind="slotProps"></slot>
           </template>
 
-        </VDataTableServer>
+        </VDataTable>
 
       </VRow>
 
