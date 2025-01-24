@@ -2,6 +2,10 @@
   <div>
     <h1>Generar PDF de Usuarios</h1>
     <button @click="generarPDF">Generar PDF</button>
+
+
+    <img alt="Chial" src="../public/guayacan_logo.svg" style="width: 400px">
+
   </div>
 </template>
 
@@ -9,12 +13,19 @@
 export default {
   methods: {
     async generarPDF() {
-      // Array de objetos de ejemplo
-      const data = [
+
+      const {user} = useSanctumAuth();
+
+      const datos = [
         {nombre: 'Juan', edad: 25, ciudad: 'Madrid'},
         {nombre: 'Ana', edad: 30, ciudad: 'Barcelona'},
         {nombre: 'Luis', edad: 35, ciudad: 'Valencia'},
       ];
+
+      let data = {
+        data: datos,
+        user: user.value,
+      };
 
       try {
         // Enviar datos al backend para generar el PDF
@@ -23,7 +34,7 @@ export default {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({data}),
+          body: JSON.stringify(data),
         });
 
         if (!response.ok) {
@@ -43,5 +54,6 @@ export default {
       }
     },
   },
+
 };
 </script>

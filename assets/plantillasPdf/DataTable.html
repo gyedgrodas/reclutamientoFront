@@ -1,43 +1,36 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
+    <title>Print Table</title>
     <meta charset="UTF-8">
+    <meta content="" name=description>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Reporte</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f4f4f4;
+            margin: 20px
         }
     </style>
 </head>
 <body>
-<h1>Reporte de Usuarios</h1>
-<table>
+
+<table class="table table-borderless">
+    <tr>
+
+        <th class="text-center">
+
+            <h3 style="color: #123a6e;font-size: 40px;font-weight: 800;"><strong> Go Credit </strong></h3>
+            <img alt="Logo Guayacan" height="100" src="{{ imagen }}"> <br>
+            <span class="font-weight-light">Generado por {{ user }}</span> <br>
+            <span class="text-sm font-weight-light"> {{ fechaActual }}</span>
+
+        </th>
+
+    </tr>
+</table>
+<table class="table table-bordered table-condensed table-striped">
     <thead>
     <tr>
         {{ tableHeaders }}
@@ -49,3 +42,4 @@
 </table>
 </body>
 </html>
+
