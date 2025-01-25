@@ -1,58 +1,121 @@
 <template>
-  <div>
-    <h1>Generar PDF de Usuarios</h1>
-    <button @click="generarPDF">Generar PDF</button>
+
+  <VCard class="mb-5"
+         title="filtros"
+  >
+    <VCardText>
+      <VRow>
+
+        <VCol
+          class="mb-3"
+          cols="12"
+          md="5"
+        >
+          <VTextField
+            v-model="titulo"
+            label="Filtro"
+            outlined
+            placeholder="Buscar..."
+          />
+        </VCol>
+
+        <VCol
+          class="mb-3"
+          cols="12"
+          md="5"
+        >
+          <VTextField
+            v-model="titulo_seccion"
+            label="titulo_seccion"
+            outlined
+            placeholder="Buscar..."
+          />
+        </VCol>
+
+        <VCol
+          class="mb-3"
+          cols="12"
+          md="5"
+        >
+          <VBtn
+            color="primary"
+            @click="buscar"
+          >
+            Buscar
+          </VBtn>
+        </VCol>
+
+      </VRow>
+    </VCardText>
+  </VCard>
 
 
-    <img alt="Chial" src="../public/guayacan_logo.svg" style="width: 400px">
+  <DataTableComponent
+    :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
+    :cantidadPorPagina="3"
+    :cantidadPorPaginaOpciones="[2,3,5]"
+    :columnas="columnas"
+    :filtros="filtros"
+    endpoint="/api/menu_opciones"
+    titulo="Ejemplo de DataTable"
+  >
 
-  </div>
+    <template #item.Acciones="{ item }">
+
+      <VBtn
+        color="primary"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-eye"/>
+      </VBtn>
+
+      <VBtn
+        color="primary"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-edit"/>
+      </VBtn>
+
+      <VBtn
+        color="error"
+        icon
+        variant="text"
+      >
+        <VIcon icon="tabler-trash"/>
+      </VBtn>
+
+
+    </template>
+
+  </DataTableComponent>
 </template>
 
-<script>
-export default {
-  methods: {
-    async generarPDF() {
+<script lang="ts" setup>
 
-      const {user} = useSanctumAuth();
+import {ref} from 'vue';
 
-      const datos = [
-        {nombre: 'Juan', edad: 25, ciudad: 'Madrid'},
-        {nombre: 'Ana', edad: 30, ciudad: 'Barcelona'},
-        {nombre: 'Luis', edad: 35, ciudad: 'Valencia'},
-      ];
+const columnas = [
+  {title: 'ID', key: 'id', sortable: true, exportable: true},
+  {title: 'titulo', key: 'titulo', sortable: false,},
+  {title: 'titulo Seccion', key: 'titulo_seccion', exportable: true},
+  {title: 'Acciones', key: 'Acciones'},
+];
 
-      let data = {
-        data: datos,
-      };
+const filtros = ref({});
 
-      try {
-        // Enviar datos al backend para generar el PDF
-        const response = await fetch('/api/pdf', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+const buscar = () => {
 
-        if (!response.ok) {
-          throw new Error('Error al generar el PDF');
-        }
-
-        // Descargar el PDF generado
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'reporte.pdf';
-        link.click();
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Error al generar el PDF:', error);
-      }
-    },
-  },
+  filtros.value = {
+    titulo: titulo.value ?? '',
+    titulo_seccion: titulo_seccion.value ?? '',
+  }
 
 };
+
+const titulo = ref('');
+const titulo_seccion = ref('');
+
+
 </script>

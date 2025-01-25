@@ -17,6 +17,7 @@ interface DataTableProps {
   cantidadPorPaginaOpciones?: number[];
   botones?: string[];
   titulo?: string;
+  filtros?: object;
 }
 
 interface PaginatedResponse {
@@ -50,6 +51,8 @@ let {
 
 } = props;
 
+let {filtros} = toRefs(props);
+
 const items = ref<[]>([]);
 const currentPage = ref<number>(1);
 const totalItems = ref<number>(0);
@@ -73,7 +76,15 @@ const getItems = async (): Promise<void> => {
     data.ordenCampo = ordenCampoOrdenar.value;
   }
 
+  if (filtros.value) {
+    let key = Object.keys(filtros.value);
+    key.forEach((k) => {
+      data[k] = filtros.value[k];
+    });
+  }
+
   try {
+
     loading.value = true;
 
     const respuesta: { data: PaginatedResponse } = await get(endpoint, data);
@@ -81,7 +92,7 @@ const getItems = async (): Promise<void> => {
     items.value = respuesta.data.data;
     totalItems.value = respuesta.data.total;
     itemsbyPage.value = respuesta.data.per_page;
-    currentPage.value = respuesta.data.current_page;
+    // currentPage.value = respuesta.data.current_page;
 
   } catch (error: any) {
 
@@ -96,7 +107,7 @@ const getItems = async (): Promise<void> => {
 
 // onMounted(getItems);
 
-watch([currentPage, itemsbyPage], getItems);
+watch([currentPage, itemsbyPage, filtros], getItems);
 
 const ordenarItems = (data) => {
 
