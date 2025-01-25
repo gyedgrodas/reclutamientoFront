@@ -167,10 +167,22 @@ onMounted(loadCatalogs)
 
       <EjemploDataTable/>
 
+      />
     </VCardText>
-
   </VCard>
 
+  <VCard class="mb-12">
+    <VCardTitle>File input</VCardTitle>
+    <VCardText>
+      <FileInput
+        label-idle="Arrastra y suelta tus archivos aquí o haz clic para seleccionarlos"
+        :credits="false"
+        allowMultiple
+        maxFiles="2"
+        name="documentos"
+      />
+    </VCardText>
+  </VCard>
 </template>
 
 <style lang="scss" scoped>
