@@ -5,8 +5,8 @@ import Documentacion from './documentacion.vue'
 const columnas = [
   {title: 'ID', key: 'id', sortable: true, exportable: true},
   {title: 'titulo', key: 'titulo', sortable: false,},
-  {title: 'titulo Seccion', key: 'titulo_seccion', exportable: false},
-  {title: 'Acciones', key: 'Acciones'},
+  {title: 'titulo Seccion', key: 'titulo_seccion'},
+  {title: 'Acciones', key: 'Acciones', exportable: true},
 ];
 </script>
 

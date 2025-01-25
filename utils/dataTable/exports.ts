@@ -114,7 +114,7 @@ export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf', hea
  */
 function filtrarDataExportable(data, headers) {
 
-  const columnasAExportar = headers.filter(header => header.exportable === true);
+  const columnasAExportar = headers.filter(header => header?.exportable === true || header?.exportable === undefined);
 
   return data.map(item => {
     const newItem = {};

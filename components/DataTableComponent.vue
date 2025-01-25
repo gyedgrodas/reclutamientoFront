@@ -147,14 +147,13 @@ const reiniciar = () => {
       <VRow>
 
         <VCol
-          class="mb-3"
           cols="12"
           md="5"
         >
 
           <VBtn
             v-if="botones.includes('csv')"
-            class="mr-2"
+            class="mr-2 mb-3"
             variant="tonal"
             @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
           >
@@ -175,7 +174,7 @@ const reiniciar = () => {
 
           <VBtn
             v-if="botones.includes('xlsx')"
-            class="mr-2"
+            class="mr-2 mb-3"
             variant="tonal"
             @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
           >
@@ -195,7 +194,7 @@ const reiniciar = () => {
 
           <VBtn
             v-if="botones.includes('pdf')"
-            class="mr-2"
+            class="mr-2 mb-3"
             variant="tonal"
             @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
           >
@@ -209,12 +208,14 @@ const reiniciar = () => {
 
             <VIcon
               icon="tabler-file-type-pdf"
+              
             />
             Pdf
           </VBtn>
 
           <VBtn
             v-if="botones.includes('reiniciar')"
+            class="mr-2 mb-3"
             variant="tonal"
             @click="reiniciar"
 
