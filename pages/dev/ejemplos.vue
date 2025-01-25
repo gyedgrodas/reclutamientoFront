@@ -1,62 +1,67 @@
 <script lang="ts" setup>
-const {showToastInfo, showToastSuccess, showToastWarning, showToastError} = useToast();
-const {paginaEspera, cargandoPagina} = useCargandoPagina();
+const { showToastInfo, showToastSuccess, showToastWarning, showToastError } = useToast()
+const { paginaEspera, cargandoPagina } = useCargandoPagina()
 
 const mostrarToastInfo = () => {
-  showToastInfo('Hello from second page');
-};
+  showToastInfo('Hello from second page')
+}
+
 const mostrarToastSuccess = () => {
-  showToastSuccess('Hello from second page');
-};
+  showToastSuccess('Hello from second page')
+}
+
 const mostrarToastWarning = () => {
-  showToastWarning('Hello from second page');
-};
+  showToastWarning('Hello from second page')
+}
+
 const mostrarToastError = () => {
-  showToastError('Hello from second page');
-};
+  showToastError('Hello from second page')
+}
 
 const activarPaginaEspera = () => {
-  paginaEspera.value = true; // Activar la pagina de espera
+  paginaEspera.value = true // Activar la pagina de espera
 
   setTimeout(() => {
-    paginaEspera.value = false; // Desactivar la pagina de espera
-  }, 1500);
-};
+    paginaEspera.value = false // Desactivar la pagina de espera
+  }, 1500)
+}
 
 const activarPaginaCargando = () => {
-  cargandoPagina.value = true; // Activar la página cargando
+  cargandoPagina.value = true // Activar la página cargando
   setTimeout(() => {
-    cargandoPagina.value = false; // Desactivar la página cargando
-  }, 1500);
-};
-
-
+    cargandoPagina.value = false // Desactivar la página cargando
+  }, 1500)
+}
 </script>
 
 <template>
-
   <VCard class="mb-5">
     <VCardTitle>Toast</VCardTitle>
     <VCardText class="d-flex justify-space-between v-col-sm-10 offset-1">
-      <VBtn border="border"
-            @click="mostrarToastSuccess">
+      <VBtn
+        border="border"
+        @click="mostrarToastSuccess"
+      >
         Mostrar Toast Success
       </VBtn>
 
-      <VBtn color="error"
-            @click="mostrarToastError">
+      <VBtn
+        color="error"
+        @click="mostrarToastError"
+      >
         Mostrar Toast Error
       </VBtn>
 
-
-      <VBtn color="warning"
-            @click="mostrarToastWarning"
+      <VBtn
+        color="warning"
+        @click="mostrarToastWarning"
       >
         Mostrar Toast Warning
       </VBtn>
 
-      <VBtn color="info"
-            @click="mostrarToastInfo"
+      <VBtn
+        color="info"
+        @click="mostrarToastInfo"
       >
         Mostrar Toast Info
       </VBtn>
@@ -66,35 +71,47 @@ const activarPaginaCargando = () => {
   <VCard class="mb-5">
     <VCardTitle>Página Cargando</VCardTitle>
     <VCardText class="d-flex justify-space-between v-col-sm-5 offset-3">
-
-      <VBtn color="info"
-            @click="activarPaginaEspera">
+      <VBtn
+        color="info"
+        @click="activarPaginaEspera"
+      >
         Pagina Espera
       </VBtn>
 
-      <VBtn color="warning"
-            @click="activarPaginaCargando"
+      <VBtn
+        color="warning"
+        @click="activarPaginaCargando"
       >
         Pagina Cargando
       </VBtn>
-
     </VCardText>
   </VCard>
-
-
 
   <VCard class="mb-12">
     <VCardTitle>Buscador General</VCardTitle>
     <VCardText>
-      <selector-buscador
+      <SelectorBuscador
         title="Buscar Asociado"
         placeholder="Ingrese el nombre del asociado "
         Endpoint="/api/asociados/buscar/select2/"
         requerido
-      ></selector-buscador>
+      />
     </VCardText>
   </VCard>
 
+  <VCard class="mb-12">
+    <VCardTitle>File input</VCardTitle>
+    <VCardText>
+      <FileInput
+        label-idle="Arrastra y suelta tus archivos aquí o haz clic para seleccionarlos"
+        :credits="false"
+        allowMultiple
+        maxFiles="2"
+        name="documentos"
+        @addfile="file"
+      />
+    </VCardText>
+  </VCard>
 </template>
 
 <style lang="scss" scoped>
