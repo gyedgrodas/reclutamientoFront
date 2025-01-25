@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import DataTableComponent from "@/components/DataTableComponent.vue";
+import EjemploDataTable from "@/views/pages/ejemplos/dataTable/ejemploDataTable.vue";
 
 const {showToastInfo, showToastSuccess, showToastWarning, showToastError} = useToast();
 const {paginaEspera, cargandoPagina} = useCargandoPagina();
@@ -32,13 +32,6 @@ const activarPaginaCargando = () => {
     cargandoPagina.value = false; // Desactivar la página cargando
   }, 1500);
 };
-
-const columnas = [
-  {title: 'ID', key: 'id', sortable: true, exportable: true},
-  {title: 'titulo', key: 'titulo', sortable: false,},
-  {title: 'titulo Seccion', key: 'titulo_seccion', exportable: false},
-  {title: 'Acciones', key: 'Acciones'},
-];
 
 </script>
 
@@ -102,46 +95,15 @@ const columnas = [
     </VCardText>
   </VCard>
 
-  <DataTableComponent
-    :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
-    :cantidadPorPagina="3"
-    :cantidadPorPaginaOpciones="[2,3,5]"
-    :columnas="columnas"
-    endpoint="/api/menu_opciones"
-    titulo="Ejemplo de DataTable"
-  >
+  <VCard class="mb-5">
 
-    <template #item.Acciones="{ item }">
+    <VCardText>
 
-      <VBtn
-        color="primary"
-        icon
-        variant="text"
-      >
-        <VIcon icon="tabler-eye"/>
-      </VBtn>
+      <EjemploDataTable/>
 
-      <VBtn
-        color="primary"
-        icon
-        variant="text"
-      >
-        <VIcon icon="tabler-edit"/>
-      </VBtn>
+    </VCardText>
 
-      <VBtn
-        color="error"
-        icon
-        variant="text"
-      >
-        <VIcon icon="tabler-trash"/>
-      </VBtn>
-
-
-    </template>
-
-  </DataTableComponent>
-
+  </VCard>
 
 </template>
 
