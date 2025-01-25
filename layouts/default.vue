@@ -38,9 +38,11 @@ const getOpcionesMenu = async (): Promise<void> => {
 
   try {
 
-    const res = await get("api/menu_opciones");
+    const res = await get("api/menu_opciones", {
+      per_page: -1,
+    });
 
-    menu.value = res.data;
+    menu.value = res.data.data;
 
     return res;
 

@@ -1,7 +1,10 @@
 <script lang="ts" setup>
+import EjemploDataTable from "@/views/pages/ejemplos/dataTable/ejemploDataTable.vue";
+
 const { showToastInfo, showToastSuccess, showToastWarning, showToastError } = useToast()
 const { paginaEspera, cargandoPagina } = useCargandoPagina()
 const { getCatalogos, catalogos } = useCatalogo()
+
 
 const mostrarToastInfo = () => {
   showToastInfo('Hello from second page')
@@ -157,6 +160,17 @@ onMounted(loadCatalogs)
       </VRow>
     </VCardText>
   </VCard>
+
+  <VCard class="mb-5">
+
+    <VCardText>
+
+      <EjemploDataTable/>
+
+    </VCardText>
+
+  </VCard>
+
 </template>
 
 <style lang="scss" scoped>
