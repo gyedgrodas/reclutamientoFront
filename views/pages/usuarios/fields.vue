@@ -3,12 +3,11 @@
 import type {VForm} from "vuetify/lib/components/VForm";
 
 const isFormValid = ref(false)
-
 const refForm = ref<VForm>()
+const { getCatalogos, catalogos } = useCatalogo()
 
 import type { UsuarioInterface } from '@/types/usuarios/index.ts';
-import FormularioColapsable from "@/views/pages/usuarios/FormularioColapsable.vue";
-const items = ['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']
+import {ref} from "vue";
 
 const data = ref( <UsuarioInterface>
   {
@@ -64,23 +63,59 @@ const props = defineProps({
 const emit = defineEmits<Emit>()
 
 if (props.item) {
-  console.log('props', props.item)
   data.value = props.item
 }
 
 const onSubmit = () => {
-
   refForm.value?.validate().then(({valid}) => {
-
     if (valid) {
-
       emit('emitirDatos', data.value)
-
     }
-
   })
-
 }
+
+const puedeMostrarDatos = computed(() => {
+
+  return Object.values(data.value).some(valor => valor !== null && valor !== undefined);
+
+});
+
+
+
+const loadCatalogs = async () => {
+  try {
+    await getCatalogos(['puestos', 'unidades', 'regiones', 'gerencias'])
+  }
+  catch (error) {
+    showToastError(error.message)
+  }
+}
+loadCatalogs()
+
+
+// Datos estáticos
+const estados = ['Activo', 'Inactivo', 'Cancelado']
+const panel = ref(0)
+
+
+
+// crear funcion llenarData
+const llenarData = (selectorData: any) => {
+  data.value.nombre = selectorData.primer_nombre + ' ' + selectorData.segundo_nombre + ' ' + selectorData.tercer_nombre
+   data.value.apellido = selectorData.primer_apellido + ' ' + selectorData.segundo_apellido
+   data.value.codigo_bankworks = selectorData.codigo_bankworks
+   data.value.usuario_dominio = 'gy'+ selectorData.primer_nombre.substring(0, 3).toLowerCase() + selectorData.primer_apellido.toLowerCase();
+   data.value.email =  data.value.usuario_dominio + '@micoopeguayacan.gt';
+   data.value.cif = selectorData.cif
+   data.value.asociado_id = selectorData.asociado_id
+   data.value.isDisabled = true
+}
+
+
+
+const nombreBoton = computed(() => {
+  return data.value.id ? 'Actualizar' : 'Guardar'
+})
 
 </script>
 
@@ -94,22 +129,219 @@ const onSubmit = () => {
     <VRow>
 
       <VCol cols="12">
-        <!-- 👉 Collapsible Section -->
-<!--        <h6 class="text-h6 mb-6">-->
-<!--          Crear Usuario-->
-<!--        </h6>-->
 
-        <FormularioColapsable :formData="data" />
+        <v-card v-if="!data.id">
+          <v-card-text>
+            <selector-buscador
+                title="Buscar Asociado"
+                placeholder="Ingrese el nombre del asociado"
+                Endpoint="/api/asociados/buscar/select2/"
+                requerido
+                @data="llenarData"
+            >
+            </selector-buscador>
+          </v-card-text>
+        </v-card>
+
+        <VExpansionPanels v-model="panel">
+          <!-- SECTION INFORMACION PERSONAL -->
+          <VExpansionPanel>
+            <VExpansionPanelTitle>Información Personal</VExpansionPanelTitle>
+            <VExpansionPanelText>
+              <VRow>
+
+                <VCol
+                    cols="12"
+                    md="6"
+                >
+                  <AppTextField
+                      v-model="data.codigo_bankworks"
+                      :rules="[requiredValidator]"
+                      label="Codigo Bankworks"
+                      placeholder="Ingrese Codigo Bankworks"
+                      :disabled="data.isDisabledEdit"
+                  />
+                </VCol>
+
+                <VCol
+                    cols="12"
+                    md="6"
+                >
+                  <AppTextField
+                      v-model="data.usuario_dominio"
+                      :rules="[requiredValidator]"
+                      label="Usuario Dominio"
+                      placeholder="Ingrese Usuario Dominio"
+                      :disabled="data.isDisabled || data.isDisabledEdit"
+                  />
+                </VCol>
+
+                <VCol
+                    cols="12"
+                    md="6"
+                >
+                  <AppTextField
+                      v-model="data.codigo_ejecutivo"
+                      :rules="[requiredValidator]"
+                      label="Codigo Ejecutivo"
+                      placeholder="Ingrese Codigo Ejecutivo"
+                      :disabled=" data.isDisabledEdit"
+                  />
+                </VCol>
+
+                <VCol
+                    cols="12"
+                    md="6"
+                >
+                  <AppTextField
+                      v-model="data.email"
+                      :rules="[requiredValidator]"
+                      label="Email"
+                      placeholder="Ingrese Email"
+                      :disabled="data.isDisabled || data.isDisabledEdit"
+                  />
+                </VCol>
+
+                <VCol
+                    cols="12"
+                    md="6"
+                >
+                  <AppAutocomplete
+                      v-model="data.estado"
+                      :items="estados"
+                      :rules="[requiredValidator]"
+                      label="Estado"
+                      placeholder="Seleccione Estado"
+                  />
+                </VCol>
+
+              </VRow>
+            </VExpansionPanelText>
+          </VExpansionPanel>
+          <!-- !SECTION Delivery Address -->
+
+          <!-- SECTION INFORMACION LABORAL-->
+          <VExpansionPanel>
+            <VExpansionPanelTitle>Información Laboral</VExpansionPanelTitle>
+            <VExpansionPanelText>
+                <VRow>
+
+
+                  <VCol
+                      cols="12"
+                      md="6"
+                  >
+                    <AppDateTimePicker
+                        v-model="data.fecha_puestoactual"
+                        :rules="[requiredValidator]"
+                        label="Fecha de Puesto Actual"
+                        placeholder="aaaa/mm/dd"
+                    />
+                  </VCol>
+
+
+                  <VCol
+                      cols="12"
+                      md="6"
+                  >
+                    <AppAutocomplete
+                        v-model="data.puesto_id"
+                        :items="catalogos.puestos"
+                        :rules="[requiredValidator]"
+                        label="Puesto"
+                        placeholder="Seleccione una opción..."
+                        item-title="nombre"
+                        item-value="id"
+                        clearable
+                        eager
+                    />
+                  </VCol>
+
+                  <VCol
+                      cols="12"
+                      md="6"
+                  >
+                    <AppDateTimePicker
+                        v-model="data.fecha_labores"
+                        :rules="[requiredValidator]"
+                        label="Fecha de Ingreso en la Institución"
+                        placeholder="dd-mm-yyyy"
+                    />
+                  </VCol>
+
+
+                  <VCol
+                      cols="12"
+                      md="6"
+                  >
+                    <AppAutocomplete
+                        v-model="data.unidad_id"
+                        :items="catalogos.unidades"
+                        :rules="[requiredValidator]"
+                        label="Unidad"
+                        placeholder="Seleccione una opción..."
+                        item-title="nombre"
+                        item-value="id"
+                    />
+                  </VCol>
+
+                  <VCol
+                      cols="12"
+                      md="6"
+                  >
+                    <AppAutocomplete
+                        v-model="data.region_id"
+                        :items="catalogos.regiones"
+                        :rules="[requiredValidator]"
+                        label="Region"
+                        placeholder="Seleccione una opción..."
+                        item-title="nombre"
+                        item-value="id"
+                    />
+                  </VCol>
+
+                  <VCol
+                      cols="12"
+                      md="6"
+                  >
+                    <AppAutocomplete
+                        v-model="data.gerencia_id"
+                        :items="catalogos.gerencias"
+                        :rules="[requiredValidator]"
+                        label="Gerencia"
+                        placeholder="Seleccione una opción..."
+                        item-title="nombre"
+                        item-value="id"
+                    />
+                  </VCol>
+
+
+                </VRow>
+            </VExpansionPanelText>
+          </VExpansionPanel>
+          <!-- !SECTION Delivery Options -->
+
+          <!-- SECTION ROLES -->
+          <VExpansionPanel>
+            <VExpansionPanelTitle>Roles y Permisos</VExpansionPanelTitle>
+
+            <VExpansionPanelText>
+
+              <v-label>seccion de roles y permisos pendiente</v-label>
+            </VExpansionPanelText>
+          </VExpansionPanel>
+          <!-- !SECTION Payment Method -->
+        </VExpansionPanels>
       </VCol>
     
 
         
-      <VCol cols="12">
+      <VCol cols="12"  v-if="puedeMostrarDatos">
         <VBtn
           type="submit"
           class="me-3"
         >
-          Guardar
+          {{ nombreBoton }}
         </VBtn>
         <VBtn
           type="reset"
