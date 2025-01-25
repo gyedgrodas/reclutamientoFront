@@ -18,6 +18,7 @@ interface DataTableProps {
   botones?: string[];
   titulo?: string;
   filtros?: object;
+  nombreArchivoExport?: string;
 }
 
 interface PaginatedResponse {
@@ -41,6 +42,8 @@ const cantidadPorPaginaValorDefault: number[] = [10, 20, 30];
 
 const botonesDefault: string[] = ['xlsx', 'pdf', 'csv', 'reiniciar'];
 
+const fecha = new Date();
+
 let {
   columnas,
   endpoint,
@@ -48,6 +51,7 @@ let {
   cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault,
   botones = botonesDefault,
   titulo = '',
+  nombreArchivoExport = 'reporte_data' + fecha.getTime(),
 
 } = props;
 
@@ -152,7 +156,7 @@ const reiniciar = () => {
             v-if="botones.includes('csv')"
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoCSV(items, 'NuevoNombre', columnas)"
+            @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
           >
 
             <VTooltip
@@ -173,7 +177,7 @@ const reiniciar = () => {
             v-if="botones.includes('xlsx')"
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoXLSX(items, 'NuevoNombre', columnas)"
+            @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
           >
             <VTooltip
               activator="parent"
@@ -193,7 +197,7 @@ const reiniciar = () => {
             v-if="botones.includes('pdf')"
             class="mr-2"
             color="secondary"
-            @click="exportarDataFormatoPDF(items, 'NuevoNombre', columnas)"
+            @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
           >
             <VTooltip
               activator="parent"

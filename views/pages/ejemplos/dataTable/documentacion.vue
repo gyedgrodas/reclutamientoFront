@@ -31,6 +31,9 @@
           <v-list-item>
             <span>• <strong>filtros</strong> (Opcional): Objeto que permite enviar parámetros para filtrar los resultados desde la API.</span>
           </v-list-item>
+          <v-list-item>
+            <span>• <strong>nombreArchivoExport</strong> (Opcional): Nombre personalizado para los archivos exportados. Valor por defecto: <strong>reporte_data + (timestamp)</strong>.</span>
+          </v-list-item>
         </v-list>
       </VExpansionPanelText>
     </VExpansionPanel>
