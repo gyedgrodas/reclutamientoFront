@@ -20,7 +20,6 @@ const columnas = [
     :cantidadPorPaginaOpciones="[2,3,5]"
     :columnas="columnas"
     endpoint="/api/menu_opciones"
-    nombreArchivoExport="jaja"
     titulo="Ejemplo de DataTable"
   >
 

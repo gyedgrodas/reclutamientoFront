@@ -155,7 +155,7 @@ const reiniciar = () => {
           <VBtn
             v-if="botones.includes('csv')"
             class="mr-2"
-            color="secondary"
+            variant="tonal"
             @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
           >
 
@@ -176,7 +176,7 @@ const reiniciar = () => {
           <VBtn
             v-if="botones.includes('xlsx')"
             class="mr-2"
-            color="secondary"
+            variant="tonal"
             @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
           >
             <VTooltip
@@ -196,7 +196,7 @@ const reiniciar = () => {
           <VBtn
             v-if="botones.includes('pdf')"
             class="mr-2"
-            color="secondary"
+            variant="tonal"
             @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
           >
             <VTooltip
@@ -215,8 +215,9 @@ const reiniciar = () => {
 
           <VBtn
             v-if="botones.includes('reiniciar')"
-            color="secondary"
+            variant="tonal"
             @click="reiniciar"
+
           >
             <VTooltip
               activator="parent"
