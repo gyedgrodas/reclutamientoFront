@@ -1,6 +1,10 @@
 <script lang="ts" setup>
+import EjemploDataTable from "@/views/pages/ejemplos/dataTable/ejemploDataTable.vue";
+
 const { showToastInfo, showToastSuccess, showToastWarning, showToastError } = useToast()
 const { paginaEspera, cargandoPagina } = useCargandoPagina()
+const { getCatalogos, catalogos } = useCatalogo()
+
 
 const mostrarToastInfo = () => {
   showToastInfo('Hello from second page')
@@ -32,6 +36,23 @@ const activarPaginaCargando = () => {
     cargandoPagina.value = false // Desactivar la página cargando
   }, 1500)
 }
+
+const data = reactive({
+  puesto_id: null,
+  unidad_id: null,
+})
+
+// Manejo de catalogs
+const loadCatalogs = async () => {
+  try {
+    await getCatalogos(['puestos', 'unidades'])
+  }
+  catch (error) {
+    showToastError(error.message)
+  }
+}
+
+onMounted(loadCatalogs)
 </script>
 
 <template>
@@ -100,6 +121,57 @@ const activarPaginaCargando = () => {
   </VCard>
 
   <VCard class="mb-12">
+    <VCardTitle>Manejo de catalogos</VCardTitle>
+    <VCardText>
+      <VRow>
+        <VCol
+          cols="12"
+          md="6"
+        >
+          <AppAutocomplete
+            v-model="data.puesto_id"
+            :items="catalogos.puestos"
+            :rules="[requiredValidator]"
+            label="Puesto"
+            placeholder="Seleccione una opción..."
+            item-title="nombre"
+            item-value="id"
+            clearable
+            eager
+          />
+        </VCol>
+
+        <VCol
+          cols="6"
+          md="6"
+        >
+          <AppAutocomplete
+            v-model="data.unidad_id"
+            :items="catalogos.unidades"
+            :rules="[requiredValidator]"
+            label="Unidad"
+            placeholder="Seleccione una opción..."
+            item-title="nombre"
+            item-value="id"
+            clearable
+            eager
+          />
+        </VCol>
+      </VRow>
+    </VCardText>
+  </VCard>
+
+  <VCard class="mb-5">
+
+    <VCardText>
+
+      <EjemploDataTable/>
+
+      />
+    </VCardText>
+  </VCard>
+
+  <VCard class="mb-12">
     <VCardTitle>File input</VCardTitle>
     <VCardText>
       <FileInput
@@ -108,7 +180,6 @@ const activarPaginaCargando = () => {
         allowMultiple
         maxFiles="2"
         name="documentos"
-        @addfile="file"
       />
     </VCardText>
   </VCard>
