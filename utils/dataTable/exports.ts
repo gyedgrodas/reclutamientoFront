@@ -1,5 +1,7 @@
 import * as XLSX from 'xlsx';
 
+import {useCargandoPagina} from "@/composables/useCargandoPagina";
+
 /**
  * Exporta un array de objetos a un archivo CSV
  * @param {Array} data - Array de objetos (e.g., [{ nombre: 'Juan', edad: 25 }, ...])
@@ -7,6 +9,10 @@ import * as XLSX from 'xlsx';
  * @param {Array} headers - Array con los nombres de las columnas (e.g., ['Nombre', 'Edad'])
  */
 export function exportarDataFormatoCSV(data, filename = 'archivo.csv', headers) {
+
+  const {paginaEspera} = useCargandoPagina();
+
+  paginaEspera.value = true;
 
   if (Array.isArray(data) || data.length > 0) {
 
@@ -25,9 +31,13 @@ export function exportarDataFormatoCSV(data, filename = 'archivo.csv', headers) 
     link.click();
     document.body.removeChild(link);
 
+  } else {
+
+    console.error('El array de datos está vacío o no es válido.');
+
   }
 
-  console.error('El array de datos está vacío o no es válido.');
+  paginaEspera.value = false;
 
 }
 
@@ -38,6 +48,10 @@ export function exportarDataFormatoCSV(data, filename = 'archivo.csv', headers) 
  * @param {Array} headers - Array con los nombres de las columnas (e.g., ['Nombre', 'Edad'])
  */
 export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx', headers = []) {
+
+  const {paginaEspera} = useCargandoPagina();
+
+  paginaEspera.value = true;
 
   if (Array.isArray(data) || data.length > 0) {
 
@@ -60,6 +74,8 @@ export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx', headers
 
   }
 
+  paginaEspera.value = false;
+
 }
 
 /**
@@ -69,6 +85,10 @@ export function exportarDataFormatoXLSX(data, filename = 'archivo.xlsx', headers
  * @param {Array} headers - Array con los nombres de las columnas (e.g., ['Nombre', 'Edad'])
  */
 export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf', headers) {
+
+  const {paginaEspera} = useCargandoPagina();
+
+  paginaEspera.value = true;
 
   const dataExportable = filtrarDataExportable(data, headers);
 
@@ -103,6 +123,9 @@ export async function exportarDataFormatoPDF(data, filename = 'archivo.pdf', hea
 
     console.error('Error al generar el PDF:', error);
 
+  } finally {
+
+    paginaEspera.value = false;
   }
 
 }
