@@ -630,6 +630,7 @@ watch([
 
 // remove all theme related values from localStorage
 const resetCustomizer = async () => {
+
   if (isCookieHasAnyValue.value) {
     // reset themeConfig values
     vuetifyTheme.themes.value.light.colors.primary = staticPrimaryColor;
@@ -656,7 +657,10 @@ const resetCustomizer = async () => {
 
     isCookieHasAnyValue.value = false;
 
-    customPrimaryColor.value = '#ffffff'
+    customPrimaryColor.value = '#ffffff';
+
+    await guardarPreferencias();
+
   }
 };
 
