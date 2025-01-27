@@ -672,7 +672,7 @@ const guardarPreferencias = async (): Promise<void> => {
     const data: preferenciasUsuario = {
 
       tema: configStore.theme as 'light' | 'dark' | 'system',
-      tema_color: cookieRef('tema_color', 'light').value as 'light' | 'dark',
+      tema_color: configStore.tema_color as 'light' | 'dark',
       aspecto: configStore.skin as 'default' | 'bordered',
       ancho_contenido_aplicacion: configStore.appContentWidth as 'fluid' | 'boxed',
       desenfoque_habilitado_barra_navegacion: configStore.isNavbarBlurEnabled ?? false,
