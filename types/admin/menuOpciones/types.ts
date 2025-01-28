@@ -1,4 +1,5 @@
 export interface MenuOpcion {
+  id?: int | null;
   titulo?: string | null;
   icono?: string | null;
   ruta?: string | null;
@@ -13,4 +14,10 @@ export interface RespuestaRequest {
   success: 'true' | 'false';
   message: string;
   data: [] | object | null;
+}
+
+export interface RespuestaRequestError {
+  success: 'false';
+  message: string;
+  data: null;
 }
