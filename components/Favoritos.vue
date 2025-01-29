@@ -260,7 +260,7 @@ const manejarRuta = (ruta: string): void => {
       <ul v-if="estaEditando"
           ref="favoritosAElegirList"
           class="parent-list d-flex flex-nowrap v-col-12"
-          style="list-style-type: none; padding: 0; min-height: 150px; background: #3cf0c5"
+          style="list-style-type: none; padding: 0; min-height: 150px; "
       >
         <li
           v-for="(item, index) in favoritosAElegir"
