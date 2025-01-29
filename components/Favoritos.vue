@@ -52,9 +52,9 @@ const obtenerFavoritosAElegir = (): void => {
 
     let favoritosDelMenu = <MenuOpcion[]>useState('menu').value;
 
-    for (let opcion of favoritosDelMenu) {
+    for (let opcion of aplarOpciones(favoritosDelMenu) ) {
 
-      if (!idsFavoritos.value.includes(opcion.id) && opcion.titulo_seccion === null) {
+      if (!idsFavoritos.value.includes(opcion.id) && opcion.titulo_seccion === null && opcion.ruta !== null) {
 
         favoritosAElegir.value.push(opcion);
 
@@ -67,6 +67,24 @@ const obtenerFavoritosAElegir = (): void => {
     showToastError('Error al obtener los favoritos a elegir');
 
   }
+
+}
+
+const aplarOpciones = (options: MenuOpcion[]): MenuOpcion[] => {
+
+  let flattened: MenuOpcion[] = [];
+
+  for (const option of options) {
+
+    const {children, ...currentOption} = option;
+    flattened.push(currentOption as MenuOpcion);
+
+    if (children && Array.isArray(children)) {
+      flattened = flattened.concat(aplarOpciones(children));
+    }
+  }
+
+  return flattened;
 
 }
 
@@ -159,6 +177,12 @@ watchEffect(() => {
 
 })
 
+const manejarRuta = (ruta: string): void => {
+
+  navigateTo( { name: ruta } );
+
+}
+
 </script>
 
 <template>
@@ -200,7 +224,7 @@ watchEffect(() => {
       <ul
         ref="favoritosList"
         class="parent-list d-flex flex-nowrap v-col-12"
-        style="list-style-type: none; padding: 0;"
+        style="list-style-type: none; padding: 0; min-height: 150px; "
       >
         <li
           v-for="(item, index) in favoritos"
@@ -210,6 +234,7 @@ watchEffect(() => {
 
           <VCard
             class="v-col-12 text-center cursor-pointer"
+            @click="manejarRuta(item.ruta)"
           >
             <VBtn
               size="x-large"
@@ -235,7 +260,7 @@ watchEffect(() => {
       <ul v-if="estaEditando"
           ref="favoritosAElegirList"
           class="parent-list d-flex flex-nowrap v-col-12"
-          style="list-style-type: none; padding: 0; margin-top: 16px;"
+          style="list-style-type: none; padding: 0; min-height: 150px; background: #3cf0c5"
       >
         <li
           v-for="(item, index) in favoritosAElegir"
