@@ -159,10 +159,6 @@ watchEffect(() => {
 
 })
 
-const hoverFavoritos = ref<number | null>(null);
-
-const hoverFavoritosAElejir = ref<number | null>(null);
-
 </script>
 
 <template>
@@ -214,8 +210,6 @@ const hoverFavoritosAElejir = ref<number | null>(null);
 
           <VCard
             class="v-col-12 text-center cursor-pointer"
-            @mouseover="hoverFavoritos = index"
-            @mouseleave="hoverFavoritos = null"
           >
             <VBtn
               size="x-large"
@@ -225,7 +219,7 @@ const hoverFavoritosAElejir = ref<number | null>(null);
             >
             </VBtn>
             <p></p>
-            <span :style="{ color: hoverFavoritos === index ? colorPrimary : 'black' }" class="font-weight-medium"> {{ item?.titulo }} </span>
+            <span > {{ item?.titulo }} </span>
 
           </VCard>
 
@@ -235,7 +229,7 @@ const hoverFavoritosAElejir = ref<number | null>(null);
       <div v-if="estaEditando" class="v-col-12 border-b"></div>
 
       <p class="text-2xl" v-if="estaEditando">
-        Otros
+        Favoritos a elegir
       </p>
 
       <ul v-if="estaEditando"
@@ -250,8 +244,7 @@ const hoverFavoritosAElejir = ref<number | null>(null);
         >
           <VCard
             class="v-col-12 text-center cursor-pointer"
-            @mouseover="hoverFavoritosAElejir = index"
-            @mouseleave="hoverFavoritosAElejir = null"
+
           >
             <VBtn
               size="x-large"
@@ -261,7 +254,7 @@ const hoverFavoritosAElejir = ref<number | null>(null);
             >
             </VBtn>
             <p></p>
-            <span :style="{ color: hoverFavoritosAElejir === index ? colorPrimary : 'black' }" class="font-weight-medium"> {{ item?.titulo }} </span>
+            <span> {{ item?.titulo }} </span>
           </VCard>
         </li>
       </ul>
