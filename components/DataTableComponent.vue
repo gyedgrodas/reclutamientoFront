@@ -1,163 +1,147 @@
 <script lang="ts" setup>
+import { exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX } from '@/utils/dataTable/exports'
 
-import {exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX} from "@/utils/dataTable/exports";
-
-const {get} = useClienteRequest();
-const {showToastError} = useToast();
+const props = defineProps<DataTableProps>()
+const { get } = useClienteRequest()
+const { showToastError } = useToast()
 
 interface Columna {
-  title: string;
-  key: string;
+  title: string
+  key: string
 }
 
 interface DataTableProps {
-  endpoint: string;
-  columnas: Columna[];
-  cantidadPorPagina?: number;
-  cantidadPorPaginaOpciones?: number[];
-  botones?: string[];
-  titulo?: string;
-  filtros?: object;
-  nombreArchivoExport?: string;
+  endpoint: string
+  columnas: Columna[]
+  cantidadPorPagina?: number
+  cantidadPorPaginaOpciones?: number[]
+  botones?: string[]
+  titulo?: string
+  filtros?: object
+  nombreArchivoExport?: string
 }
 
 interface PaginatedResponse {
-  current_page: number;
-  data: [];
-  last_page: number;
-  per_page: number;
-  total: number;
+  current_page: number
+  data: []
+  last_page: number
+  per_page: number
+  total: number
 }
 
 interface QueryParams {
-  page: number;
-  per_page: number;
-  campoAOrdenar?: string;
-  ordenCampo?: string;
+  page: number
+  per_page: number
+  campoAOrdenar?: string
+  ordenCampo?: string
 }
 
-const props = defineProps<DataTableProps>();
+const cantidadPorPaginaValorDefault: number[] = [10, 20, 30]
 
-const cantidadPorPaginaValorDefault: number[] = [10, 20, 30];
+const botonesDefault: string[] = ['xlsx', 'pdf', 'csv', 'reiniciar']
 
-const botonesDefault: string[] = ['xlsx', 'pdf', 'csv', 'reiniciar'];
+const fecha = new Date()
 
-const fecha = new Date();
-
-let {
+const {
   columnas,
   endpoint,
   cantidadPorPagina = 10,
   cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault,
   botones = botonesDefault,
   titulo = '',
-  nombreArchivoExport = 'reporte_data' + fecha.getTime(),
+  nombreArchivoExport = `reporte_data${fecha.getTime()}`,
 
-} = props;
+} = props
 
-let {filtros} = toRefs(props);
+const { filtros } = toRefs(props)
 
-const items = ref<[]>([]);
-const currentPage = ref<number>(1);
-const totalItems = ref<number>(0);
-const loading = ref<boolean>(false);
-const search = ref<string>('');
-let itemsbyPage = ref<number>(cantidadPorPagina);
-let itemsbyPageOptions = ref<number[]>(cantidadPorPaginaOpciones);
+const items = ref<[]>([])
+const currentPage = ref<number>(1)
+const totalItems = ref<number>(0)
+const loading = ref<boolean>(false)
+const search = ref<string>('')
+const itemsbyPage = ref<number>(cantidadPorPagina)
+const itemsbyPageOptions = ref<number[]>(cantidadPorPaginaOpciones)
 
-const nombreCampoOrdenar = ref<string>('');
-const ordenCampoOrdenar = ref<string>('');
+const nombreCampoOrdenar = ref<string>('')
+const ordenCampoOrdenar = ref<string>('')
 
 const getItems = async (): Promise<void> => {
-
-  let data: QueryParams = {
+  const data: QueryParams = {
     page: currentPage.value,
     per_page: itemsbyPage.value,
-  };
+  }
 
   if (ordenCampoOrdenar.value && nombreCampoOrdenar.value) {
-    data.campoAOrdenar = nombreCampoOrdenar.value;
-    data.ordenCampo = ordenCampoOrdenar.value;
+    data.campoAOrdenar = nombreCampoOrdenar.value
+    data.ordenCampo = ordenCampoOrdenar.value
   }
 
   if (filtros.value) {
-    let key = Object.keys(filtros.value);
-    key.forEach((k) => {
-      data[k] = filtros.value[k];
-    });
+    const key = Object.keys(filtros.value)
+
+    key.forEach(k => {
+      data[k] = filtros.value[k]
+    })
   }
 
   try {
+    loading.value = true
 
-    loading.value = true;
+    const respuesta: { data: PaginatedResponse } = await get(endpoint, data)
 
-    const respuesta: { data: PaginatedResponse } = await get(endpoint, data);
+    items.value = respuesta.data.data
+    totalItems.value = respuesta.data.total
+    itemsbyPage.value = respuesta.data.per_page
 
-    items.value = respuesta.data.data;
-    totalItems.value = respuesta.data.total;
-    itemsbyPage.value = respuesta.data.per_page;
     // currentPage.value = respuesta.data.current_page;
-
-  } catch (error: any) {
-
-    showToastError(error.response?.data?.message || error.message);
-
-  } finally {
-
-    loading.value = false;
-
   }
-};
+  catch (error: any) {
+    showToastError(error.response?.data?.message || error.message)
+  }
+  finally {
+    loading.value = false
+  }
+}
 
 // onMounted(getItems);
 
-watch([currentPage, itemsbyPage, filtros], getItems);
+watch([currentPage, itemsbyPage, filtros], getItems)
 
-const ordenarItems = (data) => {
+const ordenarItems = data => {
+  const campo = data?.sortBy[0]?.key
+  const orden = data?.sortBy[0]?.order
 
-  let campo = data?.sortBy[0]?.key;
-  let orden = data?.sortBy[0]?.order;
+  nombreCampoOrdenar.value = campo
+  ordenCampoOrdenar.value = orden
 
-  nombreCampoOrdenar.value = campo;
-  ordenCampoOrdenar.value = orden;
-
-  getItems();
-
-};
+  getItems()
+}
 
 const reiniciar = () => {
+  currentPage.value = 1
+  itemsbyPage.value = cantidadPorPagina
+  ordenCampoOrdenar.value = ''
+  nombreCampoOrdenar.value = ''
 
-  currentPage.value = 1;
-  itemsbyPage.value = cantidadPorPagina;
-  ordenCampoOrdenar.value = '';
-  nombreCampoOrdenar.value = '';
-
-  getItems();
-
-};
-
+  getItems()
+}
 </script>
 
 <template>
-
   <VCard :title="titulo">
-
     <VCardText>
-
       <VRow>
-
         <VCol
           cols="12"
           md="5"
         >
-
           <VBtn
             v-if="botones.includes('csv')"
             class="mr-2 mb-3"
             variant="tonal"
             @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
           >
-
             <VTooltip
               activator="parent"
               location="top"
@@ -186,9 +170,7 @@ const reiniciar = () => {
               <span>Exportar a XLS</span>
             </VTooltip>
 
-            <VIcon
-              icon="tabler-file-type-xls"
-            />
+            <VIcon icon="tabler-file-type-xls" />
             Excel
           </VBtn>
 
@@ -206,11 +188,8 @@ const reiniciar = () => {
               <span>Exportar a PDF</span>
             </VTooltip>
 
-            <VIcon
-              icon="tabler-file-type-pdf"
-              
-            />
-            Pdf
+            <VIcon icon="tabler-file-type-pdf" />
+            PDF
           </VBtn>
 
           <VBtn
@@ -218,7 +197,6 @@ const reiniciar = () => {
             class="mr-2 mb-3"
             variant="tonal"
             @click="reiniciar"
-
           >
             <VTooltip
               activator="parent"
@@ -228,12 +206,9 @@ const reiniciar = () => {
               <span>Exportar a PDF</span>
             </VTooltip>
 
-            <VIcon
-              icon="tabler-refresh"
-            />
+            <VIcon icon="tabler-refresh" />
             Recargar
           </VBtn>
-
         </VCol>
 
         <VDataTableServer
@@ -248,23 +223,20 @@ const reiniciar = () => {
           item-value="id"
           @update:options="ordenarItems"
         >
-
           <template
-            v-for="(slot,name) in $slots"
+            v-for="(slot, name) in $slots"
             :key="name"
-            v-slot:[name]="slotProps"
+            #[name]="slotProps"
           >
-            <slot :name="name" v-bind="slotProps"></slot>
+            <slot
+              :name="name"
+              v-bind="slotProps"
+            />
           </template>
-
         </VDataTableServer>
-
       </VRow>
-
     </VCardText>
-
   </VCard>
-
 </template>
 
 <style lang="scss" scoped>

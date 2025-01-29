@@ -60,20 +60,16 @@ const headers = [
 
 const items = ref([])
 
-
 const getItems = async function (): Promise<void> {
   try {
     loading.value = true
 
     const respuesta = await get('/api/users', {
-        'page[number]': currentPage.value,
-        'page[size]': itemsPerPage.value,
+      'page[number]': currentPage.value,
+      'page[size]': itemsPerPage.value,
     })
 
-
-
-
-    if (respuesta){
+    if (respuesta) {
       items.value = respuesta.data.data // Aquí deberías obtener la lista de usuarios
       totalItems.value = respuesta.data?.meta.total // Total de registros en el backend
       itemsPerPage.value = respuesta.data?.meta.per_page // Elementos por página
@@ -90,8 +86,10 @@ const getItems = async function (): Promise<void> {
 
 getItems()
 
-watch([currentPage, itemsPerPage], () => { getItems() // Vuelve a cargar los datos cuando cambian la página o el tamaño
+watch([currentPage, itemsPerPage], () => {
+  getItems() // Vuelve a cargar los datos cuando cambian la página o el tamaño
 })
+
 const deleteItem = async (id: number) => {
   const confirm = await preguntaEliminar('¿Desea Eliminar Usuario?')
 
@@ -99,7 +97,7 @@ const deleteItem = async (id: number) => {
     return
 
   try {
-    const respuesta = await deleted(`/api/user/${id}`)
+    const respuesta = await deleted(`/api/users/${id}`)
 
     showToastSuccess(respuesta.message)
 

@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import fields from '@/views/pages/usuarios/fields.vue'
+
+// eslint-disable-next-line import/extensions
+import type { UsuarioInterface } from '@/types/usuarios/index.ts'
 
 definePageMeta({
   middleware: 'permissions',
@@ -7,18 +11,12 @@ definePageMeta({
   subject: 'usuarios', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 })
 
-// eslint-disable-next-line import/extensions
-import type { UsuarioInterface } from '@/types/usuarios/index.ts'
-
-import { ref } from 'vue'
-
 const { post } = useClienteRequest()
 
-const { showToastSuccess, showToastError } = useToast();
+const { showToastSuccess, showToastError } = useToast()
 
 const requestInProgress = ref(false) // Evitar solicitudes concurrentes
-const { paginaEspera } = useCargandoPagina();
-
+const { paginaEspera } = useCargandoPagina()
 
 const guardarUsuario = async (Usuario: UsuarioInterface): Promise<void> => {
   if (!requestInProgress.value) {
@@ -26,9 +24,7 @@ const guardarUsuario = async (Usuario: UsuarioInterface): Promise<void> => {
     paginaEspera.value = true // Activar indicador de carga
 
     try {
-      const respuesta: { message: string } = await post('/api/users', Usuario );
-
-
+      const respuesta: { message: string } = await post('/api/users', Usuario)
 
       showToastSuccess(respuesta.message)
 
@@ -40,15 +36,13 @@ const guardarUsuario = async (Usuario: UsuarioInterface): Promise<void> => {
     finally {
       paginaEspera.value = false // Desactivar indicador de carga
       requestInProgress.value = false // Liberar la bandera
-
     }
   }
 }
 </script>
 
 <template>
-<div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
-
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
     <VBtn
       class="ml-auto"
       color="secondary"
@@ -56,27 +50,19 @@ const guardarUsuario = async (Usuario: UsuarioInterface): Promise<void> => {
     >
       Regresar
     </VBtn>
-
   </div>
 
   <VCard>
-
-
     <VCardItem>
-
       <VCardTitle>Crear Usuario</VCardTitle>
-
     </VCardItem>
     <VCardText>
-
-      <fields :fields="fields"
-              @emitirDatos="guardarUsuario"
+      <Fields
+        :fields="fields"
+        @emitir-datos="guardarUsuario"
       />
-
     </VCardText>
-
   </VCard>
-
 </template>
 
 <style scoped lang="scss">
