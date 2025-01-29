@@ -1,5 +1,5 @@
 export interface MenuOpcion {
-  id?: int | null;
+  id?: number | null;
   titulo?: string | null;
   icono?: string | null;
   ruta?: string | null;

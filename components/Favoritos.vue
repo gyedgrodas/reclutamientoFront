@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {onMounted, ref} from "vue";
+import {onMounted, ref, type Ref} from "vue";
 import Sortable from "sortablejs";
 import type { SortableEvent } from "sortablejs";
 import type { UsuarioInterface } from "@/types/usuarios/index";
@@ -9,7 +9,7 @@ const {get,put} = useClienteRequest();
 const user = useSanctumUser<UsuarioInterface>();
 const {showToastError, showToastSuccess} = useToast();
 
-import type {MenuOpcion, RespuestaRequest, RespuestaRequestError} from "@/types/admin/menuOpciones/types";
+import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
 const favoritos = ref<MenuOpcion[]>([]);
 
@@ -23,11 +23,10 @@ const idsFavoritos = computed(() => {
 
 })
 
-const favoritosList = ref(null);
+const favoritosList: Ref<HTMLElement | null> = ref(null);
+const favoritosAElegirList: Ref<HTMLElement | null> = ref(null);
 
-const favoritosAElegirList = ref(null);
-
-const obtenerFavoritos = async () => {
+const obtenerFavoritos = async (): Promise<void> => {
 
   try {
 
@@ -37,9 +36,9 @@ const obtenerFavoritos = async () => {
 
     obtenerFavoritosAElegir()
 
-  } catch (error) {
+  } catch (error: any) {
 
-    showToastError('Error al obtener los favoritos');
+    showToastError(error.message);
 
   }
 
@@ -85,7 +84,7 @@ const sincronizarCambios = (event:SortableEvent):void => {
 
 };
 
-const actualizarFavoritos = async () => {
+const actualizarFavoritos = async (): Promise<void> => {
 
   try {
 
@@ -95,9 +94,9 @@ const actualizarFavoritos = async () => {
 
     showToastSuccess(response.message);
 
-  } catch (error: RespuestaRequestError) {
+  } catch (e: any) {
 
-    showToastError(error.message);
+    showToastError(e.message);
 
   }
 
@@ -105,11 +104,19 @@ const actualizarFavoritos = async () => {
 
 onMounted(() => {
 
-  new Sortable(favoritosList.value, {
-    group: "shared", // Grupo compartido
-    animation: 150,
-    onEnd: sincronizarCambios,
-  });
+  if(favoritosList.value){
+
+    new Sortable(favoritosList.value, {
+      group: "shared", // Grupo compartido
+      animation: 150,
+      onEnd: sincronizarCambios,
+    });
+
+  } else {
+
+    showToastError('No se pudo cargar la lista de favoritos');
+
+  }
 
 });
 
@@ -119,17 +126,23 @@ watch(estaEditando, async (value)  => {
 
     await nextTick();
 
-    new Sortable(favoritosAElegirList.value, {
-      group: "shared",
-      animation: 150,
-      onEnd: sincronizarCambios,
-    });
+    if (favoritosAElegirList.value) {
+
+      new Sortable(favoritosAElegirList.value, {
+        group: "shared",
+        animation: 150,
+        onEnd: sincronizarCambios,
+      });
+
+    } else {
+
+      showToastError('No se pudo cargar la lista de favoritos');
+
+    }
 
   }
 
 });
-
-console.log(user.value?.puesto_id)
 
 </script>
 
@@ -180,7 +193,7 @@ console.log(user.value?.puesto_id)
           class="v-col-3"
         >
           <VCard
-            class="v-col-12 text-center"
+            class="v-col-12 text-center cursor-pointer"
           >
             <VIcon
               size="40"
@@ -205,7 +218,7 @@ console.log(user.value?.puesto_id)
           class="v-col-3"
         >
           <VCard
-            class="v-col-12 text-center"
+            class="v-col-12 text-center cursor-pointer"
           >
             <VIcon
               size="40"
