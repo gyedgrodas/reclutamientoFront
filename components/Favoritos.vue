@@ -2,12 +2,14 @@
 
 import {onMounted, ref, type Ref} from "vue";
 import Sortable from "sortablejs";
-import type { SortableEvent } from "sortablejs";
-import type { UsuarioInterface } from "@/types/usuarios/index";
+import type {SortableEvent} from "sortablejs";
+import type {UsuarioInterface} from "@/types/usuarios/index";
+import {useTheme} from 'vuetify'
 
-const {get,put} = useClienteRequest();
+const {get, put} = useClienteRequest();
 const user = useSanctumUser<UsuarioInterface>();
 const {showToastError, showToastSuccess} = useToast();
+const vuetifyTheme = useTheme()
 
 import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 
@@ -44,7 +46,7 @@ const obtenerFavoritos = async (): Promise<void> => {
 
 }
 
-const obtenerFavoritosAElegir = ():void => {
+const obtenerFavoritosAElegir = (): void => {
 
   try {
 
@@ -70,7 +72,7 @@ const obtenerFavoritosAElegir = ():void => {
 
 obtenerFavoritos();
 
-const sincronizarCambios = (event:SortableEvent):void => {
+const sincronizarCambios = (event: SortableEvent): void => {
   const oldIndex = event.oldIndex as number;
   const newIndex = event.newIndex as number;
 
@@ -88,7 +90,7 @@ const actualizarFavoritos = async (): Promise<void> => {
 
   try {
 
-    const response: RespuestaRequest = await put('api/user-favoritos/'+user.value?.id, {
+    const response: RespuestaRequest = await put('api/user-favoritos/' + user.value?.id, {
       favoritos: favoritos.value.map(favorito => favorito.id)
     });
 
@@ -104,7 +106,7 @@ const actualizarFavoritos = async (): Promise<void> => {
 
 onMounted(() => {
 
-  if(favoritosList.value){
+  if (favoritosList.value) {
 
     new Sortable(favoritosList.value, {
       group: "shared", // Grupo compartido
@@ -120,7 +122,7 @@ onMounted(() => {
 
 });
 
-watch(estaEditando, async (value)  => {
+watch(estaEditando, async (value) => {
 
   if (value) {
 
@@ -144,6 +146,23 @@ watch(estaEditando, async (value)  => {
 
 });
 
+const colorTema = ref(vuetifyTheme.global.name.value)
+
+const colorPrimary = ref<string>('')
+
+watchEffect(() => {
+  const isDarkMode = colorTema.value === 'dark'
+
+  colorPrimary.value = isDarkMode
+    ? vuetifyTheme.themes.value.dark.colors.primary
+    : vuetifyTheme.themes.value.light.colors.primary
+
+})
+
+const hoverFavoritos = ref<number | null>(null);
+
+const hoverFavoritosAElejir = ref<number | null>(null);
+
 </script>
 
 <template>
@@ -152,7 +171,7 @@ watch(estaEditando, async (value)  => {
     <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 ">
 
       <p class="text-2xl">
-         Favoritos
+        Favoritos
       </p>
 
       <VBtn
@@ -192,25 +211,37 @@ watch(estaEditando, async (value)  => {
           :key="item.id"
           class="v-col-3"
         >
+
           <VCard
             class="v-col-12 text-center cursor-pointer"
+            @mouseover="hoverFavoritos = index"
+            @mouseleave="hoverFavoritos = null"
           >
-            <VIcon
-              size="40"
+            <VBtn
+              size="x-large"
+              class="ma-1"
+              :style="{background: colorPrimary}"
               :icon="item.icono"
-            />
+            >
+            </VBtn>
             <p></p>
-            {{item?.titulo}}
+            <span :style="{ color: hoverFavoritos === index ? colorPrimary : 'black' }" class="font-weight-medium"> {{ item?.titulo }} </span>
+
           </VCard>
+
         </li>
       </ul>
 
       <div v-if="estaEditando" class="v-col-12 border-b"></div>
 
+      <p class="text-2xl" v-if="estaEditando">
+        Otros
+      </p>
+
       <ul v-if="estaEditando"
-        ref="favoritosAElegirList"
-        class="parent-list d-flex flex-nowrap v-col-12"
-        style="list-style-type: none; padding: 0; margin-top: 16px;"
+          ref="favoritosAElegirList"
+          class="parent-list d-flex flex-nowrap v-col-12"
+          style="list-style-type: none; padding: 0; margin-top: 16px;"
       >
         <li
           v-for="(item, index) in favoritosAElegir"
@@ -219,13 +250,18 @@ watch(estaEditando, async (value)  => {
         >
           <VCard
             class="v-col-12 text-center cursor-pointer"
+            @mouseover="hoverFavoritosAElejir = index"
+            @mouseleave="hoverFavoritosAElejir = null"
           >
-            <VIcon
-              size="40"
+            <VBtn
+              size="x-large"
+              class="ma-1"
+              :style="{background: colorPrimary}"
               :icon="item.icono"
-            />
+            >
+            </VBtn>
             <p></p>
-            <span v-text="item.titulo"></span>
+            <span :style="{ color: hoverFavoritosAElejir === index ? colorPrimary : 'black' }" class="font-weight-medium"> {{ item?.titulo }} </span>
           </VCard>
         </li>
       </ul>
