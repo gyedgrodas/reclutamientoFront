@@ -1,13 +1,12 @@
 <script setup lang="ts">
 
 import {onMounted, ref} from "vue";
-
 import Sortable from "sortablejs";
+import type { SortableEvent } from "sortablejs";
+import type { UsuarioInterface } from "@/types/usuarios/index";
 
 const {get,put} = useClienteRequest();
-
-const { user } = useSanctumAuth();
-
+const user = useSanctumUser<UsuarioInterface>();
 const {showToastError, showToastSuccess} = useToast();
 
 import type {MenuOpcion, RespuestaRequest, RespuestaRequestError} from "@/types/admin/menuOpciones/types";
@@ -15,6 +14,18 @@ import type {MenuOpcion, RespuestaRequest, RespuestaRequestError} from "@/types/
 const favoritos = ref<MenuOpcion[]>([]);
 
 let favoritosAElegir = ref<MenuOpcion[]>([]);
+
+const estaEditando = ref(false)
+
+const idsFavoritos = computed(() => {
+
+  return favoritos.value.map(favorito => favorito.id);
+
+})
+
+const favoritosList = ref(null);
+
+const favoritosAElegirList = ref(null);
 
 const obtenerFavoritos = async () => {
 
@@ -58,50 +69,27 @@ const obtenerFavoritosAElegir = ():void => {
 
 }
 
-obtenerFavoritos()
+obtenerFavoritos();
 
-const idsFavoritos = computed(() => {
+const sincronizarCambios = (event:SortableEvent):void => {
+  const oldIndex = event.oldIndex as number;
+  const newIndex = event.newIndex as number;
 
-  return favoritos.value.map(favorito => favorito.id);
+  const fromList = event.from === favoritosList.value ? favoritos : favoritosAElegir;
+  const toList = event.to === favoritosList.value ? favoritos : favoritosAElegir;
 
-})
+  const [movedItem] = fromList.value.splice(oldIndex, 1);
+  toList.value.splice(newIndex, 0, movedItem);
 
-const favoritosList = ref(null);
+  actualizarFavoritos();
 
-const favoritosAElegirList = ref(null);
-
-onMounted(() => {
-  const sincronizarCambios = (event) => {
-    const fromList = event.from === favoritosList.value ? favoritos : favoritosAElegir;
-    const toList = event.to === favoritosList.value ? favoritos : favoritosAElegir;
-
-    const [movedItem] = fromList.value.splice(event.oldIndex, 1);
-    toList.value.splice(event.newIndex, 0, movedItem);
-
-    actualizarFavoritos();
-
-    console.log("Estado actual de favoritos:", favoritos.value);
-    console.log("Estado actual de favoritosAElegir:", favoritosAElegir.value);
-  };
-
-  new Sortable(favoritosList.value, {
-    group: "shared", // Grupo compartido
-    animation: 150,
-    onEnd: sincronizarCambios,
-  });
-
-  new Sortable(favoritosAElegirList.value, {
-    group: "shared", // Grupo compartido
-    animation: 150,
-    onEnd: sincronizarCambios,
-  });
-});
+};
 
 const actualizarFavoritos = async () => {
 
   try {
 
-    const response: RespuestaRequest = await put('api/user-favoritos/'+user.value.id, {
+    const response: RespuestaRequest = await put('api/user-favoritos/'+user.value?.id, {
       favoritos: favoritos.value.map(favorito => favorito.id)
     });
 
@@ -114,6 +102,34 @@ const actualizarFavoritos = async () => {
   }
 
 }
+
+onMounted(() => {
+
+  new Sortable(favoritosList.value, {
+    group: "shared", // Grupo compartido
+    animation: 150,
+    onEnd: sincronizarCambios,
+  });
+
+});
+
+watch(estaEditando, async (value)  => {
+
+  if (value) {
+
+    await nextTick();
+
+    new Sortable(favoritosAElegirList.value, {
+      group: "shared",
+      animation: 150,
+      onEnd: sincronizarCambios,
+    });
+
+  }
+
+});
+
+console.log(user.value?.puesto_id)
 
 </script>
 
@@ -129,11 +145,25 @@ const actualizarFavoritos = async () => {
       <VBtn
         class="ml-auto"
         color="warning"
+        @click="estaEditando = !estaEditando"
+        v-if="!estaEditando"
       >
         <VIcon
           icon="tabler-edit"
         />
         Editar Favoritos
+      </VBtn>
+
+      <VBtn
+        class="ml-auto"
+        color="success"
+        @click="estaEditando = !estaEditando"
+        v-if="estaEditando"
+      >
+        <VIcon
+          icon="tabler-edit"
+        />
+        Guardar
       </VBtn>
     </div>
 
@@ -162,9 +192,9 @@ const actualizarFavoritos = async () => {
         </li>
       </ul>
 
-      <div class="v-col-12 border-b"></div>
+      <div v-if="estaEditando" class="v-col-12 border-b"></div>
 
-      <ul
+      <ul v-if="estaEditando"
         ref="favoritosAElegirList"
         class="parent-list d-flex flex-nowrap v-col-12"
         style="list-style-type: none; padding: 0; margin-top: 16px;"
