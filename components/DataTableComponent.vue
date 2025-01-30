@@ -19,6 +19,7 @@ interface DataTableProps {
   botones?: string[];
   titulo?: string;
   filtros?: object;
+  relaciones?: string[];
   nombreArchivoExport?: string;
 }
 
@@ -51,6 +52,7 @@ let {
   cantidadPorPagina = 10,
   cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault,
   botones = botonesDefault,
+  relaciones,
   titulo = '',
   nombreArchivoExport = 'reporte_data' + fecha.getTime(),
 
@@ -80,6 +82,7 @@ const getItems = async (): Promise<void> => {
     'page[number]': currentPage.value,
     'page[size]': itemsbyPage.value,
     'sort': sortParam,
+    'include': relaciones?.join(','),
   };
 
   if (filtros.value) {
@@ -99,7 +102,7 @@ const getItems = async (): Promise<void> => {
     const respuesta = await get(endpoint, data)
 
     items.value = respuesta.data.data;
-    totalItems.value = respuesta.data.meta.total;
+    totalItems.value = respuesta.data.total;
 
   } catch (error: any) {
 

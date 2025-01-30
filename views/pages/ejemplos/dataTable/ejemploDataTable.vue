@@ -8,6 +8,9 @@ const columnas = [
   {title: 'usuario_dominio', key: 'usuario_dominio'},
   {title: 'Acciones', key: 'Acciones', exportable: true},
 ];
+const filtros = ref({
+  nombre: ''
+});
 </script>
 
 <template>
@@ -21,6 +24,8 @@ const columnas = [
     :columnas="columnas"
     endpoint="/api/users"
     titulo="Ejemplo de DataTable"
+    :filtros="filtros"
+    :relaciones="['gerencia', 'puesto']"
   >
 
     <template #item.Acciones="{ item }">
