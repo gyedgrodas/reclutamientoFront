@@ -1,13 +1,14 @@
 <script setup lang="ts">
-
 import type {VForm} from "vuetify/lib/components/VForm";
+import type { UsuarioInterface } from '@/types/usuarios/index.ts';
+import {ref} from "vue";
+
 
 const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const { getCatalogos, catalogos } = useCatalogo()
+const { showToastError } = useToast()
 
-import type { UsuarioInterface } from '@/types/usuarios/index.ts';
-import {ref} from "vue";
 
 const data = ref( <UsuarioInterface>
   {
@@ -87,9 +88,10 @@ const loadCatalogs = async () => {
     await getCatalogos(['puestos', 'unidades', 'regiones', 'gerencias'])
   }
   catch (error) {
-    showToastError(error.message)
+    showToastError(error?.message)
   }
 }
+
 loadCatalogs()
 
 
@@ -120,6 +122,7 @@ const nombreBoton = computed(() => {
 </script>
 
 <template>
+
 
   <VForm
     ref="refForm"
