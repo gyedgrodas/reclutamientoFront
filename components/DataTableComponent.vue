@@ -122,8 +122,8 @@ const reiniciar = () => {
 
   currentPage.value = 1;
   itemsbyPage.value = cantidadPorPagina;
-  ordenCampoOrdenar.value = '';
-  nombreCampoOrdenar.value = '';
+  filtros.value = {};
+  orden.value = [{ key: columnas[0].key, order: 'asc' }];
 
   getItems();
 
@@ -139,95 +139,69 @@ const reiniciar = () => {
 
       <VRow>
 
-        <VCol
-          cols="12"
-          md="5"
-        >
-
-          <VBtn
-            v-if="botones.includes('csv')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
-          >
-
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
+        <v-container fluid>
+          <v-row justify="end">
+            <!-- Botón de Reiniciar -->
+            <VBtn
+              v-if="botones.includes('reiniciar')"
+              class="mr-2 mb-3"
+              variant="tonal"
+              @click="reiniciar"
             >
-              <span>Exportar a CSV</span>
-            </VTooltip>
-            <VIcon
-              icon="tabler-file-type-csv"
-              start
-            />
-            CSV
-          </VBtn>
+              <VTooltip activator="parent" location="top" start>
+                <span>Reiniciar</span>
+              </VTooltip>
+              <VIcon icon="tabler-refresh" />
+              Recargar
+            </VBtn>
 
-          <VBtn
-            v-if="botones.includes('xlsx')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
-          >
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
-            >
-              <span>Exportar a XLS</span>
-            </VTooltip>
+            <!-- Menú de Exportar -->
+            <v-menu>
+              <template v-slot:activator="{ props }">
+                <v-btn color="primary" v-bind="props">
+                  <VIcon icon="tabler-table-export" start />
+                  Exportar
+                </v-btn>
+              </template>
+              <v-list dense class="pa-1 ma-1">
+                <VBtn
+                  v-if="botones.includes('csv')"
+                  class="mb-1"
+                  variant="tonal"
+                  block
+                  @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
+                >
+                  <VIcon icon="tabler-file-type-csv" start />
+                  CSV
+                </VBtn>
 
-            <VIcon
-              icon="tabler-file-type-xls"
-            />
-            Excel
-          </VBtn>
+                <VBtn
+                  v-if="botones.includes('xlsx')"
+                  class="mb-1"
+                  variant="tonal"
+                  block
+                  @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
+                >
+                  <VIcon icon="tabler-file-type-xls" start />
+                  Excel
+                </VBtn>
 
-          <VBtn
-            v-if="botones.includes('pdf')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
-          >
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
-            >
-              <span>Exportar a PDF</span>
-            </VTooltip>
+                <VBtn
+                  v-if="botones.includes('pdf')"
+                  class="mb-1"
+                  variant="tonal"
+                  block
+                  @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
+                >
+                  <VIcon icon="tabler-file-type-pdf" start />
+                  PDF
+                </VBtn>
+              </v-list>
+            </v-menu>
+          </v-row>
+        </v-container>
 
-            <VIcon
-              icon="tabler-file-type-pdf"
-              
-            />
-            Pdf
-          </VBtn>
 
-          <VBtn
-            v-if="botones.includes('reiniciar')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="reiniciar"
-
-          >
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
-            >
-              <span>Exportar a PDF</span>
-            </VTooltip>
-
-            <VIcon
-              icon="tabler-refresh"
-            />
-            Recargar
-          </VBtn>
-
-        </VCol>
 
         <VDataTableServer
           v-model:items-per-page="itemsbyPage"
@@ -265,3 +239,5 @@ const reiniciar = () => {
 <style lang="scss" scoped>
 /* Estilos personalizados */
 </style>
+
+
