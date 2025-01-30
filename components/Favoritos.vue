@@ -140,6 +140,9 @@ onMounted(() => {
 
 });
 
+let sortableFavoritosAElegir: Sortable | null = null;
+let sortableFavoritos: Sortable | null = null;
+
 watch(estaEditando, async (value) => {
 
   if (value) {
@@ -148,16 +151,31 @@ watch(estaEditando, async (value) => {
 
     if (favoritosAElegirList.value) {
 
-      new Sortable(favoritosAElegirList.value, {
+      sortableFavoritosAElegir = new Sortable(favoritosAElegirList.value, {
         group: "shared",
         animation: 150,
         onEnd: sincronizarCambios,
+        ghostClass: "ghost",
+        fallbackOnBody: true, // Evita que los elementos se pierdan
+        emptyInsertThreshold: 5, // Permite soltar elementos en listas vacías
       });
 
     } else {
 
       showToastError('No se pudo cargar la lista de favoritos');
 
+    }
+
+  }else {
+
+    if (sortableFavoritos) {
+      sortableFavoritos.destroy();
+      sortableFavoritos = null;
+    }
+
+    if (sortableFavoritosAElegir) {
+      sortableFavoritosAElegir.destroy();
+      sortableFavoritosAElegir = null;
     }
 
   }
@@ -293,3 +311,5 @@ const manejarRuta = (ruta: string): void => {
 <style scoped lang="scss">
 
 </style>
+
+
