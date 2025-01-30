@@ -97,12 +97,18 @@ const sincronizarCambios = (event: SortableEvent): void => {
   const fromList = event.from === favoritosList.value ? favoritos : favoritosAElegir;
   const toList = event.to === favoritosList.value ? favoritos : favoritosAElegir;
 
+  if (fromList === favoritosAElegir && toList === favoritosAElegir) {
+    return;
+  }
+
   const [movedItem] = fromList.value.splice(oldIndex, 1);
   toList.value.splice(newIndex, 0, movedItem);
 
-  actualizarFavoritos();
-
+  if (fromList === favoritos || toList === favoritos) {
+    actualizarFavoritos();
+  }
 };
+
 
 const actualizarFavoritos = async (): Promise<void> => {
 
@@ -122,24 +128,6 @@ const actualizarFavoritos = async (): Promise<void> => {
 
 }
 
-onMounted(() => {
-
-  if (favoritosList.value) {
-
-    new Sortable(favoritosList.value, {
-      group: "shared", // Grupo compartido
-      animation: 150,
-      onEnd: sincronizarCambios,
-    });
-
-  } else {
-
-    showToastError('No se pudo cargar la lista de favoritos');
-
-  }
-
-});
-
 let sortableFavoritosAElegir: Sortable | null = null;
 let sortableFavoritos: Sortable | null = null;
 
@@ -156,13 +144,20 @@ watch(estaEditando, async (value) => {
         animation: 150,
         onEnd: sincronizarCambios,
         ghostClass: "ghost",
-        fallbackOnBody: true, // Evita que los elementos se pierdan
-        emptyInsertThreshold: 5, // Permite soltar elementos en listas vacías
+        fallbackOnBody: true,
+        emptyInsertThreshold: 5,
+        sort: false,
       });
 
-    } else {
+    }
 
-      showToastError('No se pudo cargar la lista de favoritos');
+    if (favoritosList.value) {
+
+      sortableFavoritos =  new Sortable(favoritosList.value, {
+        group: "shared",
+        animation: 150,
+        onEnd: sincronizarCambios,
+      });
 
     }
 
@@ -205,10 +200,9 @@ const manejarRuta = (ruta: string): void => {
 
 <template>
 
-  <VContainer>
-    <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 ">
+    <div class="d-flex flex-wrap justify-end justify-sm-space-between">
 
-      <p class="text-2xl">
+      <p class="text-h4">
         Favoritos
       </p>
 
@@ -235,13 +229,14 @@ const manejarRuta = (ruta: string): void => {
         />
         Guardar
       </VBtn>
+
     </div>
 
     <VCol>
 
       <ul
         ref="favoritosList"
-        class="parent-list d-flex flex-nowrap v-col-12"
+        class="parent-list d-flex flex-wrap v-col-12"
         style="list-style-type: none; padding: 0; min-height: 150px; "
       >
         <li
@@ -277,7 +272,7 @@ const manejarRuta = (ruta: string): void => {
 
       <ul v-if="estaEditando"
           ref="favoritosAElegirList"
-          class="parent-list d-flex flex-nowrap v-col-12"
+          class="parent-list d-flex flex-wrap v-col-12"
           style="list-style-type: none; padding: 0; min-height: 150px; "
       >
         <li
@@ -304,7 +299,7 @@ const manejarRuta = (ruta: string): void => {
 
     </VCol>
 
-  </VContainer>
+
 
 </template>
 
