@@ -6,6 +6,7 @@ const columnas = [
   {title: 'ID', key: 'id', sortable: true, exportable: true},
   {title: 'Nombre', key: 'nombre', sortable: false,},
   {title: 'usuario_dominio', key: 'usuario_dominio'},
+  {title: 'Gerencia', key: 'gerencia_id'},
   {title: 'Acciones', key: 'Acciones', exportable: true},
 ];
 const filtros = ref({
@@ -27,6 +28,14 @@ const filtros = ref({
     :filtros="filtros"
     :relaciones="['gerencia', 'puesto']"
   >
+
+    <template #item.gerencia_id="{ item }">
+
+<!-- Ejemplo de como usar datos de relaciones -->
+
+      {{ item.gerencia.nombre }}
+
+    </template>
 
     <template #item.Acciones="{ item }">
 

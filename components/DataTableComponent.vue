@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 
 import {exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX} from "@/utils/dataTable/exports";
-import {object} from "@ucast/core";
 
 const {get} = useClienteRequest();
 const {showToastError} = useToast();
@@ -32,10 +31,11 @@ interface PaginatedResponse {
 }
 
 interface QueryParams {
-  page: number;
-  per_page: number;
-  campoAOrdenar?: string;
-  ordenCampo?: string;
+  'page[number]'?: number;
+  'page[size]'?: number;
+  sort?: string;
+  include?: string;
+  [key: string]: string | number | undefined; // Permite agregar otros parámetros sin restricciones estrictas
 }
 
 const props = defineProps<DataTableProps>();
@@ -78,7 +78,7 @@ const getItems = async (): Promise<void> => {
 
   const sortParam = orden.value.length ? (orden.value[0].order === 'asc' ? orden.value[0].key : `-${orden.value[0].key}`) : ''
 
-  let data = {
+  let data: QueryParams = {
     'page[number]': currentPage.value,
     'page[size]': itemsbyPage.value,
     'sort': sortParam,
@@ -99,7 +99,7 @@ const getItems = async (): Promise<void> => {
 
     loading.value = true;
 
-    const respuesta = await get(endpoint, data)
+    const respuesta: {data: PaginatedResponse} = await get(endpoint, data)
 
     items.value = respuesta.data.data;
     totalItems.value = respuesta.data.total;
