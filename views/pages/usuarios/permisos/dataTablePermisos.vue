@@ -62,10 +62,12 @@ const cargarPermisos = async () => {
   try {
     const response: any = await get('/api/permisos',
       {
-        'include': 'roles',
-        'sort': sortParam,
-        'page[number]': paginacion.value.currentPage,
-        'page[size]': paginacion.value.itemsPerPage,
+        params: {
+          'include': 'roles',
+          'sort': sortParam,
+          'page[number]': paginacion.value.currentPage,
+          'page[size]': paginacion.value.itemsPerPage,
+        }
       },
     )
 

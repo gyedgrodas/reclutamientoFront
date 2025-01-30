@@ -4,10 +4,14 @@ import Documentacion from './documentacion.vue'
 
 const columnas = [
   {title: 'ID', key: 'id', sortable: true, exportable: true},
-  {title: 'titulo', key: 'titulo', sortable: false,},
-  {title: 'titulo Seccion', key: 'titulo_seccion'},
+  {title: 'Nombre', key: 'nombre', sortable: false,},
+  {title: 'usuario_dominio', key: 'usuario_dominio'},
+  {title: 'Gerencia', key: 'gerencia_id'},
   {title: 'Acciones', key: 'Acciones', exportable: true},
 ];
+const filtros = ref({
+  nombre: ''
+});
 </script>
 
 <template>
@@ -19,9 +23,19 @@ const columnas = [
     :cantidadPorPagina="3"
     :cantidadPorPaginaOpciones="[2,3,5]"
     :columnas="columnas"
-    endpoint="/api/menu_opciones"
+    endpoint="/api/users"
     titulo="Ejemplo de DataTable"
+    :filtros="filtros"
+    :relaciones="['gerencia', 'puesto']"
   >
+
+    <template #item.gerencia_id="{ item }">
+
+<!-- Ejemplo de como usar datos de relaciones -->
+
+      {{ item.gerencia.nombre }}
+
+    </template>
 
     <template #item.Acciones="{ item }">
 
