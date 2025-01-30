@@ -167,7 +167,6 @@ onMounted(loadCatalogs)
 
       <EjemploDataTable/>
 
-      />
     </VCardText>
   </VCard>
 
