@@ -35,7 +35,7 @@ interface QueryParams {
   'page[size]'?: number;
   sort?: string;
   include?: string;
-  [key: string]: string | number | undefined; // Permite agregar otros parámetros sin restricciones estrictas
+  [key: string]: string | number | undefined;
 }
 
 const props = defineProps<DataTableProps>();
@@ -68,10 +68,6 @@ const search = ref<string>('');
 let itemsbyPage = ref<number>(cantidadPorPagina);
 let itemsbyPageOptions = ref<number[]>(cantidadPorPaginaOpciones);
 
-const nombreCampoOrdenar = ref<string>('');
-const ordenCampoOrdenar = ref<string>('');
-
-
 const orden = ref([{ key: columnas[0].key, order: 'asc' }] as const)
 
 const getItems = async (): Promise<void> => {
@@ -99,7 +95,12 @@ const getItems = async (): Promise<void> => {
 
     loading.value = true;
 
-    const respuesta: {data: PaginatedResponse} = await get(endpoint, data)
+    const respuesta: {data: PaginatedResponse} = await get(endpoint, {
+      params: {
+        ...data,
+        search: search.value,
+      },
+    })
 
     items.value = respuesta.data.data;
     totalItems.value = respuesta.data.total;
@@ -200,8 +201,6 @@ const reiniciar = () => {
             </v-menu>
           </v-row>
         </v-container>
-
-
 
         <VDataTableServer
           v-model:items-per-page="itemsbyPage"
