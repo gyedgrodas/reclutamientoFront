@@ -1,49 +1,91 @@
+import type { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
+import axios from 'axios'
+import { useCookie, useRuntimeConfig } from '#imports'
+
 export const useClienteRequest = () => {
-  const client = useSanctumClient();
+  const config = useRuntimeConfig()
+  const user = useSanctumUser()
+  const options = useSanctumConfig()
+  const tokenCookie = useCookie('sanctum.token.cookie')
 
-  type RequestResponse<T = any> = T;
+  // Crear instancia de Axios con configuración base
+  const axiosInstance: AxiosInstance = axios.create({
+    baseURL: config.public.apiBaseUrl,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': tokenCookie.value ? `Bearer ${tokenCookie.value}` : '',
+    },
+  })
 
-  type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
-  type Params = Record<string, any>;
-  type Body = Record<string, any> | null;
+  // Interceptor para manejar respuestas y errores
+  axiosInstance.interceptors.response.use(
+    response => response,
+    async (error: AxiosError) => {
+      console.error('Error en respuesta:', error.response || error)
 
-  const request = async <T = any>(url: string, method: HttpMethod, body: Body = null, params: Params = {}): Promise<RequestResponse<T>> => {
-    try {
+      if (error.response?.status === 401) {
+        console.warn('Token expirado, redirigiendo a login...')
 
-      const queryString = new URLSearchParams(params).toString();
-      const fullUrl = queryString ? `${url}?${queryString}` : url;
+        // Eliminar usuario si está autenticado
+        if (user.value !== null)
+          user.value = null
 
-      const options: RequestInit = { method };
+        // eliminar token
+        tokenCookie.value = null
 
-      if (body && method !== 'GET' && method !== 'DELETE') {
-        options.body = JSON.stringify(body);
-        options.headers = {
-          'Content-Type': 'application/json',
-        };
+        // Redirigir a la página de login
+        await navigateTo(options.redirect.onAuthOnly || '/login')
       }
 
-      const res = await client(fullUrl, options);
+      return Promise.reject(error)
+    },
+  )
 
-      return res as RequestResponse<T>;
+  // Función genérica para realizar solicitudes HTTP
+  const request = async <T>(
+    method: string,
+    url: string,
+    data?: any,
+    options: AxiosRequestConfig = {},
+  ) => {
+    try {
+      const isFormData = data instanceof FormData
 
-    } catch (e: any) {
+      const response = await axiosInstance.request<T>({
+        method,
+        url,
+        data,
+        headers: {
+          ...options.headers,
+          ...(isFormData ? { 'Content-Type': 'multipart/form-data' } : {}), // Axios maneja el boundary automáticamente
+        },
+        ...options,
+      })
 
-      console.error(`Error in ${method} request to ${url}:`, e);
-
-      throw e.response._data;
-
+      return response.data
     }
-  };
+    catch (error) {
+      console.error(`Error en ${method} ${url}:`, error)
+      throw error
+    }
+  }
 
   return {
+    get<T>(url: string, options: AxiosRequestConfig = {}) {
+      return request<T>('GET', url, undefined, options)
+    },
 
-    get: <T = any>(url: string, params: Params = {}): Promise<RequestResponse<T>> => request<T>(url, 'GET', null, params),
+    post<T>(url: string, data: any, options: AxiosRequestConfig = {}) {
+      return request<T>('POST', url, data, options)
+    },
 
-    post: <T = any>(url: string, body: Body): Promise<RequestResponse<T>> => request<T>(url, 'POST', body),
+    put<T>(url: string, data: any, options: AxiosRequestConfig = {}) {
+      return request<T>('PUT', url, data, options)
+    },
 
-    put: <T = any>(url: string, body: Body): Promise<RequestResponse<T>> => request<T>(url, 'PUT', body),
-
-    deleted: <T = any>(url: string, params: Params = {}): Promise<RequestResponse<T>> => request<T>(url, 'DELETE', null, params),
-
-  };
-};
+    deleted<T>(url: string, options: AxiosRequestConfig = {}) {
+      return request<T>('DELETE', url, undefined, options)
+    },
+  }
+}

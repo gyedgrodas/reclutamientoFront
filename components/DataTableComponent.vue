@@ -18,6 +18,7 @@ interface DataTableProps {
   botones?: string[];
   titulo?: string;
   filtros?: object;
+  relaciones?: string[];
   nombreArchivoExport?: string;
 }
 
@@ -30,10 +31,11 @@ interface PaginatedResponse {
 }
 
 interface QueryParams {
-  page: number;
-  per_page: number;
-  campoAOrdenar?: string;
-  ordenCampo?: string;
+  'page[number]'?: number;
+  'page[size]'?: number;
+  sort?: string;
+  include?: string;
+  [key: string]: string | number | undefined;
 }
 
 const props = defineProps<DataTableProps>();
@@ -50,6 +52,7 @@ let {
   cantidadPorPagina = 10,
   cantidadPorPaginaOpciones = cantidadPorPaginaValorDefault,
   botones = botonesDefault,
+  relaciones,
   titulo = '',
   nombreArchivoExport = 'reporte_data' + fecha.getTime(),
 
@@ -65,38 +68,42 @@ const search = ref<string>('');
 let itemsbyPage = ref<number>(cantidadPorPagina);
 let itemsbyPageOptions = ref<number[]>(cantidadPorPaginaOpciones);
 
-const nombreCampoOrdenar = ref<string>('');
-const ordenCampoOrdenar = ref<string>('');
+const orden = ref([{ key: columnas[0].key, order: 'asc' }] as const)
 
 const getItems = async (): Promise<void> => {
 
-  let data: QueryParams = {
-    page: currentPage.value,
-    per_page: itemsbyPage.value,
-  };
+  const sortParam = orden.value.length ? (orden.value[0].order === 'asc' ? orden.value[0].key : `-${orden.value[0].key}`) : ''
 
-  if (ordenCampoOrdenar.value && nombreCampoOrdenar.value) {
-    data.campoAOrdenar = nombreCampoOrdenar.value;
-    data.ordenCampo = ordenCampoOrdenar.value;
-  }
+  let data: QueryParams = {
+    'page[number]': currentPage.value,
+    'page[size]': itemsbyPage.value,
+    'sort': sortParam,
+    'include': relaciones?.join(','),
+  };
 
   if (filtros.value) {
     let key = Object.keys(filtros.value);
-    key.forEach((k) => {
-      data[k] = filtros.value[k];
-    });
+
+    for (let i = 0; i < key.length; i++) {
+      console.log('key[i]', key[i]);
+      data[`filter[${key[i]}]`] = filtros.value[key[i]];
+    }
+
   }
 
   try {
 
     loading.value = true;
 
-    const respuesta: { data: PaginatedResponse } = await get(endpoint, data);
+    const respuesta: {data: PaginatedResponse} = await get(endpoint, {
+      params: {
+        ...data,
+        search: search.value,
+      },
+    })
 
     items.value = respuesta.data.data;
     totalItems.value = respuesta.data.total;
-    itemsbyPage.value = respuesta.data.per_page;
-    // currentPage.value = respuesta.data.current_page;
 
   } catch (error: any) {
 
@@ -108,29 +115,16 @@ const getItems = async (): Promise<void> => {
 
   }
 };
-
-// onMounted(getItems);
+getItems();
 
 watch([currentPage, itemsbyPage, filtros], getItems);
-
-const ordenarItems = (data) => {
-
-  let campo = data?.sortBy[0]?.key;
-  let orden = data?.sortBy[0]?.order;
-
-  nombreCampoOrdenar.value = campo;
-  ordenCampoOrdenar.value = orden;
-
-  getItems();
-
-};
 
 const reiniciar = () => {
 
   currentPage.value = 1;
   itemsbyPage.value = cantidadPorPagina;
-  ordenCampoOrdenar.value = '';
-  nombreCampoOrdenar.value = '';
+  filtros.value = {};
+  orden.value = [{ key: columnas[0].key, order: 'asc' }];
 
   getItems();
 
@@ -146,107 +140,81 @@ const reiniciar = () => {
 
       <VRow>
 
-        <VCol
-          cols="12"
-          md="5"
-        >
-
-          <VBtn
-            v-if="botones.includes('csv')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
-          >
-
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
+        <v-container fluid>
+          <v-row justify="end">
+            <!-- Botón de Reiniciar -->
+            <VBtn
+              v-if="botones.includes('reiniciar')"
+              class="mr-2 mb-3"
+              variant="tonal"
+              @click="reiniciar"
             >
-              <span>Exportar a CSV</span>
-            </VTooltip>
-            <VIcon
-              icon="tabler-file-type-csv"
-              start
-            />
-            CSV
-          </VBtn>
+              <VTooltip activator="parent" location="top" start>
+                <span>Reiniciar</span>
+              </VTooltip>
+              <VIcon icon="tabler-refresh" />
+              Recargar
+            </VBtn>
 
-          <VBtn
-            v-if="botones.includes('xlsx')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
-          >
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
-            >
-              <span>Exportar a XLS</span>
-            </VTooltip>
+            <!-- Menú de Exportar -->
+            <v-menu>
+              <template v-slot:activator="{ props }">
+                <v-btn color="primary" v-bind="props">
+                  <VIcon icon="tabler-table-export" start />
+                  Exportar
+                </v-btn>
+              </template>
+              <v-list dense class="pa-1 ma-1">
+                <VBtn
+                  v-if="botones.includes('csv')"
+                  class="mb-1"
+                  variant="tonal"
+                  block
+                  @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
+                >
+                  <VIcon icon="tabler-file-type-csv" start />
+                  CSV
+                </VBtn>
 
-            <VIcon
-              icon="tabler-file-type-xls"
-            />
-            Excel
-          </VBtn>
+                <VBtn
+                  v-if="botones.includes('xlsx')"
+                  class="mb-1"
+                  variant="tonal"
+                  block
+                  @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
+                >
+                  <VIcon icon="tabler-file-type-xls" start />
+                  Excel
+                </VBtn>
 
-          <VBtn
-            v-if="botones.includes('pdf')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
-          >
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
-            >
-              <span>Exportar a PDF</span>
-            </VTooltip>
-
-            <VIcon
-              icon="tabler-file-type-pdf"
-              
-            />
-            Pdf
-          </VBtn>
-
-          <VBtn
-            v-if="botones.includes('reiniciar')"
-            class="mr-2 mb-3"
-            variant="tonal"
-            @click="reiniciar"
-
-          >
-            <VTooltip
-              activator="parent"
-              location="top"
-              start
-            >
-              <span>Exportar a PDF</span>
-            </VTooltip>
-
-            <VIcon
-              icon="tabler-refresh"
-            />
-            Recargar
-          </VBtn>
-
-        </VCol>
+                <VBtn
+                  v-if="botones.includes('pdf')"
+                  class="mb-1"
+                  variant="tonal"
+                  block
+                  @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
+                >
+                  <VIcon icon="tabler-file-type-pdf" start />
+                  PDF
+                </VBtn>
+              </v-list>
+            </v-menu>
+          </v-row>
+        </v-container>
 
         <VDataTableServer
           v-model:items-per-page="itemsbyPage"
           v-model:page="currentPage"
           :headers="columnas"
           :items="items"
+          v-model:sort-by="orden"
           :items-length="totalItems"
           :items-per-page-options="itemsbyPageOptions"
           :loading="loading"
           :search="search"
           item-value="id"
-          @update:options="ordenarItems"
+          @update:sort-by="getItems"
+          @update:search="getItems"
         >
 
           <template
@@ -270,3 +238,5 @@ const reiniciar = () => {
 <style lang="scss" scoped>
 /* Estilos personalizados */
 </style>
+
+

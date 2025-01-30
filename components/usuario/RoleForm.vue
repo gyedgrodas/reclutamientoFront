@@ -1,0 +1,162 @@
+<script setup lang="ts">
+import { defineEmits, defineProps, nextTick, ref, watch } from 'vue'
+import type { VForm } from 'vuetify/components/VForm'
+import DualListbox from '@/components/DualListbox.vue'
+
+const props = defineProps({
+  visible: Boolean,
+  rol: {
+    type: Object,
+    default: null,
+  },
+  mode: {
+    type: String,
+    default: 'create',
+  },
+})
+
+const emit = defineEmits(['rolData', 'cancel'])
+
+const { get } = useClienteRequest()
+
+interface Permission {
+  id: number
+  name: string
+}
+
+// Campos y referencias del formulario
+const permisosDisponibles = ref([])
+const permisoSeleccionadoAhora = ref([])
+const permisosSeleccionadosAntes = ref([])
+const refForm = ref<VForm>()
+const name = ref('')
+const guardName = ref('api')
+const permisos = ref<Permission []>([])
+
+const cargarPermisosDisponibles = async () => {
+  try {
+    const response: any = await get('/api/permisos')
+
+    permisosDisponibles.value = response.data
+    console.log('Permisos disponibles:', permisosDisponibles.value)
+  }
+  catch (error) {
+    console.error('Error al cargar los permisos:', error)
+  }
+}
+
+// Limpiar el formulario
+const limpiarFormulario = () => {
+  name.value = ''
+
+  // guardName.value = ''
+  permisos.value = []
+}
+
+const cargarPermisosRol = async (rolId: number) => {
+  try {
+    const response: any = await get(`/api/roles/${rolId}/permisos`)
+    console.log(response.data)
+    permisosSeleccionadosAntes.value = response.data
+  }
+  catch (error) {
+  }
+}
+
+// Actualizar formulario cuando el rol cambia
+watch(
+  () => props.visible,
+  async isVisible => {
+    limpiarFormulario()
+    if (isVisible && props.mode === 'edit' && props.rol) {
+      name.value = props.rol.name || ''
+      cargarPermisosRol(props.rol.id)
+
+      // guardName.value = props.rol.guard_name || ''
+      // permisoSeleccionado.value = props.rol.permissions || []
+    }
+
+    else if (!isVisible) {
+      await nextTick()
+    }
+  },
+  { immediate: true },
+)
+
+// Enviar datos del formulario
+const onSubmit = () => {
+  if (refForm.value?.validate()) {
+    const rolData = {
+      id: props.rol?.id || null,
+      name: name.value,
+      guard_name: guardName.value,
+      permisos: permisoSeleccionadoAhora.value.slice(), // Aquí pasamos los permisos seleccionados
+    }
+
+    emit('rolData', rolData)
+  }
+}
+
+// Cerrar modal
+const cerrarModal = () => {
+  emit('cancel')
+}
+
+const actualizarPermisoSeleccionados = (permisoSeleccionados: any) => {
+  permisoSeleccionadoAhora.value = permisoSeleccionados
+}
+
+cargarPermisosDisponibles()
+
+onMounted(() => {
+})
+</script>
+
+<template>
+  <VDialog
+    :model-value="visible"
+    width="1200"
+    @update:model-value="cerrarModal"
+  >
+    <VCard>
+      <VCardTitle class="text-h4 text-center">
+        {{ mode === "create" ? "Crear Nuevo Rol" : "Editar Rol" }}
+      </VCardTitle>
+      <VCardText>
+        <VForm ref="refForm">
+          <AppTextField
+            v-model="name"
+            class="mb-4"
+            label="Nombre del Rol"
+          />
+          <AppTextField
+            v-model="guardName"
+            class="mb-4"
+            label="Guard Name"
+            disabled
+          />
+          <DualListbox
+            :items-disponibles="permisosDisponibles"
+            :items-seleccionados="permisosSeleccionadosAntes"
+            tipo="Permisos"
+            @update:selected="actualizarPermisoSeleccionados"
+          />
+        </VForm>
+      </VCardText>
+      <VCardActions>
+        <VBtn
+          color="error"
+          @click="cerrarModal"
+        >
+          Cancelar
+        </VBtn>
+        <VBtn
+          color="primary"
+          @click="onSubmit"
+        >
+          {{ mode === "create" ? "Crear" : "Actualizar" }}
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+</template>
