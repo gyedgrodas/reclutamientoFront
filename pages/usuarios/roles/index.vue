@@ -39,10 +39,12 @@ const cargarRoles = async () => {
   esperar.value = true
   try {
     const response: any = await get('/api/roles?include=permissions&', {
-      'page[number]': currentPage.value,
-      'page[size]': itemsPerPage.value,
-      'sort': sortBy.value,
-      'filter[name]': filters.value.name.join(','),
+      params: {
+        'page[number]': currentPage.value,
+        'page[size]': itemsPerPage.value,
+        'sort': sortBy.value,
+        'filter[name]': filters.value.name.join(','),
+      },
     })
 
     if (response) {

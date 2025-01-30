@@ -60,13 +60,16 @@ const headers = [
 
 const items = ref([])
 
+
 const getItems = async function (): Promise<void> {
   try {
     loading.value = true
 
     const respuesta = await get('/api/users', {
-      'page[number]': currentPage.value,
-      'page[size]': itemsPerPage.value,
+      params: {
+        'page[number]': currentPage.value,
+        'page[size]': itemsPerPage.value,
+      },
     })
 
     if (respuesta) {

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import fields from '@/views/pages/usuarios/fields.vue'
-
-// eslint-disable-next-line import/extensions
 import type { UsuarioInterface } from '@/types/usuarios/index.ts'
 
 definePageMeta({
@@ -57,7 +55,7 @@ const guardarUsuario = async (Usuario: UsuarioInterface): Promise<void> => {
       <VCardTitle>Crear Usuario</VCardTitle>
     </VCardItem>
     <VCardText>
-      <Fields
+      <fields
         :fields="fields"
         @emitir-datos="guardarUsuario"
       />
