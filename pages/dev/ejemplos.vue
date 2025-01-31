@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import EjemploDataTable from '@/views/pages/ejemplos/dataTable/ejemploDataTable.vue'
 
-const { post } = useClienteRequest()
-
 const { showToastInfo, showToastSuccess, showToastWarning, showToastError } = useToast()
 const { paginaEspera, cargandoPagina } = useCargandoPagina()
 const { getCatalogos, catalogos } = useCatalogo()
@@ -50,31 +48,6 @@ const loadCatalogs = async () => {
   }
   catch (error) {
     showToastError(error.message)
-  }
-}
-
-const file = ref([])
-
-const serverConfig = async (file: File) => {
-  const formData = new FormData()
-
-  formData.append('prueba', file)
-
-  try {
-    const res = await fetch('http://sysbaseback.test/api/medias', {
-      method: 'POST',
-      body: formData,
-    })
-
-    if (!res.ok)
-      throw new Error(`Error al subir el archivo: ${res.statusText}`)
-
-    const data = await res.json() // O res.text() dependiendo de la respuesta del servidor
-
-    console.log('Archivo subido:', data)
-  }
-  catch (error) {
-    console.error('Error al subir el archivo', error)
   }
 }
 
@@ -201,17 +174,9 @@ onMounted(loadCatalogs)
       <FileInput
         label-idle="Arrastra y suelta tus archivos aquí o haz clic para seleccionarlos"
         :credits="false"
-        allow-multiple
+        allowMultiple
         max-files="2"
         name="documentos"
-        :server="{
-          process: (fieldName, file, metadata, load, error, progress, abort) => {
-            serverConfig(file, progress)
-              .then(() => load(file.name)) // Confirma la carga exitosa
-              .catch((err) => error(err.message)); // Maneja errores
-          },
-          revert: null, // Opcional, para revertir cargas
-        }"
       />
     </VCardText>
   </VCard>
