@@ -49,7 +49,11 @@ const getPermisos = async (): Promise<void> => {
 
     paginaEspera.value = true;
 
-    const response: { data: Permission } = await get('api/permisos');
+    const response: { data: Permission } = await get('api/permisos', {
+      params: {
+        'page[size]': -1,
+      }
+    });
 
     permisos.value = response.data;
 
