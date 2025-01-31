@@ -5,6 +5,7 @@ import Sortable from "sortablejs";
 import type {SortableEvent} from "sortablejs";
 import type {UsuarioInterface} from "@/types/usuarios/index";
 import {useTheme} from 'vuetify'
+const ability = useAbility();
 
 const {get, put} = useClienteRequest();
 const user = useSanctumUser<UsuarioInterface>();
@@ -12,6 +13,7 @@ const {showToastError, showToastSuccess} = useToast();
 const vuetifyTheme = useTheme()
 
 import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
+import {useAbility} from "@casl/vue";
 
 const favoritos = ref<MenuOpcion[]>([]);
 
@@ -52,11 +54,15 @@ const obtenerFavoritosAElegir = (): void => {
 
     let favoritosDelMenu = <MenuOpcion[]>useState('menu').value;
 
-    for (let opcion of aplarOpciones(favoritosDelMenu) ) {
+    for (let opcion of <MenuOpcion[]>aplarOpciones(favoritosDelMenu) ) {
 
       if (!idsFavoritos.value.includes(opcion.id) && opcion.titulo_seccion === null && opcion.ruta !== null) {
 
-        favoritosAElegir.value.push(opcion);
+        if(ability.can(opcion.action, opcion.subject)){
+
+          favoritosAElegir.value.push(opcion);
+
+        }
 
       }
 
