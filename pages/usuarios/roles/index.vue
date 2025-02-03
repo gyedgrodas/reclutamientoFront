@@ -1,24 +1,17 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import Swal from 'sweetalert2'
-import { format } from 'date-fns'
 import RoleForm from '@/components/usuario/RoleForm.vue'
 
 const { put, get, post, deleted } = useClienteRequest()
 
 // Variables reactivas
 const allRoles = ref([]) // Lista completa para el selector
-const roles = ref([])
 const seleccionarRol = ref()
-const currentPage = ref(1)
-const itemsPerPage = ref(5)
-const totalItems = ref(0)
-const sortBy = ref('')
-const esperar = ref(false)
 const verModalDeRol = ref(false)
 const formMode = ref('create')
 
-const filters = ref({
+const filtros = ref({
   name: [],
 })
 
@@ -27,47 +20,12 @@ const buscarRoles = async (searchTerm: string) => {
     const url = searchTerm ? `/api/roles?filter[name]=${searchTerm} ` : '/api/roles'
     const response: any = await get(url)
 
-    allRoles.value = response.data
+    allRoles.value = Array.isArray(response.data) ? response.data : response.data.data
+
+    console.log('Roles encontrados:', allRoles.value)
   }
   catch (error) {
     console.error('Error al buscar roles:', error)
-  }
-}
-
-// Cargar roles desde la API
-const cargarRoles = async () => {
-  esperar.value = true
-  try {
-    const response: any = await get('/api/roles?include=permissions&', {
-      params: {
-        'page[number]': currentPage.value,
-        'page[size]': itemsPerPage.value,
-        'sort': sortBy.value,
-        'filter[name]': filters.value.name.join(','),
-      },
-    })
-
-    if (response) {
-      // Roles para la tabla (datos paginados)
-      roles.value = response.data.map((item: any) => ({
-        ...item,
-        created_at: format(new Date(item.created_at), 'dd-MM-yyyy HH:mm:ss'),
-        updated_at: format(new Date(item.updated_at), 'dd-MM-yyyy HH:mm:ss'),
-      }))
-
-      if (allRoles.value.length === 0)
-        allRoles.value = response.data
-
-      totalItems.value = response.total
-      itemsPerPage.value = response.per_page
-      currentPage.value = response.current_page
-    }
-  }
-  catch (error) {
-    console.error('Error al cargar los roles:', error)
-  }
-  finally {
-    esperar.value = false
   }
 }
 
@@ -106,7 +64,6 @@ const guardarRol = async (rolData: any) => {
 
     verModalDeRol.value = false
     await nextTick()
-    await cargarRoles()
   }
   catch (error: any) {
     console.error('Error al guardar el rol:', error)
@@ -129,7 +86,6 @@ const eliminarRol = async (rol: any) => {
       'Eliminado!',
       'El rol ha sido eliminado con éxito.',
       'success')
-    await cargarRoles()
   }
   catch (error: any) {
     console.error('Error al eliminar el rol:', error)
@@ -141,15 +97,11 @@ const eliminarRol = async (rol: any) => {
   }
 }
 
-watch([currentPage, itemsPerPage, sortBy, filters], cargarRoles, { deep: true })
-
-cargarRoles()
-
-const headers = [
-  { title: 'Nombre', key: 'name' },
-  { title: 'GUARD NAME', key: 'guard_name' },
-  { title: 'PERMISOS', key: 'permisos' },
-  { title: 'Acción', key: 'actions', sortable: false },
+const columnas = [
+  { title: 'Nombre', key: 'name', sortable: true, exportable: true },
+  { title: 'GUARD NAME', key: 'guard_name', sortable: true, exportable: true },
+  { title: 'PERMISOS', key: 'permisos', sortable: false, exportable: true },
+  { title: 'Acción', key: 'actions', sortable: false, exportable: false },
 ]
 </script>
 
@@ -172,7 +124,7 @@ const headers = [
       <div class="app-user-search-filter d-flex align-center flex-wrap gap-6">
         <div style="inline-size: 25rem;">
           <AppAutocomplete
-            v-model="filters.name"
+            v-model="filtros.name"
             :items="allRoles"
             item-title="name"
             chips
@@ -188,15 +140,14 @@ const headers = [
 
   <VCard>
     <VCardText>
-      <VDataTableServer
-        v-model:items-per-page="itemsPerPage"
-        v-model:page="currentPage"
-        :items="roles"
-        :headers="headers"
-        item-value="id"
-        :items-length="totalItems"
-        :items-per-page-options="[5, 10, 20, 50, -1]"
-        :loading="esperar"
+      <DataTableComponent
+        :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
+        :cantidad-por-pagina="5"
+        :cantidad-por-pagina-opciones="[2, 3, 5]"
+        :columnas="columnas"
+        endpoint="/api/roles"
+        :filtros="filtros"
+        :relaciones="['permissions']"
       >
         <template #item.permisos="{ item }">
           <div class="d-flex flex-wrap gap-2 py-2">
@@ -232,7 +183,8 @@ const headers = [
             @click="eliminarRol(item)"
           />
         </template>
-      </VDataTableServer>
+        <!--      </VDataTableServer> -->
+      </datatablecomponent>
     </VCardText>
   </VCard>
 

@@ -2,96 +2,63 @@
 import { ref } from 'vue'
 import { can } from '@layouts/plugins/casl'
 
+const { get } = useClienteRequest()
+
 definePageMeta({
   middleware: 'permissions',
   action: 'listar usuarios', // Acción requerida
   subject: 'usuarios', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 })
 
-const { get, deleted } = useClienteRequest()
+const { deleted } = useClienteRequest()
 
 const { showToastSuccess, showToastError, preguntaEliminar } = useToast()
 
-const currentPage = ref(1) // Página actual
-const itemsPerPage = ref(2) // Elementos por página
-const totalItems = ref(0) // Total de elementos en el backend
-const loading = ref(false) // Indicador de carga
-const search = ref('') // Búsqueda de usuarios
+const allUsers = ref([])
 
-const headers = [
-  {
-    title: '',
-    value: 'id',
-  },
-  {
-    title: 'Usuario Dominio',
-    value: 'usuario_dominio',
-  },
-  {
-    title: 'Cif',
-    value: 'cif',
-  },
-  {
-    title: 'Asociado Id',
-    value: 'asociado_id',
-  },
-  {
-    title: 'Email',
-    value: 'email',
-  },
+const filtros = ref({
+  usuario_dominio: [],
+})
 
-  {
-    title: 'Nombre',
-    value: 'nombre',
-  },
-  {
-    title: 'Apellido',
-    value: 'apellido',
-  },
-  {
-    title: 'fecha de creacion',
-    value: 'created_at',
-  },
-  {
-    title: 'Acciones',
-    value: 'Acciones',
-  },
-]
-
-const items = ref([])
-
-
-const getItems = async function (): Promise<void> {
+const cargarUsuarios = async () => {
   try {
-    loading.value = true
+    const url = '/api/users'
+    const response: any = await get(url, { params: filtros.value })
 
-    const respuesta = await get('/api/users', {
-      params: {
-        'page[number]': currentPage.value,
-        'page[size]': itemsPerPage.value,
-      },
-    })
-
-    if (respuesta) {
-      items.value = respuesta.data.data // Aquí deberías obtener la lista de usuarios
-      totalItems.value = respuesta.data?.meta.total // Total de registros en el backend
-      itemsPerPage.value = respuesta.data?.meta.per_page // Elementos por página
-      currentPage.value = respuesta.data?.meta.current_page // Página actual
-    }
+    // Asigna los usuarios a la variable 'allUsers' para actualizar la tabla
+    allUsers.value = response.data.data
   }
   catch (error) {
-    console.error('Error al obtener los datos:', error.message)
-  }
-  finally {
-    loading.value = false
+    console.error('Error al cargar usuarios:', error)
+    showToastError('Error al cargar usuarios')
   }
 }
 
-getItems()
+const buscarUsuarios = async (searchTerm: string) => {
+  try {
+    const url = searchTerm ? `/api/users?filter[usuario_dominio]=${searchTerm} ` : '/api/users'
+    const response: any = await get(url)
 
-watch([currentPage, itemsPerPage], () => {
-  getItems() // Vuelve a cargar los datos cuando cambian la página o el tamaño
-})
+    allUsers.value = response.data.data
+
+    console.log('usuario encontrados:', allUsers.value)
+  }
+  catch (error) {
+    console.error('Error al buscar usuarios:', error)
+  }
+}
+
+const columnas = [
+  { title: 'ID', key: 'id', exportable: true },
+  { title: 'Usuario Dominio', key: 'usuario_dominio', exportable: true },
+  { title: 'Cif', key: 'cif', exportable: true },
+  { title: 'Asociado Id', key: 'asociado_id', exportable: true },
+  { title: 'Email', key: 'email', exportable: true },
+  { title: 'Nombre', key: 'nombre', exportable: true },
+  { title: 'Apellido', key: 'apellido', exportable: true },
+  { title: 'fecha de creacion', key: 'created_at', exportable: true },
+  { title: 'Acciones', key: 'Acciones', sortable: false, exportable: false },
+]
 
 const deleteItem = async (id: number) => {
   const confirm = await preguntaEliminar('¿Desea Eliminar Usuario?')
@@ -104,7 +71,14 @@ const deleteItem = async (id: number) => {
 
     showToastSuccess(respuesta.message)
 
-    await getItems()
+    // Recarga los usuarios después de la eliminación
+    await cargarUsuarios()
+
+    // Opcionalmente, puedes limpiar filtros si es necesario
+    filtros.value = {} // Restablece filtros si es necesario
+
+    // Si el componente no se actualiza, forzar un cambio reactivo
+    allUsers.value = [...allUsers.value] // Esto garantiza que la tabla se actualice.
   }
   catch (error) {
     showToastError(error.message)
@@ -114,61 +88,72 @@ const deleteItem = async (id: number) => {
 
 <template>
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+    <h1>Gestión de Usuarios</h1>
     <VBtn
       v-if="can('crear usuarios', 'usuarios')"
-      class="ml-auto"
+      class="ms-auto"
       color="success"
       to="/usuarios/create"
     >
       Nuevo Usuario
     </VBtn>
   </div>
-
-  <VCard>
-    <VCardTitle> Usuario </VCardTitle>
-
-    <VCardText>
-      <VDataTableServer
-        v-model:items-per-page="itemsPerPage"
-        v-model:page="currentPage"
-        :items="items"
-        :headers="headers"
-        :search="search"
-        item-value="id"
-        :items-length="totalItems"
-        :items-per-page-options="[2, 5, 10, 50, -1]"
-        :loading="loading"
-      >
-        <template #item.Acciones="{ item }">
-          <VBtn
-            v-if="can('ver usuarios', 'usuarios')"
-            icon
-            variant="text"
-            color="primary"
-            :to="`/usuarios/show/${item.id}` "
-          >
-            <VIcon icon="tabler-eye" />
-          </VBtn>
-          <VBtn
-            v-if="can('editar usuarios', 'usuarios')"
-            icon
-            variant="text"
-            color="primary"
-            :to="`/usuarios/edit/${item.id}` "
-          >
-            <VIcon icon="tabler-edit" />
-          </VBtn>
-          <VBtn
-            v-if="can('eliminar usuarios', 'usuarios')"
-            icon
-            color="error"
-            variant="text"
-            @click="deleteItem(item.id)"
-          >
-            <VIcon icon="tabler-trash" />
-          </VBtn>
-        </template>
-      </VDataTableServer>
+  <VCard class="mb-2">
+    <VCardText class="d-flex flex-wrap gap-6 mb-4">
+      <div class="app-user-search-filter d-flex align-center flex-wrap gap-6">
+        <div style="inline-size: 25rem;">
+          <AppAutocomplete
+            v-model="filtros.usuario_dominio"
+            :items="allUsers"
+            item-title="usuario_dominio"
+            chips
+            multiple
+            closable-chips
+            placeholder="Seleccionar usuarios"
+            @update:search="buscarUsuarios"
+          />
+        </div>
+      </div>
     </VCardText>
+  </VCard>
+  <VCard>
+    <DataTableComponent
+      :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
+      :cantidad-por-pagina="5"
+      :cantidad-por-pagina-opciones="[2, 3, 5]"
+      :columnas="columnas"
+      endpoint="/api/users"
+      :filtros="filtros"
+    >
+      <template #item.Acciones="{ item }">
+        <VBtn
+          v-if="can('ver usuarios', 'usuarios')"
+          icon
+          variant="text"
+          color="primary"
+          :to="`/usuarios/show/${item.id}` "
+        >
+          <VIcon icon="tabler-eye" />
+        </VBtn>
+        <VBtn
+          v-if="can('editar usuarios', 'usuarios')"
+          icon
+          variant="text"
+          color="primary"
+          :to="`/usuarios/edit/${item.id}` "
+        >
+          <VIcon icon="tabler-edit" />
+        </VBtn>
+        <VBtn
+          v-if="can('eliminar usuarios', 'usuarios')"
+          icon
+          color="error"
+          variant="text"
+          @click="deleteItem(item.id)"
+        >
+          <VIcon icon="tabler-trash" />
+        </VBtn>
+      </template>
+    </DataTableComponent>
   </VCard>
 </template>

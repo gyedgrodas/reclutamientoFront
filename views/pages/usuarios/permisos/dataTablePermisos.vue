@@ -1,21 +1,33 @@
 <script setup lang="ts">
-import { defineExpose, onMounted, ref } from 'vue'
+import { defineExpose, ref } from 'vue'
 import Swal from 'sweetalert2'
 import DataModal from '@/views/pages/usuarios/permisos/dataModal.vue'
 
-const { get, deleted } = useClienteRequest()
-const permisos = ref([])
+const { deleted, get } = useClienteRequest()
 const esperar = ref(false)
 
-const paginacion = ref({
-  currentPage: 1,
-  totalItems: 0,
-  itemsPerPage: 5,
-})
-
+const allPermisos = ref([])
 const dialog = ref(false)
 const isEditing = ref(false)
 const deleteDialog = ref(false)
+
+const filtros = ref({
+  name: [],
+})
+
+const buscarPermisos = async (searchTerm: string) => {
+  try {
+    const url = searchTerm ? `/api/permisos?filter[name]=${searchTerm} ` : '/api/permisos'
+    const response: any = await get(url)
+
+    allPermisos.value = Array.isArray(response.data) ? response.data : response.data.data
+
+    console.log('permisos encontrados:', allPermisos.value)
+  }
+  catch (error) {
+    console.error('Error al buscar permisos:', error)
+  }
+}
 
 const dialogItem = ref<{ id: number | null; name: string; guard_name: string }>({
   id: null,
@@ -33,58 +45,17 @@ const closeDialog = (value: boolean) => {
   dialog.value = value
 }
 
-const headers = [
-  { title: 'NOMBRE', key: 'name', width: '15%', sortable: true },
-  { title: 'SUJETO', key: 'subject', width: '15%', sortable: true },
-  { title: 'GUARD NAME', key: 'guard_name', width: '10%', sortable: true },
-
-  { title: 'Roles', key: 'roles', sortable: false },
-
-  // { title: 'CREADO', key: 'created_at' },
-  // { title: 'MODIFICADO', key: 'updated_at' },
-  { title: 'ACCIONES', key: 'actions', sortable: false },
+const columnas = [
+  { title: 'NOMBRE', key: 'name', sortable: true },
+  { title: 'SUJETO', key: 'subject', sortable: true },
+  { title: 'GUARD NAME', key: 'guard_name', sortable: true },
+  { title: 'Roles', key: 'roles', sortable: false, exportable: false },
+  { title: 'ACCIONES', key: 'actions', sortable: false, exportable: false },
 ]
-
-const orden = ref([{ key: 'name', order: 'asc' }] as const)
 
 const deleteItem = (item: any) => {
   dialogItem.value = { ...item }
   deleteDialog.value = true
-}
-
-const cargarPermisos = async () => {
-  console.log(orden)
-  esperar.value = true
-
-  const sortParam = orden.value.length
-    ? (orden.value[0].order === 'asc' ? orden.value[0].key : `-${orden.value[0].key}`)
-    : '' // 👈 No enviar `sort` si no hay orden
-  try {
-    const response: any = await get('/api/permisos',
-      {
-        params: {
-          'include': 'roles',
-          'sort': sortParam,
-          'page[number]': paginacion.value.currentPage,
-          'page[size]': paginacion.value.itemsPerPage,
-        }
-      },
-    )
-
-    if (response) {
-      permisos.value = response.data.map((item: any) => ({
-        ...item,
-      }))
-
-      paginacion.value.totalItems = response.total
-      paginacion.value.itemsPerPage = response.per_page
-      paginacion.value.currentPage = response.current_page
-      esperar.value = false
-    }
-  }
-  catch (error) {
-    console.error('Error al cargar los permisos:', error)
-  }
 }
 
 const deleteItemConfirm = async () => {
@@ -103,9 +74,6 @@ const deleteItemConfirm = async () => {
     // Realiza la eliminación en el backend
     await deleted(`/api/permisos/${dialogItem.value.id}`)
     esperar.value = true
-
-    // Recarga la tabla
-    await cargarPermisos()
   }
   catch (error) {
     console.error('Error al eliminar el permiso:', error)
@@ -121,29 +89,40 @@ const deleteItemConfirm = async () => {
   }
 }
 
-watch(() => [paginacion.value.currentPage, paginacion.value.itemsPerPage], () => {
-  cargarPermisos()
-}, { deep: true })
-
-onMounted(cargarPermisos)
 defineExpose({
   openDialog,
 })
 </script>
 
 <template>
+  <VCard class="mb-2">
+    <VCardText class="d-flex flex-wrap gap-6 mb-4">
+      <div class="app-user-search-filter d-flex align-center flex-wrap gap-6">
+        <div style="inline-size: 25rem;">
+          <AppAutocomplete
+            v-model="filtros.name"
+            :items="allPermisos"
+            item-title="name"
+            chips
+            multiple
+            closable-chips
+            :clearable="true"
+            placeholder="Seleccionar roles"
+            @update:search="buscarPermisos"
+          />
+        </div>
+      </div>
+    </VCardText>
+  </VCard>
   <!-- Tabla de datos -->
-  <VDataTableServer
-    v-model:items-per-page="paginacion.itemsPerPage"
-    v-model:page="paginacion.currentPage"
-    v-model:sort-by="orden"
-    :headers="headers"
-    :items="permisos"
-    item-value="id"
-    :items-length="paginacion.totalItems"
-    :items-per-page-options="[5, 10, 20, 50, -1]"
-    :loading="esperar"
-    @update:sort-by="cargarPermisos"
+  <DataTableComponent
+    :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
+    :cantidad-por-pagina="5"
+    :cantidad-por-pagina-opciones="[2, 3, 5]"
+    :columnas="columnas"
+    endpoint="/api/permisos"
+    :filtros="filtros"
+    :relaciones="['roles']"
   >
     <!-- Columna personalizada de permisos -->
     <template #item.roles="{ item }">
@@ -184,14 +163,13 @@ defineExpose({
         </IconBtn>
       </div>
     </template>
-  </VDataTableServer>
+  </datatablecomponent>
 
   <DataModal
     v-model:abrirModal="dialog"
     :is-editing="isEditing"
     :dialog-item="dialogItem"
     @actualizar-abrir-modal="closeDialog"
-    @actualizar-tabla="cargarPermisos"
   />
 
   <!-- Diálogo de eliminación -->

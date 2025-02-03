@@ -35,7 +35,7 @@ const cargarRolesDisponibles = async () => {
   try {
     const response: any = await get('/api/roles')
 
-    rolesDisponibles.value = response.data
+    rolesDisponibles.value = response.data.data
   }
   catch (error) {
     console.error('Error al cargar los permisos:', error)
