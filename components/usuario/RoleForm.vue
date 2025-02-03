@@ -37,7 +37,7 @@ const cargarPermisosDisponibles = async () => {
   try {
     const response: any = await get('/api/permisos')
 
-    permisosDisponibles.value = response.data
+    permisosDisponibles.value = response.data.data
     console.log('Permisos disponibles:', permisosDisponibles.value)
   }
   catch (error) {
@@ -56,7 +56,7 @@ const limpiarFormulario = () => {
 const cargarPermisosRol = async (rolId: number) => {
   try {
     const response: any = await get(`/api/roles/${rolId}/permisos`)
-    console.log(response.data)
+
     permisosSeleccionadosAntes.value = response.data
   }
   catch (error) {
