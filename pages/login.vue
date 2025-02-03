@@ -17,7 +17,6 @@ const user = useSanctumUser();
 definePageMeta({
   layout: 'blank',
   public: true,
-
 });
 
 const isPasswordVisible = ref(false);
@@ -52,6 +51,17 @@ const onSubmit = async () => {
       await login(form.value)
 
     } catch (error) {
+
+      // navigateTo('/auth/DobleFactorAutenticacion')
+
+      if (error.message === 'Token was not returned from the API') {
+
+
+        navigateTo('/auth/DobleFactorAutenticacion')
+
+        return
+
+      }
 
       msgError.value = error?.response?._data?.message || 'Ocurrió un error inesperado.'
 
