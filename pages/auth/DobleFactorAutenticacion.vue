@@ -12,6 +12,12 @@ definePageMeta({
   }
 });
 
+if(!useState('tieneDobleFactorActivo').value) {
+
+  navigateTo('/login')
+
+}
+
 const router = useRouter()
 const otp = ref('')
 const isOtpInserted = ref(false)

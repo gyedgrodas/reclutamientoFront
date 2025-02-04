@@ -45,17 +45,18 @@ const errors = ref({
 
 const onSubmit = async () => {
   const {valid: isValid} = await refVForm.value?.validate();
+
   if (isValid) {
+
     try {
       // Realizar login primero (si aún no se ha hecho)
       await login(form.value)
 
     } catch (error) {
 
-      // navigateTo('/auth/DobleFactorAutenticacion')
-
       if (error.message === 'Token was not returned from the API') {
 
+        useState('tieneDobleFactorActivo', () => true)
 
         navigateTo('/auth/DobleFactorAutenticacion')
 
