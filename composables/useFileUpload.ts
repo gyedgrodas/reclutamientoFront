@@ -1,10 +1,10 @@
 import { ref } from 'vue'
 import type { RespuestaRequest } from '@/types/admin/menuOpciones/types'
-import { useApi } from '@/composables/useApi' // Asegúrate de importar correctamente useApi
+import { useClienteRequest } from '@/composables/useClienteRequest' // Asegúrate de importar correctamente useApi
 
 export function useFileUpload(url: string) {
   const files = ref<File[]>([]) // Lista de archivos en FilePond
-  const { post, deleted } = useApi() // Asegúrate de que `get` esté en `useApi()`
+  const { post, deleted } = useClienteRequest() // Asegúrate de que `get` esté en `useApi()`
 
   const loadFile = async (source: string, load: any) => {
     fetch(source)

@@ -6,7 +6,6 @@ const { paginaEspera, cargandoPagina } = useCargandoPagina()
 const { getCatalogos, catalogos } = useCatalogo()
 const { files, serverConfig } = useFileUpload('/api/media')
 
-
 const mostrarToastInfo = () => {
   showToastInfo('Hello from second page')
 }
