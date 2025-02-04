@@ -63,6 +63,8 @@ const preloadedFiles = [
     },
   },
 ];
+
+onMounted(loadCatalogs)
 </script>
 
 <template>
@@ -172,6 +174,7 @@ const preloadedFiles = [
   </VCard>
 
   <VCard class="mb-5">
+
     <VCardText>
       <EjemploDataTable />
     </VCardText>
@@ -191,6 +194,12 @@ const preloadedFiles = [
       />
     </VCardText>
   </VCard>
+  <VCard class="mb-12">
+    <VCardTitle>Notificación de correo</VCardTitle>
+    <VCardText>
+      <NotificacionCorreo />
+    </VCardText>
+  </vcard>
 </template>
 
 <style lang="scss" scoped>

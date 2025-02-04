@@ -117,7 +117,7 @@ const getItems = async (): Promise<void> => {
 };
 getItems();
 
-watch([currentPage, itemsbyPage, filtros], getItems);
+watch([currentPage, itemsbyPage, filtros], getItems, { deep: true });
 
 const reiniciar = () => {
 
