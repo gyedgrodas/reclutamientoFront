@@ -16,7 +16,9 @@ export default defineComponent({
 </script>
 <template>
 
-  <h1>Bienvenidos a Go Credit {{ user?.nombre+' '+user?.apellido }} </h1>
+  <h2>Bienvenido, {{ user?.nombre}} </h2>
+
+  <favoritos/>
 
 </template>
 
