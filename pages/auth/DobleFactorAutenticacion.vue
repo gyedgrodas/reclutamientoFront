@@ -12,7 +12,7 @@ definePageMeta({
   }
 });
 
-if(!useState('usuarioTemporal').value) {
+if(!useState('idUsuarioTemporal').value) {
 
   navigateTo('/login')
 
@@ -24,19 +24,24 @@ const { showToastError, showToastSuccess } = useToast()
 
 const {refreshIdentity} = useSanctumAuth();
 const codigo = ref('')
+const cargando = ref(false)
 
 const verificarCodigo = async () => {
+
+  cargando.value = true
   try {
 
-    const usuarioTemportal = useState('usuarioTemporal')
+    const usuarioTemportal = useState('idUsuarioTemporal')
 
     const res: {message: string} = await post('api/auth/confirmar-factor-autenticacion-dos-factores', {
       codigo: codigo.value,
-      user_id: usuarioTemportal.value.id
+      user_id: usuarioTemportal.value
     })
 
     const isSecure = useRequestURL().protocol.startsWith("https");
+
     const cookie = useCookie('sanctum.token.cookie', { secure: isSecure });
+
     cookie.value = res.data.token;
 
     await refreshIdentity();
@@ -47,8 +52,12 @@ const verificarCodigo = async () => {
 
     showToastError(error?.response?.data?.message)
 
+  } finally {
+
+      cargando.value = false
   }
 }
+
 </script>
 
 <template>
@@ -108,24 +117,19 @@ const verificarCodigo = async () => {
                   type="number"
                   class="pa-0"
                   @finish="verificarCodigo"
+                  :disabled="cargando"
                 />
               </VCol>
 
               <VCol cols="12">
                 <VBtn
                   block
-                  type="submit"
+                  @click="verificarCodigo"
+                  :loading="cargando"
                 >
                   Verificar
                 </VBtn>
               </VCol>
-<!--              -->
-<!--              <VCol cols="12">-->
-<!--                <div class="d-flex justify-center align-center flex-wrap">-->
-<!--                  <span class="me-1">Didn't get the code?</span>-->
-<!--                  <a href="#">Resend</a>-->
-<!--                </div>-->
-<!--              </VCol>-->
 
             </VRow>
           </VForm>

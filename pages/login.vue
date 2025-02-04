@@ -44,23 +44,21 @@ const errors = ref({
 });
 
 const onSubmit = async () => {
+
   const {valid: isValid} = await refVForm.value?.validate();
 
   if (isValid) {
 
     try {
 
-
-
       const res = await post('api/auth/login', form.value);
 
-      console.log(res.token)
 
       if (!res.token) {
 
-        const usuarioTemportal = useState('usuarioTemporal', () => null)
+        const usuarioTemportal = useState('idUsuarioTemporal', () => null)
 
-        usuarioTemportal.value = res.data.user;
+        usuarioTemportal.value = res.data.user_id;
 
         navigateTo('/auth/DobleFactorAutenticacion')
 
@@ -70,7 +68,9 @@ const onSubmit = async () => {
        else {
 
         const isSecure = useRequestURL().protocol.startsWith("https");
+
         const cookie = useCookie('sanctum.token.cookie', { secure: isSecure });
+
         cookie.value = res.token;
 
         await refreshIdentity();
