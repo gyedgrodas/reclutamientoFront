@@ -11,8 +11,8 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import {VNodeRenderer} from '@layouts/components/VNodeRenderer'
 import {themeConfig} from '@themeConfig'
 
-const {login} = useSanctumAuth();
-const user = useSanctumUser();
+const {refreshIdentity} = useSanctumAuth();
+const {post} = useClienteRequest();
 
 definePageMeta({
   layout: 'blank',
@@ -49,20 +49,37 @@ const onSubmit = async () => {
   if (isValid) {
 
     try {
-      // Realizar login primero (si aún no se ha hecho)
-      await login(form.value)
 
-    } catch (error) {
 
-      if (error.message === 'Token was not returned from the API') {
 
-        useState('tieneDobleFactorActivo', () => true)
+      const res = await post('api/auth/login', form.value);
+
+      console.log(res.token)
+
+      if (!res.token) {
+
+        const usuarioTemportal = useState('usuarioTemporal', () => null)
+
+        usuarioTemportal.value = res.data.user;
 
         navigateTo('/auth/DobleFactorAutenticacion')
 
         return
 
       }
+       else {
+
+        const isSecure = useRequestURL().protocol.startsWith("https");
+        const cookie = useCookie('sanctum.token.cookie', { secure: isSecure });
+        cookie.value = res.token;
+
+        await refreshIdentity();
+
+        navigateTo('/')
+
+      }
+
+    } catch (error) {
 
       msgError.value = error?.response?._data?.message || 'Ocurrió un error inesperado.'
 

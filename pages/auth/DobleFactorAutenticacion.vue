@@ -12,23 +12,42 @@ definePageMeta({
   }
 });
 
-if(!useState('tieneDobleFactorActivo').value) {
+if(!useState('usuarioTemporal').value) {
 
   navigateTo('/login')
 
 }
 
-const router = useRouter()
-const otp = ref('')
-const isOtpInserted = ref(false)
+const { post } = useClienteRequest()
 
-const onFinish = () => {
-  isOtpInserted.value = true
+const { showToastError, showToastSuccess } = useToast()
 
-  setTimeout(() => {
-    isOtpInserted.value = false
-    router.push('/')
-  }, 2000)
+const {refreshIdentity} = useSanctumAuth();
+const codigo = ref('')
+
+const verificarCodigo = async () => {
+  try {
+
+    const usuarioTemportal = useState('usuarioTemporal')
+
+    const res: {message: string} = await post('api/auth/confirmar-factor-autenticacion-dos-factores', {
+      codigo: codigo.value,
+      user_id: usuarioTemportal.value.id
+    })
+
+    const isSecure = useRequestURL().protocol.startsWith("https");
+    const cookie = useCookie('sanctum.token.cookie', { secure: isSecure });
+    cookie.value = res.data.token;
+
+    await refreshIdentity();
+
+    navigateTo('/')
+
+  } catch (error) {
+
+    showToastError(error?.response?.data?.message)
+
+  }
 }
 </script>
 
@@ -85,18 +104,15 @@ const onFinish = () => {
                   Escribe tu código de seguridad de 6 dígitos
                 </h6>
                 <VOtpInput
-                  v-model="otp"
-                  :disabled="isOtpInserted"
+                  v-model="codigo"
                   type="number"
                   class="pa-0"
-                  @finish="onFinish"
+                  @finish="verificarCodigo"
                 />
               </VCol>
 
               <VCol cols="12">
                 <VBtn
-                  :loading="isOtpInserted"
-                  :disabled="isOtpInserted"
                   block
                   type="submit"
                 >
@@ -122,8 +138,8 @@ const onFinish = () => {
 <style lang="scss">
 @use "@core/scss/template/pages/page-auth";
 
-.v-otp-input {
-  .v-otp-input__content {
+.v-codigo-input {
+  .v-codigo-input__content {
     padding-inline: 0;
   }
 }
