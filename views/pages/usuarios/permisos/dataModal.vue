@@ -101,7 +101,6 @@ const actualizarPermisoSeleccionados = (permisoSeleccionados: any) => {
 
 // Crear o editar un permiso
 const onSubmit = async () => {
-  console.log('asdfasdfsadf')
   refForm.value?.validate().then(async ({ valid }) => {
     if (valid) {
       if (!localItem.value.name.trim())

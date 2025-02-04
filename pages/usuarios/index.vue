@@ -20,20 +20,6 @@ const filtros = ref({
   usuario_dominio: [],
 })
 
-const cargarUsuarios = async () => {
-  try {
-    const url = '/api/users'
-    const response: any = await get(url, { params: filtros.value })
-
-    // Asigna los usuarios a la variable 'allUsers' para actualizar la tabla
-    allUsers.value = response.data.data
-  }
-  catch (error) {
-    console.error('Error al cargar usuarios:', error)
-    showToastError('Error al cargar usuarios')
-  }
-}
-
 const buscarUsuarios = async (searchTerm: string) => {
   try {
     const url = searchTerm ? `/api/users?filter[usuario_dominio]=${searchTerm} ` : '/api/users'
@@ -41,10 +27,9 @@ const buscarUsuarios = async (searchTerm: string) => {
 
     allUsers.value = response.data.data
 
-    console.log('usuario encontrados:', allUsers.value)
   }
   catch (error) {
-    console.error('Error al buscar usuarios:', error)
+    showToastError(error.message)
   }
 }
 
@@ -71,14 +56,7 @@ const deleteItem = async (id: number) => {
 
     showToastSuccess(respuesta.message)
 
-    // Recarga los usuarios después de la eliminación
-    await cargarUsuarios()
-
-    // Opcionalmente, puedes limpiar filtros si es necesario
-    filtros.value = {} // Restablece filtros si es necesario
-
-    // Si el componente no se actualiza, forzar un cambio reactivo
-    allUsers.value = [...allUsers.value] // Esto garantiza que la tabla se actualice.
+    // allUsers.value = [...allUsers.value] // Esto garantiza que la tabla se actualice.
   }
   catch (error) {
     showToastError(error.message)

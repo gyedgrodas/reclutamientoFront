@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import Swal from 'sweetalert2'
 import RoleForm from '@/components/usuario/RoleForm.vue'
 
-const { put, get, post, deleted } = useClienteRequest()
+const { get, deleted } = useClienteRequest()
 
 // Variables reactivas
 const allRoles = ref([]) // Lista completa para el selector
@@ -41,41 +41,6 @@ const editarRol = (rol: any) => {
   seleccionarRol.value = rol
   formMode.value = 'edit'
   verModalDeRol.value = true
-}
-
-// Guardar o Actualizar un rol (crear o editar)
-const guardarRol = async (rolData: any) => {
-  try {
-    if (formMode.value === 'create') {
-      await post('/api/roles', { data: rolData })
-      Swal.fire(
-        'Agregado!',
-        'El rol ha sido agregado con éxito.',
-        'success')
-    }
-    else {
-      console.log(rolData)
-      await put(`/api/roles/${rolData.id}`, { data: rolData })
-      Swal.fire(
-        'Actualizado!',
-        'El rol ha sido actualizado con éxito.',
-        'success')
-    }
-
-    verModalDeRol.value = false
-    await nextTick()
-  }
-  catch (error: any) {
-    console.error('Error al guardar el rol:', error)
-    Swal.fire(
-      'Error!',
-      error?.response?.data?.message || 'Error al guardar el rol.',
-      'error',
-    )
-  }
-  finally {
-    verModalDeRol.value = false
-  }
 }
 
 // Eliminar un rol
@@ -193,7 +158,6 @@ const columnas = [
     :visible="verModalDeRol"
     :mode="formMode"
     :rol="seleccionarRol"
-    @rol-data="guardarRol"
-    @cancel="verModalDeRol = false"
+    @cerrar="verModalDeRol = false"
   />
 </template>
