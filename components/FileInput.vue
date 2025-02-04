@@ -70,9 +70,21 @@ const FilePond = vueFilePond(FilePondPluginImagePreview, FilePondPluginFileValid
       id: $attrs.id || `filepond-${Math.random().toString(36).substr(2, 9)}`, // Generar un ID único si no se pasa uno
       allowMultiple: $attrs.multiple !== undefined, // Permitir múltiples archivos si se especifica el atributo 'multiple'
     }"
-    @addfile="(file) => emit('addfile', file)"
-    @removefile="(file) => emit('removefile', file)"
-    @processfile="(file) => emit('processfile', file)"
+    @addfile="(error, fileItem) => {
+      !error
+        ? emit('addfile', fileItem.file) // Emitir archivo si no hay error
+        : console.error('Error al agregar archivo:', error)
+    }"
+    @removefile="(error, file) => {
+      !error
+        ? emit('removefile', file) // Emitir evento si no hay error
+        : console.error('Error al eliminar archivo:', error)
+    }"
+    @processfile="(error, file) => {
+      !error
+        ? emit('processfile', file) // Emitir evento si no hay error
+        : console.error('Error al procesar archivo:', error)
+    }"
     @warning="handleWarning"
   />
 </template>
