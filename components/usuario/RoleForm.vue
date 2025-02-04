@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { defineEmits, defineProps, nextTick, ref, watch } from 'vue'
 import type { VForm } from 'vuetify/components/VForm'
+import Swal from 'sweetalert2'
 import DualListbox from '@/components/DualListbox.vue'
 
 const props = defineProps({
@@ -15,9 +16,9 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['rolData', 'cancel'])
+const emit = defineEmits(['cerrar'])
 
-const { get } = useClienteRequest()
+const { put, get, post } = useClienteRequest()
 
 interface Permission {
   id: number
@@ -32,12 +33,13 @@ const refForm = ref<VForm>()
 const name = ref('')
 const guardName = ref('api')
 const permisos = ref<Permission []>([])
+const isFormValid = ref(false)
 
 const cargarPermisosDisponibles = async () => {
   try {
     const response: any = await get('/api/permisos')
 
-    permisosDisponibles.value = response.data
+    permisosDisponibles.value = response.data.data
     console.log('Permisos disponibles:', permisosDisponibles.value)
   }
   catch (error) {
@@ -56,7 +58,7 @@ const limpiarFormulario = () => {
 const cargarPermisosRol = async (rolId: number) => {
   try {
     const response: any = await get(`/api/roles/${rolId}/permisos`)
-    console.log(response.data)
+
     permisosSeleccionadosAntes.value = response.data
   }
   catch (error) {
@@ -67,6 +69,7 @@ const cargarPermisosRol = async (rolId: number) => {
 watch(
   () => props.visible,
   async isVisible => {
+    console.log('isVisible:', props)
     limpiarFormulario()
     if (isVisible && props.mode === 'edit' && props.rol) {
       name.value = props.rol.name || ''
@@ -83,23 +86,48 @@ watch(
   { immediate: true },
 )
 
-// Enviar datos del formulario
-const onSubmit = () => {
-  if (refForm.value?.validate()) {
-    const rolData = {
-      id: props.rol?.id || null,
-      name: name.value,
-      guard_name: guardName.value,
-      permisos: permisoSeleccionadoAhora.value.slice(), // Aquí pasamos los permisos seleccionados
+const guardarRol = async () => {
+  refForm.value?.validate().then(async ({ valid }) => {
+    if (!valid)
+      return
+    try {
+      const rolData = {
+        id: props.rol?.id || null,
+        name: name.value,
+        guard_name: guardName.value,
+        permisos: permisoSeleccionadoAhora.value.slice(),
+      }
+
+      if (props.mode === 'create') {
+        await post('/api/roles', { data: rolData })
+        Swal.fire(
+          'Agregado!',
+          'El rol ha sido agregado con éxito.',
+          'success')
+      }
+      else {
+        console.log(rolData)
+        await put(`/api/roles/${rolData.id}`, { data: rolData })
+        Swal.fire(
+          'Actualizado!',
+          'El rol ha sido actualizado con éxito.',
+          'success')
+      }
+      emit('cerrar')
+      await nextTick()
     }
-
-    emit('rolData', rolData)
-  }
-}
-
-// Cerrar modal
-const cerrarModal = () => {
-  emit('cancel')
+    catch (error: any) {
+      console.error('Error al guardar el rol:', error)
+      Swal.fire(
+        'Error!',
+        error?.response?.data?.message || 'Error al guardar el rol.',
+        'error',
+      )
+    }
+    finally {
+      emit('cerrar')
+    }
+  })
 }
 
 const actualizarPermisoSeleccionados = (permisoSeleccionados: any) => {
@@ -107,27 +135,28 @@ const actualizarPermisoSeleccionados = (permisoSeleccionados: any) => {
 }
 
 cargarPermisosDisponibles()
-
-onMounted(() => {
-})
 </script>
 
 <template>
   <VDialog
-    :model-value="visible"
+    :model-value="props.visible"
     width="1200"
-    @update:model-value="cerrarModal"
+    @update:model-value="emit('cerrar')"
   >
     <VCard>
       <VCardTitle class="text-h4 text-center">
         {{ mode === "create" ? "Crear Nuevo Rol" : "Editar Rol" }}
       </VCardTitle>
       <VCardText>
-        <VForm ref="refForm">
+        <VForm
+          ref="refForm"
+          v-model="isFormValid"
+        >
           <AppTextField
             v-model="name"
             class="mb-4"
             label="Nombre del Rol"
+            :rules="[requiredValidator]"
           />
           <AppTextField
             v-model="guardName"
@@ -146,13 +175,13 @@ onMounted(() => {
       <VCardActions>
         <VBtn
           color="error"
-          @click="cerrarModal"
+          @click="visible = false"
         >
           Cancelar
         </VBtn>
         <VBtn
           color="primary"
-          @click="onSubmit"
+          @click="guardarRol"
         >
           {{ mode === "create" ? "Crear" : "Actualizar" }}
         </VBtn>

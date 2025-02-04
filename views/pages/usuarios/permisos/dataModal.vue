@@ -35,7 +35,7 @@ const cargarRolesDisponibles = async () => {
   try {
     const response: any = await get('/api/roles')
 
-    rolesDisponibles.value = response.data
+    rolesDisponibles.value = response.data.data
   }
   catch (error) {
     console.error('Error al cargar los permisos:', error)
@@ -101,7 +101,6 @@ const actualizarPermisoSeleccionados = (permisoSeleccionados: any) => {
 
 // Crear o editar un permiso
 const onSubmit = async () => {
-  console.log('asdfasdfsadf')
   refForm.value?.validate().then(async ({ valid }) => {
     if (valid) {
       if (!localItem.value.name.trim())
