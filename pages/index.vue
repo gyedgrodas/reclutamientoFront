@@ -12,4 +12,12 @@ const nombreDeUser = usuario.value?.nombre;
 
   <h1>Bienvenido, {{ nombreDeUser }}</h1>
 
+  <VCard>
+
+    <VCardTitle>Prueba</VCardTitle>
+
+<!--    <AgregaDobleFactorAuth />-->
+
+  </VCard>
+
 </template>

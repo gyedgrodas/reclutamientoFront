@@ -33,7 +33,7 @@ const verificarCodigo = async () => {
 
     const usuarioTemportal = useState('idUsuarioTemporal')
 
-    const res: {message: string} = await post('api/auth/confirmar-factor-autenticacion-dos-factores', {
+    const res: {message: string} = await post('api/auth/doble-factor/validar-codigo-auth', {
       codigo: codigo.value,
       user_id: usuarioTemportal.value
     })
@@ -42,7 +42,7 @@ const verificarCodigo = async () => {
 
     const cookie = useCookie('sanctum.token.cookie', { secure: isSecure });
 
-    cookie.value = res.data.token;
+    cookie.value = res.token;
 
     await refreshIdentity();
 
