@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import EjemploDataTable from "@/views/pages/ejemplos/dataTable/ejemploDataTable.vue";
+import EjemploDataTable from '@/views/pages/ejemplos/dataTable/ejemploDataTable.vue'
 
 const { showToastInfo, showToastSuccess, showToastWarning, showToastError } = useToast()
 const { paginaEspera, cargandoPagina } = useCargandoPagina()
 const { getCatalogos, catalogos } = useCatalogo()
-
 
 const mostrarToastInfo = () => {
   showToastInfo('Hello from second page')
@@ -162,10 +161,8 @@ onMounted(loadCatalogs)
   </VCard>
 
   <VCard class="mb-5">
-
     <VCardText>
-
-      <EjemploDataTable/>
+      <EjemploDataTable />
 
     </VCardText>
   </VCard>
@@ -177,11 +174,17 @@ onMounted(loadCatalogs)
         label-idle="Arrastra y suelta tus archivos aquí o haz clic para seleccionarlos"
         :credits="false"
         allowMultiple
-        maxFiles="2"
+        max-files="2"
         name="documentos"
       />
     </VCardText>
   </VCard>
+  <VCard class="mb-12">
+    <VCardTitle>Notificación de correo</VCardTitle>
+    <VCardText>
+      <NotificacionCorreo />
+    </VCardText>
+  </vcard>
 </template>
 
 <style lang="scss" scoped>
