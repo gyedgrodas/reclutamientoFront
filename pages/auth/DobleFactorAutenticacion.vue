@@ -12,7 +12,7 @@ definePageMeta({
   }
 });
 
-if(!useState('idUsuarioTemporal').value) {
+if(!useState('user_id').value) {
 
   navigateTo('/login')
 
