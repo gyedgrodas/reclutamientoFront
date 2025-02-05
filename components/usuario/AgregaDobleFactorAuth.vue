@@ -1,20 +1,31 @@
 <script setup lang="ts">
 
-import { ref, onMounted } from 'vue'
+import {ref, onMounted} from 'vue'
 
-const { post } = useClienteRequest()
-const { user } = useSanctumAuth()
+const {get, post} = useClienteRequest()
+const {showToastSuccess, showToastError} = useToast()
 
-const { showToastSuccess, showToastError } = useToast()
+interface InterfaceProps {
+  user_id: number,
+  autenticar_usuario: boolean
+}
+
+const {user_id, autenticar_usuario = false } = defineProps<InterfaceProps>()
+
+interface InterfaceEmits {
+  (event: 'codigoConfirmado',  valor: any): void;
+}
+
+let emits = defineEmits<InterfaceEmits>();
+
 
 const qr = ref('')
-
 const codigo = ref('')
 
 const obtenerQR = async () => {
   try {
 
-    const res = await post('api/auth/doble-factor/crear', {})
+    const res = await get('api/auth/doble-factor/generar-qr/' + user_id,)
 
     qr.value = res.data.qr_code
 
@@ -31,15 +42,28 @@ onMounted(() => {
 
 })
 
-
 const verificarCodigo = async () => {
   try {
 
-    const res: {message: string} = await post('api/auth/doble-factor/confirmar-codigo', {
-      codigo: codigo.value
+    const res: { message: string } = await post('api/auth/doble-factor/confirmar-codigo', {
+      codigo: codigo.value,
+      user_id: user_id,
+      autenticar_usuario: autenticar_usuario
     })
 
+    if(autenticar_usuario) {
+
+      let token = res.token
+
+      emits('codigoConfirmado',token)
+
+      return
+
+    }
+
     showToastSuccess(res.message)
+
+    emits('codigoConfirmado', 'codigoConfirmado')
 
   } catch (error) {
 
@@ -52,18 +76,65 @@ const verificarCodigo = async () => {
 
 <template>
 
-  <VCol class="v-col-12 text-center">
+    <h4 class="text-h4 text-center mb-6">
+      Add Authenticator App
+    </h4>
+    <h5 class="text-h5 mb-2">
+      Authenticator Apps
+    </h5>
 
-    <img :src="'data:image/png;base64,' + qr" alt="Código QR de prueba">
+    <p class="text-body-1 mb-6">
+      Utilizando una aplicación de autenticación como Google Authenticator, Microsoft Authenticator, Authy o 1Password,
+      escanee el código QR. Generará un código de 6 dígitos para que lo ingrese a continuación.
+    </p>
 
-    <VTextField v-model="codigo"
-                label="Código de verificación"
-                outlined
-                type="number"
-    ></VTextField>
+    <div class="mb-6">
 
-    <VBtn @click="verificarCodigo" block>Verificar</VBtn>
+      <VImg :src="'data:image/png;base64,' + qr"
+            alt="Código QR"
+            class="mx-auto"
+            width="150"
+      />
 
-  </VCol>
+    </div>
+
+    <VAlert
+      title="ASDLKNASDA9AHS678dGhASD78AB"
+      text="If you are unable to scan the QR code, you can manually enter the secret key below."
+      variant="tonal"
+      color="warning"
+    />
+    <AppTextField
+      v-model="codigo"
+      name="auth-code"
+      label="Enter Authentication Code"
+      placeholder="123 456"
+      class="mt-4 mb-6"
+    />
+
+    <div class="d-flex justify-end flex-wrap gap-4">
+      <!--    <VBtn-->
+      <!--      color="secondary"-->
+      <!--      variant="tonal"-->
+      <!--      @click="resetAuthCode"-->
+      <!--    >-->
+      <!--      Cancel-->
+      <!--    </VBtn>-->
+
+      <VBtn
+        type="submit"
+        @click="verificarCodigo"
+      >
+        Continue
+        <VIcon
+          end
+          icon="tabler-arrow-right"
+          class="flip-in-rtl"
+        />
+      </VBtn>
+    </div>
 
 </template>
+
+
+

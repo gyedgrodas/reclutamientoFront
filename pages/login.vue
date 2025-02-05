@@ -53,16 +53,24 @@ const onSubmit = async () => {
 
       const res = await post('api/auth/login', form.value);
 
+      if (noVieneToken(res)) {
 
-      if (!res.token) {
+        useState('idUsuarioTemporal', () => res.data.user_id)
 
-        const usuarioTemportal = useState('idUsuarioTemporal', () => null)
+        if(debeRegistrarDobleFactor(res)) {
 
-        usuarioTemportal.value = res.data.user_id;
+          useState('registrar_doble_factor', () => true)
 
-        navigateTo('/auth/DobleFactorAutenticacion')
+          await navigateTo('/auth/RegistrarFactorAutenticacion')
 
-        return
+          return
+
+        } else{
+
+          navigateTo('/auth/DobleFactorAutenticacion')
+
+          return
+        }
 
       }
        else {
@@ -86,6 +94,19 @@ const onSubmit = async () => {
     }
   }
 };
+
+const noVieneToken = (res) => {
+
+  return !res.token
+
+}
+
+const debeRegistrarDobleFactor = (res) => {
+
+  return !res.data.registrar_doble_factor
+
+
+}
 
 
 watch(form, () => {
