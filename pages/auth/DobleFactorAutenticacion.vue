@@ -31,7 +31,7 @@ const verificarCodigo = async () => {
   cargando.value = true
   try {
 
-    const usuarioTemportal = useState('idUsuarioTemporal')
+    const usuarioTemportal = useState('user_id')
 
     const res: {message: string} = await post('api/auth/doble-factor/validar-codigo-auth', {
       codigo: codigo.value,

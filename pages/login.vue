@@ -55,7 +55,9 @@ const onSubmit = async () => {
 
       if (noVieneToken(res)) {
 
-        useState('idUsuarioTemporal', () => res.data.user_id)
+        let valorUser = useState('user_id', () => null)
+
+        valorUser.value = res.data.user_id
 
         if(debeRegistrarDobleFactor(res)) {
 
@@ -103,7 +105,7 @@ const noVieneToken = (res) => {
 
 const debeRegistrarDobleFactor = (res) => {
 
-  return !res.data.registrar_doble_factor
+  return res.data.registrar_doble_factor
 
 
 }

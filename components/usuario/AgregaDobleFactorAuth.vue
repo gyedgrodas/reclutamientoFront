@@ -45,6 +45,7 @@ onMounted(() => {
 const verificarCodigo = async () => {
   try {
 
+    console.log('El usuario que se enviara es:', user_id);
     const res: { message: string } = await post('api/auth/doble-factor/confirmar-codigo', {
       codigo: codigo.value,
       user_id: user_id,
@@ -98,16 +99,10 @@ const verificarCodigo = async () => {
 
     </div>
 
-    <VAlert
-      title="ASDLKNASDA9AHS678dGhASD78AB"
-      text="If you are unable to scan the QR code, you can manually enter the secret key below."
-      variant="tonal"
-      color="warning"
-    />
     <AppTextField
       v-model="codigo"
       name="auth-code"
-      label="Enter Authentication Code"
+      label="Ingrese el código"
       placeholder="123 456"
       class="mt-4 mb-6"
     />
