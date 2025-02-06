@@ -43,7 +43,15 @@ const errors = ref({
   password: '',
 });
 
-const onSubmit = async () => {
+interface RespuestaSolicitud {
+  token?: string;
+  data: {
+    user_id: string;
+    registrar_doble_factor: boolean;
+  };
+}
+
+const onSubmit = async (): Promise<void> => {
 
   const {valid: isValid} = await refVForm.value?.validate();
 
@@ -51,35 +59,34 @@ const onSubmit = async () => {
 
     try {
 
-      const res = await post('api/auth/login', form.value);
+      const res: RespuestaSolicitud = await post('api/auth/login', form.value);
 
       if (noVieneToken(res)) {
 
-        let valorUser = useState('user_id', () => null)
+        const valorUser = useState<string | null>('user_id', () => null);
 
-        valorUser.value = res.data.user_id
+        valorUser.value = res.data.user_id;
 
-        if(debeRegistrarDobleFactor(res)) {
+        if (debeRegistrarDobleFactor(res)) {
 
-          useState('registrar_doble_factor', () => true)
+          useState<boolean>('registrar_doble_factor', () => true)
 
-          await navigateTo('/auth/RegistrarFactorAutenticacion')
+          navigateTo('/auth/RegistrarFactorAutenticacion')
 
           return
 
-        } else{
+        } else {
 
           navigateTo('/auth/DobleFactorAutenticacion')
 
           return
         }
 
-      }
-       else {
+      } else {
 
         const isSecure = useRequestURL().protocol.startsWith("https");
 
-        const cookie = useCookie('sanctum.token.cookie', { secure: isSecure });
+        const cookie = useCookie('sanctum.token.cookie', {secure: isSecure});
 
         cookie.value = res.token;
 
@@ -89,27 +96,27 @@ const onSubmit = async () => {
 
       }
 
-    } catch (error) {
+    } catch (error: unknown) {
 
-      msgError.value = error?.response?._data?.message || 'Ocurrió un error inesperado.'
+      const err = error as { response?: { _data?: { message?: string } } };
+
+      msgError.value = err.response?._data?.message ?? 'Ocurrió un error inesperado.';
 
     }
   }
 };
 
-const noVieneToken = (res) => {
+const noVieneToken = (res: RespuestaSolicitud): boolean => {
 
   return !res.token
 
 }
 
-const debeRegistrarDobleFactor = (res) => {
+const debeRegistrarDobleFactor = (res: RespuestaSolicitud): boolean => {
 
   return res.data.registrar_doble_factor
 
-
 }
-
 
 watch(form, () => {
   msgError.value = ''
@@ -213,26 +220,27 @@ watch(form, () => {
                   label="Password"
                   placeholder="············"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  class="mb-8"
                 />
 
-                <div class="d-flex align-center flex-wrap justify-space-between my-6">
-                  <VCheckbox
-                    v-model="form.remember"
-                    label="Remember me"
-                  />
-                  <a
-                    class="text-primary"
-                    href="javascript:void(0)"
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
+<!--                <div class="d-flex align-center flex-wrap justify-space-between my-6">-->
+<!--                  <VCheckbox-->
+<!--                    v-model="form.remember"-->
+<!--                    label="Remember me"-->
+<!--                  />-->
+<!--                  <a-->
+<!--                    class="text-primary"-->
+<!--                    href="javascript:void(0)"-->
+<!--                  >-->
+<!--                    Forgot Password?-->
+<!--                  </a>-->
+<!--                </div>-->
 
                 <VBtn
                   block
                   type="submit"
                 >
-                  Login
+                  Iniciar Sesión
                 </VBtn>
               </VCol>
 
