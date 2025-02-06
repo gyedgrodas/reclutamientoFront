@@ -98,9 +98,9 @@ const onSubmit = async (): Promise<void> => {
 
     } catch (error: unknown) {
 
-      const err = error as { response?: { _data?: { message?: string } } };
+      const err = error as { response?: { data?: { message?: string } } };
 
-      msgError.value = err.response?._data?.message ?? 'Ocurrió un error inesperado.';
+      msgError.value = err.response?.data?.message ?? 'Ocurrió un error inesperado.';
 
     }
   }

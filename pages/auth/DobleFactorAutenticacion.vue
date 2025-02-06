@@ -12,7 +12,9 @@ definePageMeta({
   }
 });
 
-if(!useState('user_id').value) {
+const usuarioTemportal = useState<string | null>('user_id')
+
+if(!usuarioTemportal.value) {
 
   navigateTo('/login')
 
@@ -20,20 +22,33 @@ if(!useState('user_id').value) {
 
 const { post } = useClienteRequest()
 
-const { showToastError, showToastSuccess } = useToast()
+const { showToastError } = useToast()
 
 const {refreshIdentity} = useSanctumAuth();
-const codigo = ref('')
-const cargando = ref(false)
 
-const verificarCodigo = async () => {
+const codigo = ref<string>('')
+const cargando = ref<boolean>(false)
+
+interface RespuestaRequest {
+  message: string,
+  token?: string
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+const verificarCodigo = async (): Promise<void> => {
 
   cargando.value = true
+
   try {
 
-    const usuarioTemportal = useState('user_id')
-
-    const res: {message: string} = await post('api/auth/doble-factor/validar-codigo-auth', {
+    const res:RespuestaRequest = await post('api/auth/doble-factor/validar-codigo-auth', {
       codigo: codigo.value,
       user_id: usuarioTemportal.value
     })
@@ -48,9 +63,12 @@ const verificarCodigo = async () => {
 
     navigateTo('/')
 
-  } catch (error) {
+  }catch (error: unknown) {
 
-    showToastError(error?.response?.data?.message)
+    const err = error as ApiError;
+
+    console.log(err)
+    showToastError(err.response?.data?.message ?? 'Ocurrió un error inesperado.')
 
   } finally {
 
