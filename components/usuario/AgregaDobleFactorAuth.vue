@@ -7,7 +7,7 @@ const {showToastSuccess, showToastError} = useToast()
 
 interface InterfaceProps {
   user_id: number,
-  autenticar_usuario: boolean
+  autenticar_usuario?: boolean
 }
 
 const {user_id, autenticar_usuario = false } = defineProps<InterfaceProps>()

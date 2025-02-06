@@ -4,7 +4,7 @@ export interface UsuarioInterface {
 
         isDisabledEdit: false,
 
-        id: string;
+        id: number;
         
         usuario_dominio: string;
         
@@ -71,6 +71,10 @@ export interface UsuarioInterface {
         ctc_cobros: string;
         
         gestiones_crm_vencidas: string;
+
+        tieneDobleFactorActivo: boolean;
+
+        two_factor_habilitado: boolean;
 
 
         
