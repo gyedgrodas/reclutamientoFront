@@ -51,6 +51,7 @@ const data = ref( <UsuarioInterface>
 interface Emit {
 
   (e: 'emitirDatos', value: UsuarioInterface ): void
+  (e: 'restablecerCodigo2fa', value: any ): void
 
 }
 
@@ -68,9 +69,13 @@ if (props.item) {
 }
 
 const onSubmit = () => {
+  console.log('emitiendo datos')
   refForm.value?.validate().then(({valid}) => {
     if (valid) {
       emit('emitirDatos', data.value)
+    } else {
+
+      console.log('Daros no validados!')
     }
   })
 }
@@ -114,10 +119,23 @@ const llenarData = (selectorData: any) => {
 }
 
 
+const estaEditando = computed(() => {
+  return data.value.id
+})
 
 const nombreBoton = computed(() => {
   return data.value.id ? 'Actualizar' : 'Guardar'
 })
+
+const restablecerCodigo = () => {
+
+  if(estaEditando.value) {
+
+    emit('restablecerCodigo2fa', data.value.id)
+
+  }
+
+}
 
 </script>
 
@@ -331,6 +349,53 @@ const nombreBoton = computed(() => {
             <VExpansionPanelText>
 
               <v-label>seccion de roles y permisos pendiente</v-label>
+            </VExpansionPanelText>
+          </VExpansionPanel>
+
+          <!--  SECTION AUTENTICACIÓN-->
+          <VExpansionPanel>
+            <VExpansionPanelTitle>Autenticación</VExpansionPanelTitle>
+
+            <VExpansionPanelText>
+
+
+              <VCard class="pa-4">
+                <VRow align="center">
+                  <!-- Autenticación en dos pasos -->
+                  <VCol cols="12" md="6" class="d-flex align-center">
+                    <VLabel for="twoFactorSwitch" class="mr-2 text-medium-emphasis">Autenticación en dos pasos</VLabel>
+                    <VSwitch
+                      id="twoFactorSwitch"
+                      v-model="data.two_factor_habilitado"
+                      inset
+                      color="primary"
+                    >
+                      <template #label>
+                        <strong>{{ data.two_factor_habilitado ? 'Sí' : 'No' }}</strong>
+                      </template>
+                    </VSwitch>
+                  </VCol>
+
+                  <VCol
+                    v-if="data.two_factor_habilitado && data.id"
+                    cols="12"
+                    md="6"
+                    class="d-flex align-center justify-end"
+                  >
+                    <VLabel for="resetButton" class="mr-2 text-medium-emphasis">Restablecer Código</VLabel>
+                    <VBtn
+                      id="resetButton"
+                      color="primary"
+                      variant="flat"
+                      @click="restablecerCodigo"
+                    >
+                      <VIcon class="tabler-refresh mr-1" />
+                      Restablecer
+                    </VBtn>
+                  </VCol>
+                </VRow>
+              </VCard>
+
             </VExpansionPanelText>
           </VExpansionPanel>
           <!-- !SECTION Payment Method -->

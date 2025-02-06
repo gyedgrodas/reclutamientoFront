@@ -121,6 +121,36 @@ const puedeMostrarDatos = computed(() => {
 
 });
 
+const restablecerCodigo2fa = async (user_id) => {
+
+  if (!requestInProgress.value) {
+
+    paginaEspera.value = true;
+    requestInProgress.value = true;
+
+    try {
+
+      const respuesta = await put('api/auth/doble-factor/reestablecer-codigo/' + user_id, {});
+
+      showToastSuccess(respuesta.message);
+
+      getUsuario();
+
+    } catch (error) {
+
+      showToastError(error.message);
+
+    } finally {
+
+      paginaEspera.value = false;
+      requestInProgress.value = false;
+
+    }
+
+  }
+
+}
+
 </script>
 
 <template>
@@ -151,6 +181,7 @@ const puedeMostrarDatos = computed(() => {
                 v-if="puedeMostrarDatos"
                 :item="itemUsuario"
                 @emitirDatos="actualizarUsuario"
+                @restablecer-codigo2fa="restablecerCodigo2fa"
         />
 
       </VCardText>
