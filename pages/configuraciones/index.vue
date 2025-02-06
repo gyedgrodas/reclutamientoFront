@@ -8,7 +8,7 @@ definePageMeta({
   subject: 'configuraciones', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 })
 
-const { get, deleted } = useClienteRequest()
+const { deleted } = useClienteRequest()
 
 const { showToastSuccess, showToastError, preguntaEliminar } = useToast()
 
@@ -47,7 +47,7 @@ const deleteItem = async (id: number) => {
     <VBtn
       v-if="can('crear configuraciones', 'configuraciones')"
       class="ml-auto"
-      color="success"
+      color="primary"
       to="/configuraciones/create"
     >
       Nueva Configuracion
