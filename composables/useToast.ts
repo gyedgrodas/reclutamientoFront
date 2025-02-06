@@ -77,13 +77,50 @@ export default function useToast() {
     return false;
   };
 
+  const realizarPregunta = async ({
+                                    titulo = "¿Estás seguro?",
+                                    message = "No podrás revertir esto!",
+                                    texto_btn_confirmar = "Sí, eliminar",
+                                    texto_btn_cancelar = "Cancelar",
+                                    color_confirmar = "#d33",
+                                    color_cancelar = "#3085d6",
+                                    icono = "warning",
+                                  }: {
+    titulo?: string;
+    message?: string;
+    texto_btn_confirmar?: string;
+    texto_btn_cancelar?: string;
+    color_confirmar?: string;
+    color_cancelar?: string;
+    icono?: "warning" | "error" | "success" | "info";
+  }) => {
+    const temaColor = useCookie("tema_color");
+    const isDarkMode = temaColor.value === "dark";
+
+    let result = await Swal.fire({
+      title: titulo,
+      text: message,
+      icon: icono,
+      showCancelButton: true,
+      confirmButtonText: texto_btn_confirmar,
+      cancelButtonText: texto_btn_cancelar,
+      confirmButtonColor: color_confirmar,
+      cancelButtonColor: color_cancelar,
+      background: isDarkMode ? "#25293C" : "#fff",
+      customClass: isDarkMode ? "text-white" : "text-black",
+    });
+
+    return result.isConfirmed;
+  };
+
 
   return {
     showToastSuccess,
     showToastError,
     showToastWarning,
     showToastInfo,
-    preguntaEliminar
+    preguntaEliminar,
+    realizarPregunta
   }
 
 }
