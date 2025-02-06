@@ -19,13 +19,21 @@ interface InterfaceEmits {
 let emits = defineEmits<InterfaceEmits>();
 
 
-const qr = ref('')
-const codigo = ref('')
+const qr = ref<string | null>('')
+const codigo = ref<string | null>('')
 
-const obtenerQR = async () => {
+interface RespuestaRequest {
+  message: string,
+  token?: string,
+  data: {
+    qr_code: string
+  }
+}
+
+const obtenerQR = async (): Promise<void> => {
   try {
 
-    const res = await get('api/auth/doble-factor/generar-qr/' + user_id,)
+    const res:RespuestaRequest = await get('api/auth/doble-factor/generar-qr/' + user_id,)
 
     qr.value = res.data.qr_code
 
@@ -45,8 +53,7 @@ onMounted(() => {
 const verificarCodigo = async () => {
   try {
 
-    console.log('El usuario que se enviara es:', user_id);
-    const res: { message: string } = await post('api/auth/doble-factor/confirmar-codigo', {
+    const res:RespuestaRequest = await post('api/auth/doble-factor/confirmar-codigo', {
       codigo: codigo.value,
       user_id: user_id,
       autenticar_usuario: autenticar_usuario
@@ -66,9 +73,11 @@ const verificarCodigo = async () => {
 
     emits('codigoConfirmado', 'codigoConfirmado')
 
-  } catch (error) {
+  }catch (error: unknown) {
 
-    showToastError(error)
+    const err = error as { response?: { data?: { message?: string } } };
+
+    showToastError(err.response?.data?.message ?? 'Ocurrió un error inesperado.');
 
   }
 }

@@ -21,10 +21,9 @@ if(!useState('registrar_doble_factor').value) {
 
 }
 
-const user_id = <number>useState('user_id').value;
-console.log('El usuario que se enviara es:', useState('user_id').value);
+const user_id = useState<number>('user_id').value;
 
-const codigoFueValidado =  async (token: any) => {
+const codigoFueValidado =  async (token: string): Promise<void> => {
 
   const isSecure = useRequestURL().protocol.startsWith("https");
 
