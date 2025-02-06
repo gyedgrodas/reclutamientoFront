@@ -86,15 +86,15 @@ const verificarCodigo = async () => {
 
 <template>
 
-    <h4 class="text-h4 text-center mb-6">
-      Add Authenticator App
+    <h4 class="text-h4 text-center mb-3">
+      Autenticación de doble factor
     </h4>
-    <h5 class="text-h5 mb-2">
-      Authenticator Apps
-    </h5>
+<!--    <h5 class="text-h5 mb-2">-->
+<!--      Escanee el código QR-->
+<!--    </h5>-->
 
     <p class="text-body-1 mb-6">
-      Utilizando una aplicación de autenticación como Google Authenticator, Microsoft Authenticator, Authy o 1Password,
+      Utilizando la aplicación Microsoft Authenticator
       escanee el código QR. Generará un código de 6 dígitos para que lo ingrese a continuación.
     </p>
 
@@ -108,7 +108,7 @@ const verificarCodigo = async () => {
 
     </div>
 
-    <AppTextField
+    <VTextField
       v-model="codigo"
       name="auth-code"
       label="Ingrese el código"
