@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { defineProps, onMounted, ref, watch } from 'vue'
-import Swal from 'sweetalert2'
 import type { VForm } from 'vuetify/lib/components/VForm'
 import DualListbox from '@/components/DualListbox.vue'
 
 const props = defineProps<Props>()
 const emit = defineEmits(['actualizarAbrirModal', 'actualizarTabla'])
+const { showToastError, showToastSuccess } = useToast()
+const { paginaEspera } = useCargandoPagina()
 
 const { put, get, post } = useClienteRequest()
 
@@ -38,6 +39,7 @@ const cargarRolesDisponibles = async () => {
     rolesDisponibles.value = response.data.data
   }
   catch (error) {
+    showToastError('Error al cargar los roles')
     console.error('Error al cargar los permisos:', error)
   }
 }
@@ -49,12 +51,14 @@ const cargarSujetos = async () => {
     sujetosDisponibles.value = response.data
   }
   catch (error) {
+    showToastError('Error al cargar los sujetos')
     console.error('Error al cargar los permisos:', error)
   }
 }
 
 const cargarRolPermiso = async () => {
   if (!localItem.value.id) {
+    showToastError('No se puede cargar permisos porque el ID del permiso es inválido.')
     console.error('No se puede cargar permisos porque el ID del permiso es inválido.')
 
     return
@@ -66,6 +70,7 @@ const cargarRolPermiso = async () => {
     rolesSeleccionadosAntes.value = response.data
   }
   catch (error) {
+    showToastError('Error al cargar permisos del rol')
     console.error('Error al cargar permisos del rol:', error)
   }
 }
@@ -112,31 +117,24 @@ const onSubmit = async () => {
       try {
         if (localItem.value.id) {
           const response = await put(`/api/permisos/${localItem.value.id}`, { data: localItem.value })
-          if (response) {
-            Swal.fire({
-              title: 'Permiso actualizado',
-              icon: 'success',
-              showConfirmButton: false,
-              timer: 1500,
-            })
-          }
+          if (response)
+            showToastSuccess('Permiso actualizado')
+          paginaEspera.value = true
         }
         else {
           const response = await post('/api/permisos', { data: localItem.value })
-          if (response) {
-            Swal.fire({
-              title: 'Permiso creado',
-              icon: 'success',
-              showConfirmButton: false,
-              timer: 1500,
-            })
-          }
+          if (response)
+            showToastSuccess('Permiso creado')
+          paginaEspera.value = true
         }
         emit('actualizarTabla', true)
       }
       catch (error) {
+        paginaEspera.value = false
+        showToastError('Error en la operación')
         console.error('Error en la operación:', error)
       }
+      paginaEspera.value = false
       cerrarModal()
     }
   })
