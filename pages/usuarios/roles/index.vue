@@ -71,18 +71,16 @@ const columnas = [
 </script>
 
 <template>
-  <div class="container mt-5">
-    <div class="d-flex justify-content-between">
-      <h1>Gestión de Roles</h1>
-      <VBtn
-        class="ms-auto"
-        style="inline-size: 18rem;"
-        prepend-icon="tabler-plus"
-        @click="crearNuevoRol"
-      >
-        Nuevo Rol
-      </VBtn>
-    </div>
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between mb-6">
+    <h1>Gestión de Roles</h1>
+    <VBtn
+      class="ms-auto"
+      style="inline-size: 18rem;"
+      prepend-icon="tabler-plus"
+      @click="crearNuevoRol"
+    >
+      Nuevo Rol
+    </VBtn>
   </div>
   <VCard class="mb-2">
     <VCardText class="d-flex flex-wrap gap-6 mb-4">
@@ -104,53 +102,51 @@ const columnas = [
   </VCard>
 
   <VCard>
-    <VCardText>
-      <DataTableComponent
-        :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
-        :cantidad-por-pagina="5"
-        :cantidad-por-pagina-opciones="[2, 3, 5]"
-        :columnas="columnas"
-        endpoint="/api/roles"
-        :filtros="filtros"
-        :relaciones="['permissions']"
-      >
-        <template #item.permisos="{ item }">
-          <div class="d-flex flex-wrap gap-2 py-2">
-            <!-- Se agregó pb-2 -->
-            <VChip
-              v-for="permiso in item.permissions"
-              :key="permiso.id"
-              color="primary"
-              size="small"
-            >
-              {{ permiso.name }}
-            </VChip>
-            <VChip
-              v-if="!item.permissions.length"
-              color="warning"
-              size="small"
-            >
-              Sin Permisos
-            </VChip>
-          </div>
-        </template>
-        <template #item.actions="{ item }">
-          <VBtn
-            icon="tabler-edit"
-            variant="text"
+    <DataTableComponent
+      :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
+      :cantidad-por-pagina="5"
+      :cantidad-por-pagina-opciones="[2, 3, 5]"
+      :columnas="columnas"
+      endpoint="/api/roles"
+      :filtros="filtros"
+      :relaciones="['permissions']"
+    >
+      <template #item.permisos="{ item }">
+        <div class="d-flex flex-wrap gap-2 py-2">
+          <!-- Se agregó pb-2 -->
+          <VChip
+            v-for="permiso in item.permissions"
+            :key="permiso.id"
             color="primary"
-            @click="editarRol(item)"
-          />
-          <VBtn
-            icon="tabler-trash"
-            variant="text"
-            color="error"
-            @click="eliminarRol(item)"
-          />
-        </template>
-        <!--      </VDataTableServer> -->
-      </datatablecomponent>
-    </VCardText>
+            size="small"
+          >
+            {{ permiso.name }}
+          </VChip>
+          <VChip
+            v-if="!item.permissions.length"
+            color="warning"
+            size="small"
+          >
+            Sin Permisos
+          </VChip>
+        </div>
+      </template>
+      <template #item.actions="{ item }">
+        <VBtn
+          icon="tabler-edit"
+          variant="text"
+          color="primary"
+          @click="editarRol(item)"
+        />
+        <VBtn
+          icon="tabler-trash"
+          variant="text"
+          color="error"
+          @click="eliminarRol(item)"
+        />
+      </template>
+      <!--      </VDataTableServer> -->
+    </datatablecomponent>
   </VCard>
 
   <!-- Reutilización del formulario -->
