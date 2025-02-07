@@ -1,5 +1,11 @@
 <script lang="ts" setup>
 
+definePageMeta({
+  middleware: 'permissions',
+  action: 'crear opcion menu',
+  subject: 'menu opcion',
+})
+
 import Fields from '@/views/admin/menuOpciones/fields.vue';
 import type {MenuOpcion, RespuestaRequest} from "@/types/admin/menuOpciones/types";
 import type {Permission} from "@/types/admin/permisos/types";

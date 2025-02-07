@@ -1,23 +1,27 @@
-<script lang="ts" setup>
+<script lang="ts">
+import {defineComponent} from 'vue'
 
-import type { UsuarioInterface } from '@/types/usuarios/index'
-
-const usuario = useSanctumUser<UsuarioInterface>();
-
-const nombreDeUser = usuario.value?.nombre;
-
+export default defineComponent({
+  name: "index",
+  data() {
+    return {
+      user: null as unknown
+    }
+  },
+  mounted() {
+    const userRef = useSanctumUser()
+    this.user = userRef.value // Acceder al valor del ref
+  }
+})
 </script>
-
 <template>
 
-  <h1>Bienvenido, {{ nombreDeUser }}</h1>
+  <h2>Bienvenido, {{ user?.nombre}} </h2>
 
-  <VCard>
-
-    <VCardTitle>Prueba</VCardTitle>
-
-<!--    <AgregaDobleFactorAuth />-->
-
-  </VCard>
+  <favoritos/>
 
 </template>
+
+<style scoped lang="scss">
+
+</style>

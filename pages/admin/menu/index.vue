@@ -35,6 +35,12 @@
 
 <script lang="ts" setup>
 
+definePageMeta({
+  middleware: 'permissions',
+  action: 'ver opcion menu', // Acción requerida
+  subject: 'menu opcion', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+})
+
 const {post} = useClienteRequest();
 const {showToastSuccess, showToastError} = useToast();
 const {paginaEspera} = useCargandoPagina();

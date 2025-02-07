@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import EjemploDataTable from "@/views/pages/ejemplos/dataTable/ejemploDataTable.vue";
+import EjemploDataTable from '@/views/pages/ejemplos/dataTable/ejemploDataTable.vue'
 
 const { showToastInfo, showToastSuccess, showToastWarning, showToastError } = useToast()
 const { paginaEspera, cargandoPagina } = useCargandoPagina()
 const { getCatalogos, catalogos } = useCatalogo()
-
+const { files, serverConfig } = useFileUpload('/api/media')
 
 const mostrarToastInfo = () => {
   showToastInfo('Hello from second page')
@@ -51,6 +51,18 @@ const loadCatalogs = async () => {
     showToastError(error.message)
   }
 }
+
+
+
+
+const preloadedFiles = [
+  {
+    source: 'http://sysbaseback.local/storage/10055/reporte_data1738086395317.pdf',
+    options: {
+      type: 'local',
+    },
+  },
+];
 
 onMounted(loadCatalogs)
 </script>
@@ -164,9 +176,7 @@ onMounted(loadCatalogs)
   <VCard class="mb-5">
 
     <VCardText>
-
-      <EjemploDataTable/>
-
+      <EjemploDataTable />
     </VCardText>
   </VCard>
 
@@ -174,14 +184,22 @@ onMounted(loadCatalogs)
     <VCardTitle>File input</VCardTitle>
     <VCardText>
       <FileInput
+        v-model="files"
         label-idle="Arrastra y suelta tus archivos aquí o haz clic para seleccionarlos"
-        :credits="false"
-        allowMultiple
-        maxFiles="2"
+        allow-multiple
+        max-files="2"
         name="documentos"
+        :server="serverConfig"
+        :files="preloadedFiles"
       />
     </VCardText>
   </VCard>
+  <VCard class="mb-12">
+    <VCardTitle>Notificación de correo</VCardTitle>
+    <VCardText>
+      <NotificacionCorreo />
+    </VCardText>
+  </vcard>
 </template>
 
 <style lang="scss" scoped>

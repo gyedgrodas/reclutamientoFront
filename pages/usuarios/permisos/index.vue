@@ -23,10 +23,8 @@ const abrirCreateModal = () => {
         Nuevo Permiso
       </VBtn>
     </div>
-    <VCard>
-      <VCardText>
-        <DataTablePermisos ref="dataTablePermisos" />
-      </VCardText>
-    </VCard>
+    <VCardText>
+      <DataTablePermisos ref="dataTablePermisos" />
+    </VCardText>
   </div>
 </template>
