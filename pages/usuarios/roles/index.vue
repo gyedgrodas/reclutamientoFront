@@ -147,6 +147,12 @@ const columnas = [
             color="error"
             @click="eliminarRol(item)"
           />
+          <VBtn
+            icon="tabler-eye"
+            variant="text"
+            color="primary"
+            :to="`/usuarios/roles/show/${item.id}`"
+          />
         </template>
         <!--      </VDataTableServer> -->
       </datatablecomponent>
