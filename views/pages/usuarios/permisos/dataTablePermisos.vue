@@ -149,6 +149,12 @@ defineExpose({
     <!-- Acciones -->
     <template #item.actions="{ item }">
       <div class="d-flex gap-1">
+        <VBtn
+          icon="tabler-eye"
+          variant="text"
+          color="primary"
+          :to="`/usuarios/permisos/show/${item.id}`"
+        />
         <IconBtn @click="openDialog(true, item)">
           <VIcon
             icon="tabler-edit"
