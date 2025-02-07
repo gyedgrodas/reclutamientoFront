@@ -87,8 +87,10 @@ cargarRoles()
         </VCol>
       </VRow>
     </vcardtext>
-    <VCardText>
+    <VCardItem>
       <VCardTitle>Roles</VCardTitle>
+    </VCardItem>
+    <VCardText>
       <VChip
         v-for="(role, index) in nombreRoles"
         :key="index"
@@ -96,6 +98,13 @@ cargarRoles()
         class="ma-1"
       >
         {{ role }}
+      </VChip>
+      <VChip
+        v-if=" !nombreRoles || nombreRoles.length === 0"
+        color="error"
+        class="v-col-sm-12"
+      >
+        El Permiso no cuenta con roles actualmente asignados!!
       </VChip>
     </VCardText>
   </vcard>
