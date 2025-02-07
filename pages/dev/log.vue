@@ -6,7 +6,7 @@ const vista = ref()
 
 const loadLogs = async () => {
   try {
-    vista.value = await get('/api/desarrollo/logs')
+    vista.value = await get('/api/log-viewer/logs')
   }
   catch (error) {
     showToastError('Error al cargar los logs')
