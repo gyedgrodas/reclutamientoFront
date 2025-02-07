@@ -55,7 +55,7 @@ const getPermisos = async (): Promise<void> => {
       }
     });
 
-    permisos.value = response.data;
+    permisos.value = response.data.data;
 
     console.log('El valor de los permisos: ', permisos.value);
 
