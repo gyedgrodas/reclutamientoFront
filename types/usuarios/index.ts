@@ -37,6 +37,5 @@ export interface UsuarioInterface {
   gestiones_crm_vencidas: string;
   abilityRules: [];
   roles: [];
+  permissions: [];
 }
-
-
