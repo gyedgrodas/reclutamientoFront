@@ -337,7 +337,7 @@ const restablecerCodigo = () => {
             <VExpansionPanelText>
               <!-- AGREGAR EL EL COMPONENTE PARA ROLES Y PERMISOS -->
               <DualListbox
-                :items-disponibles="catalogos.roles.data && rolesSeleccionados"
+                :items-disponibles="catalogos.roles.data"
                 :items-seleccionados="rolesSeleccionados"
                 tipo="Roles"
                 @update:selected="guardarRolesSeleccionados"
@@ -395,7 +395,8 @@ const restablecerCodigo = () => {
                   </VCol>
                 </VRow>
               </VCard>
-          <!-- !SECTION Payment Method -->
+            </VExpansionPanelText>
+          </VExpansionPanel>
         </VExpansionPanels>
       </VCol>
 
