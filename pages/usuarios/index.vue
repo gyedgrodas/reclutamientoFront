@@ -65,12 +65,13 @@ const deleteItem = async (id: number) => {
 </script>
 
 <template>
-  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between mb-6">
     <h1>Gestión de Usuarios</h1>
     <VBtn
       v-if="can('crear usuarios', 'usuarios')"
       class="ms-auto"
-      color="success"
+      style="inline-size: 18rem;"
+      prepend-icon="tabler-plus"
       to="/usuarios/create"
     >
       Nuevo Usuario
@@ -109,7 +110,7 @@ const deleteItem = async (id: number) => {
           icon
           variant="text"
           color="primary"
-          :to="`/usuarios/show/${item.id}` "
+          :to="`/apps/user/show/${item.id}`"
         >
           <VIcon icon="tabler-eye" />
         </VBtn>

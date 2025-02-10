@@ -11,20 +11,16 @@ const abrirCreateModal = () => {
 </script>
 
 <template>
-  <div class="container mt-5">
-    <div class="d-flex justify-content-between">
-      <h1>Gestión de Permisos</h1>
-      <VBtn
-        class="ms-auto"
-        style="inline-size: 18rem;"
-        prepend-icon="tabler-plus"
-        @click="abrirCreateModal"
-      >
-        Nuevo Permiso
-      </VBtn>
-    </div>
-    <VCardText>
-      <DataTablePermisos ref="dataTablePermisos" />
-    </VCardText>
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between mb-6">
+    <h1>Gestión de Permisos</h1>
+    <VBtn
+      class="ms-auto"
+      style="inline-size: 18rem;"
+      prepend-icon="tabler-plus"
+      @click="abrirCreateModal"
+    >
+      Nuevo Permiso
+    </VBtn>
   </div>
+  <DataTablePermisos ref="dataTablePermisos" />
 </template>

@@ -181,9 +181,6 @@ const onSubmit = async () => {
             :items-disponibles="rolesDisponibles"
             :items-seleccionados="rolesSeleccionadosAntes"
             tipo="Roles"
-            selected-title="Roles Seleccionados"
-            item-text="name"
-            item-value="id"
             @update:selected="actualizarPermisoSeleccionados"
           />
         </VCardText>

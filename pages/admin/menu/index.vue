@@ -11,8 +11,9 @@
     </p>
 
     <VBtn
-      class="ml-auto"
-      color="success"
+      class="ms-auto"
+      style="inline-size: 18rem;"
+      prepend-icon="tabler-plus"
       to="/admin/menu/create"
     >
       Nueva Opción

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import fields from '@/views/pages/usuarios/fields.vue'
+import type { UsuarioInterface } from '@/types/usuarios/index.ts';
+import {ref} from "vue";
 
 import {useTheme} from "vuetify";
 
@@ -8,54 +11,36 @@ definePageMeta({
   subject: 'usuarios',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 });
 
-
-import fields from '@/views/pages/usuarios/fields.vue'
-
-import type { UsuarioInterface } from '@/types/usuarios/index.ts';
-
-import {ref} from "vue";
-
 const { put, get  } = useClienteRequest();
-
-const { showToastSuccess, showToastError, realizarPregunta } = useToast();
-
+const { showToastSuccess, showToastError } = useToast();
 const route = useRoute();
-
 const id = route.params.id;
-
 const Usuario = ref(fields);
-
 const { paginaEspera } = useCargandoPagina();
 const requestInProgress = ref(false); // Evitar solicitudes concurrentes
 
 const actualizarUsuario = async ( Usuario: UsuarioInterface ): Promise<void> => {
-
   if (!requestInProgress.value) {
-
     paginaEspera.value = true;
     requestInProgress.value = true;
 
     try {
-
-      const respuesta = await put('/api/users/' + id, Usuario );
-
+      const respuesta = await put(`/api/users/${id}`, {
+        ...Usuario,
+        roles: Usuario.roles.map(role => role.id),
+        permissions: Usuario.permissions.map(permission => permission.id),
+      });
+      console.log("Respuesta del backend:", respuesta);
       showToastSuccess(respuesta.message);
-
       navigateTo('/usuarios');
 
     } catch (error) {
-
       showToastError(error.message);
-
     } finally {
-
       paginaEspera.value = false;
       requestInProgress.value = false;
-
     }
-
   }
-
 }
 
 const itemUsuario = ref( <UsuarioInterface>
@@ -103,7 +88,11 @@ const getUsuario = async () => {
 
     const respuesta: { data: UsuarioInterface } = await get('/api/users/' + id );
 
-    itemUsuario.value = { ...respuesta.data, isDisabledEdit: true };
+    itemUsuario.value = {
+      ...respuesta.data,
+      roles: Array.isArray(respuesta.data.roles) ? respuesta.data.roles : [],
+
+      isDisabledEdit: true };
 
   } catch (error: { message: string }) {
 
@@ -182,42 +171,26 @@ const restablecerCodigo2fa = async (user_id) => {
 </script>
 
 <template>
-
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
-
+    <h1>Gestión de Roles</h1>
     <VBtn
       class="ml-auto"
-      color="secondary"
+      prepend-icon="tabler-arrow-left"
       to="/usuarios/"
     >
       Regresar
     </VBtn>
-
   </div>
 
   <VCard>
-
-    <VCardItem>
-
-      <VCardTitle>Editar Usuario</VCardTitle>
-
-    </VCardItem>
-
       <VCardText>
-
-        <fields :fields="fields"
-                v-if="puedeMostrarDatos"
-                :item="itemUsuario"
-                @emitirDatos="actualizarUsuario"
-                @restablecer-codigo2fa="restablecerCodigo2fa"
+        <fields
+          :fields="fields"
+          v-if="puedeMostrarDatos"
+          :item="itemUsuario"
+          @emitirDatos="actualizarUsuario"
+          @restablecer-codigo2fa="restablecerCodigo2fa"
         />
-
       </VCardText>
-
   </VCard>
-
 </template>
-
-<style scoped lang="scss">
-
-</style>

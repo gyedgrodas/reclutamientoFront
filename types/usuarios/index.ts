@@ -37,6 +37,7 @@ export interface UsuarioInterface {
   gestiones_crm_vencidas: string;
   abilityRules: [];
   roles: [];
+  permissions: [];
   tieneDobleFactorActivo: boolean;
   two_factor_habilitado: boolean;
 }
