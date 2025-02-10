@@ -2,7 +2,7 @@
 import UserProfileHeader from '@/views/pages/perfil_usuario/perfilUsuarioHeader.vue'
 import Perfil from '@/views/pages/perfil_usuario/perfil/index.vue'
 import Funciones from '@/views/pages/perfil_usuario/funciones/index.vue'
-import Equipo from '@/views/pages/perfil_usuario/equipo/index.vue'
+import Equipo from '@/views/pages/perfil_usuario/seguridad/index.vue'
 
 definePageMeta({
   navActiveLink: 'perfil-usuario-tab',
@@ -21,7 +21,7 @@ console.log(activeTab)
 // tabs
 const tabs = [
   { title: 'Perfil', icon: 'tabler-user-check', tab: 'perfil' },
-  { title: 'Equipo', icon: 'tabler-users', tab: 'equipo' },
+  { title: 'Seguridad', icon: 'tabler-lock', tab: 'seguridad' },
   { title: 'Funciones', icon: 'tabler-layout-grid', tab: 'funciones' },
   // { title: 'Connections', icon: 'tabler-link', tab: 'connections' },
 ]
@@ -62,7 +62,7 @@ const tabs = [
         </VWindowItem>
 
         <!-- Equipo -->
-        <VWindowItem value="equipo">
+        <VWindowItem value="seguridad">
           <Equipo />
         </VWindowItem>
 
