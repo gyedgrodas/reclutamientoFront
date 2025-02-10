@@ -11,13 +11,12 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import {VNodeRenderer} from '@layouts/components/VNodeRenderer'
 import {themeConfig} from '@themeConfig'
 
-const {login} = useSanctumAuth();
-const user = useSanctumUser();
+const {refreshIdentity} = useSanctumAuth();
+const {post} = useClienteRequest();
 
 definePageMeta({
   layout: 'blank',
   public: true,
-
 });
 
 const isPasswordVisible = ref(false);
@@ -44,21 +43,80 @@ const errors = ref({
   password: '',
 });
 
-const onSubmit = async () => {
+interface RespuestaSolicitud {
+  token?: string;
+  data: {
+    user_id: string;
+    registrar_doble_factor: boolean;
+  };
+}
+
+const onSubmit = async (): Promise<void> => {
+
   const {valid: isValid} = await refVForm.value?.validate();
+
   if (isValid) {
+
     try {
-      // Realizar login primero (si aún no se ha hecho)
-      await login(form.value)
 
-    } catch (error) {
+      const res: RespuestaSolicitud = await post('api/auth/login', form.value);
 
-      msgError.value = error?.response?._data?.message || 'Ocurrió un error inesperado.'
+      if (noVieneToken(res)) {
+
+        const valorUser = useState<string | null>('user_id', () => null);
+
+        valorUser.value = res.data.user_id;
+
+        if (debeRegistrarDobleFactor(res)) {
+
+          useState<boolean>('registrar_doble_factor', () => true)
+
+          navigateTo('/auth/RegistrarFactorAutenticacion')
+
+          return
+
+        } else {
+
+          navigateTo('/auth/DobleFactorAutenticacion')
+
+          return
+        }
+
+      } else {
+
+        const isSecure = useRequestURL().protocol.startsWith("https");
+
+        const cookie = useCookie('sanctum.token.cookie', {secure: isSecure});
+
+        cookie.value = res.token;
+
+        await refreshIdentity();
+
+        navigateTo('/')
+
+      }
+
+    } catch (error: unknown) {
+
+      const err = error as { response?: { data?: { message?: string } } };
+
+      msgError.value = err.response?.data?.message ?? 'Ocurrió un error inesperado.';
 
     }
   }
 };
 
+const noVieneToken = (res: RespuestaSolicitud): boolean => {
+
+  return !res.token
+
+}
+
+const debeRegistrarDobleFactor = (res: RespuestaSolicitud): boolean => {
+
+  return res.data.registrar_doble_factor
+
+}
 
 watch(form, () => {
   msgError.value = ''
@@ -162,26 +220,27 @@ watch(form, () => {
                   label="Password"
                   placeholder="············"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  class="mb-8"
                 />
 
-                <div class="d-flex align-center flex-wrap justify-space-between my-6">
-                  <VCheckbox
-                    v-model="form.remember"
-                    label="Remember me"
-                  />
-                  <a
-                    class="text-primary"
-                    href="javascript:void(0)"
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
+<!--                <div class="d-flex align-center flex-wrap justify-space-between my-6">-->
+<!--                  <VCheckbox-->
+<!--                    v-model="form.remember"-->
+<!--                    label="Remember me"-->
+<!--                  />-->
+<!--                  <a-->
+<!--                    class="text-primary"-->
+<!--                    href="javascript:void(0)"-->
+<!--                  >-->
+<!--                    Forgot Password?-->
+<!--                  </a>-->
+<!--                </div>-->
 
                 <VBtn
                   block
                   type="submit"
                 >
-                  Login
+                  Iniciar Sesión
                 </VBtn>
               </VCol>
 

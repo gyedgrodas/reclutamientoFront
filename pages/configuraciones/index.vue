@@ -19,6 +19,8 @@ const columnas = [
   { title: 'Acciones', key: 'Acciones' },
 ]
 
+const dataTable = ref(null)
+
 const filtros = ref({
   nombre: '',
 })
@@ -34,7 +36,7 @@ const deleteItem = async (id: number) => {
 
     showToastSuccess(respuesta.message)
 
-    await getItems()
+    dataTable.value?.getItems()
   }
   catch (error) {
     showToastError(error.message)
@@ -56,6 +58,7 @@ const deleteItem = async (id: number) => {
 
   <VCardText>
     <DataTableComponent
+      ref="dataTable"
       :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
       :cantidad-por-pagina="3"
       :cantidad-por-pagina-opciones="[2, 3, 5]"

@@ -3,6 +3,8 @@ import fields from '@/views/pages/usuarios/fields.vue'
 import type { UsuarioInterface } from '@/types/usuarios/index.ts';
 import {ref} from "vue";
 
+import {useTheme} from "vuetify";
+
 definePageMeta({
   middleware: 'permissions',
   action: 'editar usuarios', // Acción requerida
@@ -110,6 +112,62 @@ const puedeMostrarDatos = computed(() => {
 
 });
 
+const vuetifyTheme = useTheme()
+const colorPrimario = ref('')
+// Detectar el tema actual (oscuro o claro)
+const colorTema = ref(vuetifyTheme.global.name.value)
+
+watchEffect(() => {
+  const isDarkMode = colorTema.value === 'dark'
+
+  colorPrimario.value = isDarkMode
+    ? vuetifyTheme.themes.value.dark.colors.primary
+    : vuetifyTheme.themes.value.light.colors.primary
+
+})
+
+const restablecerCodigo2fa = async (user_id) => {
+
+  if (!requestInProgress.value) {
+
+    let parametrosPregunta = {
+      titulo: '¿Reestablecer código de doble factor?',
+      message: 'Si reestablece el código de doble factor, el usuario deberá configurar un nuevo código de doble factor y el código actual dejará de ser válido.',
+      texto_btn_confirmar: 'Sí, restablecer',
+      texto_btn_cancelar: 'Cancelar',
+      color_confirmar: colorPrimario.value,
+      color_cancelar: '#6c757d',
+    }
+
+    const confirm = await realizarPregunta(parametrosPregunta);
+    if (!confirm) return;
+
+    paginaEspera.value = true;
+    requestInProgress.value = true;
+
+    try {
+
+      const respuesta = await put('api/auth/doble-factor/reestablecer-codigo/' + user_id, {});
+
+      showToastSuccess(respuesta.message);
+
+      getUsuario();
+
+    } catch (error) {
+
+      showToastError(error.message);
+
+    } finally {
+
+      paginaEspera.value = false;
+      requestInProgress.value = false;
+
+    }
+
+  }
+
+}
+
 </script>
 
 <template>
@@ -131,6 +189,7 @@ const puedeMostrarDatos = computed(() => {
           v-if="puedeMostrarDatos"
           :item="itemUsuario"
           @emitirDatos="actualizarUsuario"
+          @restablecer-codigo2fa="restablecerCodigo2fa"
         />
       </VCardText>
   </VCard>

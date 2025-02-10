@@ -38,4 +38,6 @@ export interface UsuarioInterface {
   abilityRules: [];
   roles: [];
   permissions: [];
+  tieneDobleFactorActivo: boolean;
+  two_factor_habilitado: boolean;
 }

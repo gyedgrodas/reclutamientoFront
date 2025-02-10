@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { defineExpose, ref } from 'vue'
-import Swal from 'sweetalert2'
 import DataModal from '@/views/pages/usuarios/permisos/dataModal.vue'
 
 const { deleted, get } = useClienteRequest()
-const esperar = ref(false)
+
+const { showToastError, showToastSuccess, preguntaEliminar } = useToast()
+const { paginaEspera } = useCargandoPagina()
 
 const allPermisos = ref([])
 const dialog = ref(false)
 const isEditing = ref(false)
-const deleteDialog = ref(false)
+const dataTable = ref(null)
 
 const filtros = ref({
   name: [],
@@ -53,38 +54,26 @@ const columnas = [
   { title: 'ACCIONES', key: 'actions', sortable: false, exportable: false },
 ]
 
-const deleteItem = (item: any) => {
-  dialogItem.value = { ...item }
-  deleteDialog.value = true
-}
-
-const deleteItemConfirm = async () => {
+const deleteItem = async (item: any) => {
   try {
-    deleteDialog.value = false // Cierra el diálogo de confirmación
+    const confirmado = await preguntaEliminar('¿Estás seguro de eliminar este permiso?')
 
-    // Muestra la alerta inmediatamente
-    Swal.fire({
-      title: 'Eliminado!',
-      text: 'El permiso ha sido eliminado.',
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false,
-    })
+    if (!confirmado)
+      return
 
-    // Realiza la eliminación en el backend
-    await deleted(`/api/permisos/${dialogItem.value.id}`)
-    esperar.value = true
+    paginaEspera.value = true
+
+    await deleted(`/api/permisos/${item.id}`)
+    showToastSuccess('Permiso eliminado correctamente')
+
+    dataTable.value?.getItems()
   }
   catch (error) {
+    showToastError('Error al eliminar el permiso')
     console.error('Error al eliminar el permiso:', error)
-    Swal.fire({
-      title: 'Error',
-      text: 'No se pudo eliminar el permiso.',
-      icon: 'error',
-      showConfirmButton: true,
-    })
   }
   finally {
+    paginaEspera.value = false
     dialogItem.value = { id: null, name: '', guard_name: '' } // Limpia el diálogo
   }
 }
@@ -116,6 +105,7 @@ defineExpose({
   </VCard>
   <!-- Tabla de datos -->
   <DataTableComponent
+    ref="dataTable"
     :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
     :cantidad-por-pagina="5"
     :cantidad-por-pagina-opciones="[2, 3, 5]"
@@ -149,6 +139,12 @@ defineExpose({
     <!-- Acciones -->
     <template #item.actions="{ item }">
       <div class="d-flex gap-1">
+        <VBtn
+          icon="tabler-eye"
+          variant="text"
+          color="primary"
+          :to="`/usuarios/permisos/show/${item.id}`"
+        />
         <IconBtn @click="openDialog(true, item)">
           <VIcon
             icon="tabler-edit"
@@ -164,37 +160,11 @@ defineExpose({
       </div>
     </template>
   </datatablecomponent>
-
   <DataModal
     v-model:abrirModal="dialog"
     :is-editing="isEditing"
     :dialog-item="dialogItem"
     @actualizar-abrir-modal="closeDialog"
+    @actualizar-tabla="dataTable.getItems()"
   />
-
-  <!-- Diálogo de eliminación -->
-  <VDialog
-    v-model="deleteDialog"
-    max-width="500px"
-  >
-    <VCard title="Confirmar eliminación">
-      <VCardText>
-        <p>¿Estás seguro de que deseas eliminar este permiso?</p>
-      </VCardText>
-      <VCardActions>
-        <VBtn
-          color="error"
-          @click="deleteDialog = false"
-        >
-          Cancelar
-        </VBtn>
-        <VBtn
-          color="success"
-          @click="deleteItemConfirm"
-        >
-          Aceptar
-        </VBtn>
-      </VCardActions>
-    </VCard>
-  </VDialog>
 </template>

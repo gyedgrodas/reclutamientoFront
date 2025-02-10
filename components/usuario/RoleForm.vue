@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { defineEmits, defineProps, nextTick, ref, watch } from 'vue'
 import type { VForm } from 'vuetify/components/VForm'
-import Swal from 'sweetalert2'
 import DualListbox from '@/components/DualListbox.vue'
 
 const props = defineProps({
@@ -16,7 +15,9 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['cerrar'])
+const emit = defineEmits(['cerrar', 'actualizarTabla'])
+const { showToastSuccess, showToastError } = useToast()
+const { paginaEspera } = useCargandoPagina()
 
 const { put, get, post } = useClienteRequest()
 
@@ -43,6 +44,7 @@ const cargarPermisosDisponibles = async () => {
     console.log('Permisos disponibles:', permisosDisponibles.value)
   }
   catch (error) {
+    showToastError('Error al cargar los permisos')
     console.error('Error al cargar los permisos:', error)
   }
 }
@@ -62,6 +64,8 @@ const cargarPermisosRol = async (rolId: number) => {
     permisosSeleccionadosAntes.value = response.data
   }
   catch (error) {
+    showToastError('Error al cargar los permisos del rol')
+    console.error('Error al cargar los permisos del rol:', error)
   }
 }
 
@@ -99,34 +103,28 @@ const guardarRol = async () => {
       }
 
       if (props.mode === 'create') {
+        paginaEspera.value = true
+
         await post('/api/roles', { data: rolData })
-        Swal.fire(
-          'Agregado!',
-          'El rol ha sido agregado con éxito.',
-          'success')
+        showToastSuccess('Rol creado con éxito')
       }
       else {
-        console.log(rolData)
+        paginaEspera.value = true
+
         await put(`/api/roles/${rolData.id}`, { data: rolData })
-        Swal.fire(
-          'Actualizado!',
-          'El rol ha sido actualizado con éxito.',
-          'success')
+        showToastSuccess('Rol actualizado con éxito')
       }
+      emit('actualizarTabla', true)
       emit('cerrar')
-      await nextTick()
     }
     catch (error: any) {
+      showToastError(`Error al guardar el rol: ${error.response.data.message}`)
       console.error('Error al guardar el rol:', error)
-      Swal.fire(
-        'Error!',
-        error?.response?.data?.message || 'Error al guardar el rol.',
-        'error',
-      )
     }
     finally {
       emit('cerrar')
     }
+    paginaEspera.value = false
   })
 }
 

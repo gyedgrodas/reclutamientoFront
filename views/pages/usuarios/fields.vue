@@ -58,7 +58,8 @@ const data = ref<UsuarioInterface>({
 
 interface Emit {
 
-  (e: 'emitirDatos', value: UsuarioInterface): void
+  (e: 'emitirDatos', value: UsuarioInterface ): void
+  (e: 'restablecerCodigo2fa', value: any ): void
 
 }
 
@@ -109,19 +110,34 @@ const panel = ref(0)
 
 // crear funcion llenarData
 const llenarData = (selectorData: any) => {
-  data.value.nombre = `${selectorData.primer_nombre} ${selectorData.segundo_nombre} ${selectorData.tercer_nombre}`
-  data.value.apellido = `${selectorData.primer_apellido} ${selectorData.segundo_apellido}`
-  data.value.codigo_bankworks = selectorData.codigo_bankworks
-  data.value.usuario_dominio = `gy${selectorData.primer_nombre.substring(0, 3).toLowerCase()}${selectorData.primer_apellido.toLowerCase()}`
-  data.value.email = `${data.value.usuario_dominio}@micoopeguayacan.gt`
-  data.value.cif = selectorData.cif
-  data.value.asociado_id = selectorData.asociado_id
-  data.value.isDisabled = true
+  data.value.nombre = selectorData.primer_nombre + ' ' + selectorData.segundo_nombre + ' ' + selectorData.tercer_nombre
+   data.value.apellido = selectorData.primer_apellido + ' ' + selectorData.segundo_apellido
+   data.value.codigo_bankworks = selectorData.codigo_bankworks
+   data.value.usuario_dominio = 'gy'+ selectorData.primer_nombre.substring(0, 3).toLowerCase() + selectorData.primer_apellido.toLowerCase();
+   data.value.email =  data.value.usuario_dominio + '@micoopeguayacan.gt';
+   data.value.cif = selectorData.cif
+   data.value.asociado_id = selectorData.asociado_id
+   data.value.isDisabled = true
 }
+
+const estaEditando = computed(() => {
+  return data.value.id
+})
 
 const nombreBoton = computed(() => {
   return data.value.id ? 'Actualizar' : 'Guardar'
 })
+
+const restablecerCodigo = () => {
+
+  if(estaEditando.value) {
+
+    emit('restablecerCodigo2fa', data.value.id)
+
+  }
+
+}
+
 </script>
 
 <template>
@@ -335,6 +351,50 @@ const nombreBoton = computed(() => {
               />
             </VExpansionPanelText>
           </VExpansionPanel>
+
+          <!--  SECTION AUTENTICACIÓN -->
+          <VExpansionPanel>
+            <VExpansionPanelTitle>Autenticación</VExpansionPanelTitle>
+
+            <VExpansionPanelText>
+
+
+              <VCard class="pa-4">
+                <VRow align="center">
+                  <!-- Autenticación en dos pasos -->
+                  <VCol cols="12" md="6" class="d-flex align-center">
+                    <VLabel for="twoFactorSwitch" class="mr-2 text-medium-emphasis">Autenticación en dos pasos</VLabel>
+                    <VSwitch
+                      id="twoFactorSwitch"
+                      v-model="data.two_factor_habilitado"
+                      inset
+                      color="primary"
+                    >
+                      <template #label>
+                        <strong>{{ data.two_factor_habilitado ? 'Sí' : 'No' }}</strong>
+                      </template>
+                    </VSwitch>
+                  </VCol>
+
+                  <VCol
+                    v-if="data.two_factor_habilitado && data.id"
+                    cols="12"
+                    md="6"
+                    class="d-flex align-center justify-end"
+                  >
+                    <VLabel for="resetButton" class="mr-2 text-medium-emphasis">Restablecer Código</VLabel>
+                    <VBtn
+                      id="resetButton"
+                      color="primary"
+                      variant="flat"
+                      @click="restablecerCodigo"
+                    >
+                      <VIcon class="tabler-refresh mr-1" />
+                      Restablecer
+                    </VBtn>
+                  </VCol>
+                </VRow>
+              </VCard>
           <!-- !SECTION Payment Method -->
         </VExpansionPanels>
       </VCol>
