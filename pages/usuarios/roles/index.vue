@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Swal from 'sweetalert2'
 import RoleForm from '@/components/usuario/RoleForm.vue'
 
 const { get, deleted } = useClienteRequest()
+const { paginaEspera } = useCargandoPagina()
+const { showToastError, showToastSuccess, preguntaEliminar } = useToast()
 
 // Variables reactivas
 const allRoles = ref([]) // Lista completa para el selector
 const seleccionarRol = ref()
 const verModalDeRol = ref(false)
 const formMode = ref('create')
+const dataTable = ref(null)
 
 const filtros = ref({
   name: [],
@@ -46,19 +48,24 @@ const editarRol = (rol: any) => {
 // Eliminar un rol
 const eliminarRol = async (rol: any) => {
   try {
+    const confirmado = await preguntaEliminar('¿Estás seguro de eliminar este rol?')
+
+    if (!confirmado)
+      return
+
+    paginaEspera.value = true
+
     await deleted(`/api/roles/${rol.id}`)
-    Swal.fire(
-      'Eliminado!',
-      'El rol ha sido eliminado con éxito.',
-      'success')
+
+    showToastSuccess('Rol eliminado correctamente')
+    dataTable.value?.getItems()
   }
   catch (error: any) {
+    showToastError('Error al eliminar el rol')
     console.error('Error al eliminar el rol:', error)
-    Swal.fire(
-      'Error!',
-      error?.response?.data?.message || 'Error al eliminar el rol.',
-      'error',
-    )
+  }
+  finally {
+    paginaEspera.value = false
   }
 }
 
@@ -106,6 +113,7 @@ const columnas = [
   <VCard>
     <VCardText>
       <DataTableComponent
+        ref="dataTable"
         :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
         :cantidad-por-pagina="5"
         :cantidad-por-pagina-opciones="[2, 3, 5]"
@@ -147,8 +155,13 @@ const columnas = [
             color="error"
             @click="eliminarRol(item)"
           />
+          <VBtn
+            icon="tabler-eye"
+            variant="text"
+            color="primary"
+            :to="`/usuarios/roles/show/${item.id}`"
+          />
         </template>
-        <!--      </VDataTableServer> -->
       </datatablecomponent>
     </VCardText>
   </VCard>
@@ -159,5 +172,6 @@ const columnas = [
     :mode="formMode"
     :rol="seleccionarRol"
     @cerrar="verModalDeRol = false"
+    @actualizar-tabla="dataTable.getItems()"
   />
 </template>

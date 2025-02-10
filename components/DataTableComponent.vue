@@ -130,6 +130,10 @@ const reiniciar = () => {
 
 };
 
+defineExpose({
+  getItems,
+});
+
 </script>
 
 <template>
