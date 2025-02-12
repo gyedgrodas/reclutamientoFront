@@ -59,9 +59,13 @@ const getPermisos = async (): Promise<void> => {
 
     paginaEspera.value = true;
 
-    const response: { data: Permission } = await get('api/permisos');
+    const response: { data: Permission } = await get('api/permisos', {
+      params: {
+        'page[size]': -1
+      }
+    });
 
-    permisos.value = response.data;
+    permisos.value = response.data.data;
 
     console.log('El valor de los permisos: ', permisos.value);
 

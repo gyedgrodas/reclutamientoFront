@@ -51,7 +51,7 @@ const getPermisos = async (): Promise<void> => {
 
     const response: { data: Permission } = await get('api/permisos', {
       params: {
-        'page[size]': -1,
+        'page[size]': -1
       }
     });
 
