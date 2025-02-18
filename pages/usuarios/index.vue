@@ -90,6 +90,7 @@ const deleteItem = async (id: number) => {
             closable-chips
             placeholder="Seleccionar usuarios"
             @update:search="buscarUsuarios"
+            clear-on-select
           />
         </div>
       </div>

@@ -166,18 +166,18 @@ const restablecerCodigo = () => {
             <VExpansionPanelTitle>Información Personal</VExpansionPanelTitle>
             <VExpansionPanelText>
               <VRow>
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppTextField
-                    v-model="data.codigo_bankworks"
-                    :rules="[requiredValidator]"
-                    label="Codigo Bankworks"
-                    placeholder="Ingrese Codigo Bankworks"
-                    :disabled="data.isDisabledEdit"
-                  />
-                </VCol>
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppTextField-->
+<!--                    v-model="data.codigo_bankworks"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Codigo Bankworks"-->
+<!--                    placeholder="Ingrese Codigo Bankworks"-->
+<!--                    :disabled="data.isDisabledEdit"-->
+<!--                  />-->
+<!--                </VCol>-->
 
                 <VCol
                   cols="12"
@@ -192,18 +192,18 @@ const restablecerCodigo = () => {
                   />
                 </VCol>
 
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppTextField
-                    v-model="data.codigo_ejecutivo"
-                    :rules="[requiredValidator]"
-                    label="Codigo Ejecutivo"
-                    placeholder="Ingrese Codigo Ejecutivo"
-                    :disabled=" data.isDisabledEdit"
-                  />
-                </VCol>
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppTextField-->
+<!--                    v-model="data.codigo_ejecutivo"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Codigo Ejecutivo"-->
+<!--                    placeholder="Ingrese Codigo Ejecutivo"-->
+<!--                    :disabled=" data.isDisabledEdit"-->
+<!--                  />-->
+<!--                </VCol>-->
 
                 <VCol
                   cols="12"
