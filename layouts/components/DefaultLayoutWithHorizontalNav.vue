@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const navItems = useState('menu')
+import { can } from '@layouts/plugins/casl'
 
 import { themeConfig } from '@themeConfig'
 
@@ -10,6 +10,8 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 import { HorizontalNavLayout } from '@layouts'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+
+const navItems = useState('menu')
 </script>
 
 <template>
@@ -46,6 +48,6 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
     </template>
 
     <!-- 👉 Customizer -->
-     <TheCustomizer />
+    <TheCustomizer v-if="can('ver preferencias', 'preferencias')" />
   </HorizontalNavLayout>
 </template>

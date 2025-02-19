@@ -16,6 +16,7 @@ import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
 import {VerticalNavLayout} from '@layouts'
+import {can} from "@layouts/plugins/casl";
 
 </script>
 
@@ -56,7 +57,7 @@ import {VerticalNavLayout} from '@layouts'
     </template>
 
     <!-- 👉 Customizer -->
-    <TheCustomizer/>
+    <TheCustomizer v-if="can('ver preferencias', 'preferencias')"/>
   </VerticalNavLayout>
 
 </template>

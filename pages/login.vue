@@ -205,7 +205,7 @@ watch(form, () => {
                   :rules="[requiredValidator, usuarioValidator]"
                   autofocus
                   label="Usuario Dominio"
-                  placeholder="gyxxxxxx"
+                  placeholder="Ingresa usuario dominio"
                   type="email"
                 />
               </VCol>
@@ -245,37 +245,37 @@ watch(form, () => {
               </VCol>
 
               <!-- create account -->
-              <VCol
-                class="text-body-1 text-center"
-                cols="12"
-              >
-                <span class="d-inline-block">
-                  New on our platform?
-                </span>
-                <a
-                  class="text-primary ms-1 d-inline-block text-body-1"
-                  href="javascript:void(0)"
-                >
-                  Create an account
-                </a>
-              </VCol>
+<!--              <VCol-->
+<!--                class="text-body-1 text-center"-->
+<!--                cols="12"-->
+<!--              >-->
+<!--                <span class="d-inline-block">-->
+<!--                  New on our platform?-->
+<!--                </span>-->
+<!--                <a-->
+<!--                  class="text-primary ms-1 d-inline-block text-body-1"-->
+<!--                  href="javascript:void(0)"-->
+<!--                >-->
+<!--                  Create an account-->
+<!--                </a>-->
+<!--              </VCol>-->
 
-              <VCol
-                class="d-flex align-center"
-                cols="12"
-              >
-                <VDivider/>
-                <span class="mx-4">or</span>
-                <VDivider/>
-              </VCol>
+<!--              <VCol-->
+<!--                class="d-flex align-center"-->
+<!--                cols="12"-->
+<!--              >-->
+<!--                <VDivider/>-->
+<!--                <span class="mx-4">or</span>-->
+<!--                <VDivider/>-->
+<!--              </VCol>-->
 
-              <!-- auth providers -->
-              <VCol
-                class="text-center"
-                cols="12"
-              >
-                <AuthProvider/>
-              </VCol>
+<!--              &lt;!&ndash; auth providers &ndash;&gt;-->
+<!--              <VCol-->
+<!--                class="text-center"-->
+<!--                cols="12"-->
+<!--              >-->
+<!--&lt;!&ndash;                <AuthProvider/>&ndash;&gt;-->
+<!--              </VCol>-->
             </VRow>
           </VForm>
         </VCardText>

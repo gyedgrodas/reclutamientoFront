@@ -41,8 +41,10 @@
 
 
           <VBtn
-            color="success"
+            color="medium-emphasis"
             icon
+            size="small"
+            variant="text"
             @click="guardarPreferencias"
           >
             <VTooltip
