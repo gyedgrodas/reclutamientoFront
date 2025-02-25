@@ -9,6 +9,9 @@ definePageMeta({
   key: 'tab',
 })
 
+const { paginaEspera } = useCargandoPagina()
+const usuario = useSanctumUser()
+const { get } = useClienteRequest()
 const route = useRoute('perfil-usuario-tab')
 
 const activeTab = computed({
@@ -16,24 +19,56 @@ const activeTab = computed({
   set: () => route.params.tab,
 })
 
-console.log(activeTab)
+const user = ref(null)
+
+const mostrarUsuario = async () => {
+  paginaEspera.value = true
+
+  const userId = usuario.value.id
+  if (!userId) {
+    console.error('No se proporcionó un ID de usuario.')
+
+    return
+  }
+
+  try {
+    const response = await get(`/api/users/${userId}`)
+    if (response && response?.data)
+      user.value = response.data
+
+    else
+      console.warn('No se encontraron datos para este usuario.')
+  }
+  catch (error) {
+    console.error('Error al obtener un usuario:', error)
+  }
+  finally {
+    paginaEspera.value = false
+  }
+}
 
 // tabs
 const tabs = [
   { title: 'Perfil', icon: 'tabler-user-check', tab: 'perfil' },
   { title: 'Seguridad', icon: 'tabler-lock', tab: 'seguridad' },
   { title: 'Funciones', icon: 'tabler-layout-grid', tab: 'funciones' },
+
   // { title: 'Connections', icon: 'tabler-link', tab: 'connections' },
 ]
+
+onMounted(() => {
+  mostrarUsuario()
+})
 </script>
 
 <template>
   <div>
-    <UserProfileHeader />
+    <UserProfileHeader :user="user" />
 
     <VTabs
       v-model="activeTab"
       class="v-tabs-pill my-2"
+      v-if="user"
     >
       <VTab
         v-for="item in tabs"
@@ -50,7 +85,7 @@ const tabs = [
       </VTab>
     </VTabs>
 
-    <ClientOnly>
+    <ClientOnly >
       <VWindow
         v-model="activeTab"
         class="disable-tab-transition"
@@ -58,7 +93,7 @@ const tabs = [
       >
         <!-- Perfil -->
         <VWindowItem value="perfil">
-          <Perfil />
+          <Perfil :user="user" />
         </VWindowItem>
 
         <!-- Equipo -->
@@ -70,7 +105,6 @@ const tabs = [
         <VWindowItem value="funciones">
           <Funciones />
         </VWindowItem>
-
       </VWindow>
     </ClientOnly>
   </div>

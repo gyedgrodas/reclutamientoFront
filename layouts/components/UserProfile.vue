@@ -90,43 +90,43 @@ const user = useSanctumUser()
           </VListItem>
 
           <!-- 👉 Settings -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-settings"
-                size="22"
-              />
-            </template>
+<!--          <VListItem link>-->
+<!--            <template #prepend>-->
+<!--              <VIcon-->
+<!--                class="me-2"-->
+<!--                icon="tabler-settings"-->
+<!--                size="22"-->
+<!--              />-->
+<!--            </template>-->
 
-            <VListItemTitle>Settings</VListItemTitle>
-          </VListItem>
+<!--            <VListItemTitle>Settings</VListItemTitle>-->
+<!--          </VListItem>-->
 
           <!-- 👉 Pricing -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-currency-dollar"
-                size="22"
-              />
-            </template>
+<!--          <VListItem link>-->
+<!--            <template #prepend>-->
+<!--              <VIcon-->
+<!--                class="me-2"-->
+<!--                icon="tabler-currency-dollar"-->
+<!--                size="22"-->
+<!--              />-->
+<!--            </template>-->
 
-            <VListItemTitle>Pricing</VListItemTitle>
-          </VListItem>
+<!--            <VListItemTitle>Pricing</VListItemTitle>-->
+<!--          </VListItem>-->
 
           <!-- 👉 FAQ -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-help"
-                size="22"
-              />
-            </template>
+<!--          <VListItem link>-->
+<!--            <template #prepend>-->
+<!--              <VIcon-->
+<!--                class="me-2"-->
+<!--                icon="tabler-help"-->
+<!--                size="22"-->
+<!--              />-->
+<!--            </template>-->
 
-            <VListItemTitle>FAQ</VListItemTitle>
-          </VListItem>
+<!--            <VListItemTitle>FAQ</VListItemTitle>-->
+<!--          </VListItem>-->
 
           <!-- Divider -->
           <VDivider class="my-2" />

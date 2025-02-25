@@ -1,12 +1,10 @@
 <script lang="ts" setup>
-
 const props = defineProps({
   data: {
     type: Object,
     required: true,
   },
-});
-
+})
 </script>
 
 <template>
@@ -17,149 +15,180 @@ const props = defineProps({
       </p>
 
       <VList class="card-list text-medium-emphasis">
-
-
-        <!--// 👉 Nombre de usuario-->
+        <!-- // 👉 Nombre de usuario -->
         <VListItem>
-
-          <VListItemTitle >
+          <VListItemTitle>
             <span class="d-flex align-center">
-            <VIcon
-              icon="tabler-user"
-              size="24"
-              class="me-2"
-            />
-            <div class="text-body-1 font-weight-medium me-2">Nombre de Usuario:</div>
-            <div>{{ props?.data.nombre}} {{ props?.data.apellido }}</div>
-                </span>
-          </VListItemTitle>
-        </VListItem>
-
-        <!--// 👉 Cif-->
-        <VListItem>
-
-          <VListItemTitle class="mb-3">
-             <span class="d-flex align-center">
-            <VIcon icon="tabler-scan" size="24"
-                class="me-2" />
-            <div class="text-body-1 font-weight-medium me-2">CIF:</div>
-            <div>{{ props?.data.cif }}</div>
-                 </span>
-          </VListItemTitle>
-
-        </VListItem>
-
-        <!--// 👉 Email-->
-        <VListItem>
-
-          <VListItemTitle class="mb-3">
-             <span class="d-flex align-center">
-            <VIcon icon="tabler-mail" size="24"
-                class="me-2" />
-            <div class="text-body-1 font-weight-medium me-2">Correo Electrónico:</div>
-            <div>{{ props?.data.email }}</div>
-               </span>
-          </VListItemTitle>
-
-        </VListItem>
-
-        <!--// 👉 Usuario Dominio-->
-        <VListItem>
-
-          <VListItemTitle class="mb-3">
-             <span class="d-flex align-center">
-            <VIcon icon="tabler-user-hexagon" size="24"
-                   class="me-2"/>
-            <div class="text-body-1 font-weight-medium me-2">usuario Dominio:</div>
-            <div>{{ props?.data.usuario_dominio }}</div>
+              <VIcon
+                icon="tabler-user"
+                size="24"
+                class="me-2"
+              />
+              <div class="text-body-1 font-weight-medium me-2">Nombre de Usuario:</div>
+              <div>{{ props?.data.nombre }} {{ props?.data.apellido }}</div>
             </span>
           </VListItemTitle>
         </VListItem>
 
-        <!-- 👉 Estado-->
+        <!-- // 👉 Cif -->
         <VListItem>
-
           <VListItemTitle class="mb-3">
-             <span class="d-flex align-center">
-            <VIcon icon="tabler-circle-check" size="24"
-                class="me-2" />
-            <div class="text-body-1 font-weight-medium me-2">Estado:</div>
-            <div>Activo</div>
+            <span class="d-flex align-center">
+              <VIcon
+                icon="tabler-scan"
+                size="24"
+                class="me-2"
+              />
+              <div class="text-body-1 font-weight-medium me-2">CIF:</div>
+              <div>{{ props?.data.cif }}</div>
             </span>
           </VListItemTitle>
         </VListItem>
 
+        <!-- // 👉 Email -->
+        <VListItem>
+          <VListItemTitle class="mb-3">
+            <span class="d-flex align-center">
+              <VIcon
+                icon="tabler-mail"
+                size="24"
+                class="me-2"
+              />
+              <div class="text-body-1 font-weight-medium me-2">Correo Electrónico:</div>
+              <div>{{ props?.data.email }}</div>
+            </span>
+          </VListItemTitle>
+        </VListItem>
+
+        <!-- // 👉 Usuario Dominio -->
+        <VListItem>
+          <VListItemTitle class="mb-3">
+            <span class="d-flex align-center">
+              <VIcon
+                icon="tabler-user-hexagon"
+                size="24"
+                class="me-2"
+              />
+              <div class="text-body-1 font-weight-medium me-2">Usuario Dominio:</div>
+              <div>{{ props?.data.usuario_dominio }}</div>
+            </span>
+          </VListItemTitle>
+        </VListItem>
+
+        <!-- // 👉 Unidad -->
+        <VListItem>
+          <VListItemTitle class="mb-3">
+            <span class="d-flex align-center">
+              <VIcon
+                icon="tabler-building"
+                size="24"
+                class="me-2"
+              />
+              <div class="text-body-1 font-weight-medium me-2">Unidad:</div>
+              <div>{{ props?.data?.unidad?.nombre }}</div>
+            </span>
+          </VListItemTitle>
+        </VListItem>
+
+        <!-- 👉 Estado -->
+        <VListItem>
+          <VListItemTitle class="mb-3">
+            <span class="d-flex align-center">
+              <VIcon
+                icon="tabler-circle-check"
+                size="24"
+                class="me-2"
+              />
+              <div class="text-body-1 font-weight-medium me-2">Estado:</div>
+              <div>Activo</div>
+            </span>
+          </VListItemTitle>
+        </VListItem>
       </VList>
 
       <p class="text-sm text-disabled mt-6">
-        CONTACTOS
+        ROLES
       </p>
 
-<!--      <VList class="card-list text-medium-emphasis">-->
-<!--        <VListItem-->
-<!--          v-for="item in props.data.contacts"-->
-<!--          :key="item.property"-->
-<!--        >-->
-<!--          <VListItemTitle class="mb-3">-->
-<!--            <span class="d-flex align-center">-->
-<!--              <VIcon-->
-<!--                :icon="item.icon"-->
-<!--                size="24"-->
-<!--                class="me-2"-->
-<!--              />-->
-<!--              <div class="text-body-1 font-weight-medium me-2">{{ item.property }}:</div>-->
-<!--              <div>{{ item.value }}</div>-->
-<!--            </span>-->
-<!--          </VListItemTitle>-->
-<!--        </VListItem>-->
-<!--      </VList>-->
+      <VList class="card-list text-medium-emphasis">
+        <VListItem>
+          <VListItemTitle class="mb-0">
+            <span class="d-flex align-center">
+              <VIcon
+                icon="tabler-lock-square"
+                size="24"
+                class="me-2"
+              />
+              <div class="d-flex flex-wrap">
+                <VChip
+                  v-for="role in props.data.roles"
+                  :key="role.id"
+                  color="primary"
+                  size="small"
+                  class="ma-1"
+                >
+                  {{ role.name }}
+                </VChip>
+                <VChip
+                  v-if="!props.data?.roles?.length"
+                  color="warning"
+                  size="small"
+                  class="ma-1"
+                >
+                  Sin Permisos
+                </VChip>
+              </div>
+            </span>
+          </VListItemTitle>
+        </VListItem>
+      </VList>
 
-      <p class="text-sm text-disabled mt-6">
-        EQUIPOS
-      </p>
+<!--      <p class="text-sm text-disabled mt-6">-->
+<!--        EQUIPOS-->
+<!--      </p>-->
 
-<!--      <VList class="card-list text-medium-emphasis">-->
-<!--        <VListItem-->
-<!--          v-for="item in props.data.teams"-->
-<!--          :key="item.property"-->
-<!--        >-->
-<!--          <VListItemTitle class="mb-3">-->
-<!--            <span class="d-flex align-center">-->
-<!--              <div class="text-body-1 font-weight-medium me-2">{{ item.property }}</div>-->
-<!--              <div>{{ item.value }}</div>-->
-<!--            </span>-->
-<!--          </VListItemTitle>-->
-<!--        </VListItem>-->
-<!--      </VList>-->
+      <!--      <VList class="card-list text-medium-emphasis"> -->
+      <!--        <VListItem -->
+      <!--          v-for="item in props.data.teams" -->
+      <!--          :key="item.property" -->
+      <!--        > -->
+      <!--          <VListItemTitle class="mb-3"> -->
+      <!--            <span class="d-flex align-center"> -->
+      <!--              <div class="text-body-1 font-weight-medium me-2">{{ item.property }}</div> -->
+      <!--              <div>{{ item.value }}</div> -->
+      <!--            </span> -->
+      <!--          </VListItemTitle> -->
+      <!--        </VListItem> -->
+      <!--      </VList> -->
     </VCardText>
   </VCard>
 
-  <VCard>
-    <VCardText>
-      <p class="text-sm text-disabled">
-        DESCRIPCIÓN GENERAL
-      </p>
+<!--  <VCard>-->
+<!--    <VCardText>-->
+<!--      <p class="text-sm text-disabled">-->
+<!--        DESCRIPCIÓN GENERAL-->
+<!--      </p>-->
 
-<!--      <VList class="card-list text-medium-emphasis">-->
-<!--        <VListItem-->
-<!--          v-for="item in props.data.overview"-->
-<!--          :key="item.property"-->
-<!--        >-->
-<!--          <VListItemTitle class="mb-3">-->
-<!--            <span class="d-flex align-center">-->
-<!--              <VIcon-->
-<!--                :icon="item.icon"-->
-<!--                size="24"-->
-<!--                class="me-2"-->
-<!--              />-->
-<!--              <div class="text-body-1 font-weight-medium me-2">{{ item.property }}:</div>-->
-<!--              <div>{{ item.value }}</div>-->
-<!--            </span>-->
-<!--          </VListItemTitle>-->
-<!--        </VListItem>-->
-<!--      </VList>-->
-    </VCardText>
-  </VCard>
+      <!--      <VList class="card-list text-medium-emphasis"> -->
+      <!--        <VListItem -->
+      <!--          v-for="item in props.data.overview" -->
+      <!--          :key="item.property" -->
+      <!--        > -->
+      <!--          <VListItemTitle class="mb-3"> -->
+      <!--            <span class="d-flex align-center"> -->
+      <!--              <VIcon -->
+      <!--                :icon="item.icon" -->
+      <!--                size="24" -->
+      <!--                class="me-2" -->
+      <!--              /> -->
+      <!--              <div class="text-body-1 font-weight-medium me-2">{{ item.property }}:</div> -->
+      <!--              <div>{{ item.value }}</div> -->
+      <!--            </span> -->
+      <!--          </VListItemTitle> -->
+      <!--        </VListItem> -->
+      <!--      </VList> -->
+<!--    </VCardText>-->
+<!--  </VCard>-->
 </template>
 
 <style lang="scss" scoped>

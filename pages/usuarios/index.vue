@@ -111,7 +111,7 @@ const deleteItem = async (id: number) => {
           icon
           variant="text"
           color="primary"
-          :to="`/apps/user/show/${item.id}`"
+          :to="`/usuarios/show/${item.id}`"
         >
           <VIcon icon="tabler-eye" />
         </VBtn>

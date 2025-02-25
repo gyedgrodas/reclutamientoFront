@@ -2,8 +2,13 @@
 import About from './About.vue'
 import ActivityTimeline from './bitacora.vue'
 
-const user = useSanctumUser()
-
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
+    default: () => ({}),
+  },
+})
 </script>
 
 <template>
@@ -23,7 +28,6 @@ const user = useSanctumUser()
         <VCol cols="12">
           <ActivityTimeline />
         </VCol>
-
       </VRow>
     </VCol>
   </VRow>

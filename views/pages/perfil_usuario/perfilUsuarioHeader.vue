@@ -1,21 +1,20 @@
 <script lang="ts" setup>
+import usuario from '@images/avatars/usuario.png'
 
-import imagenFondo from "@/assets/images/avatars/imagenFondo.png" // Imagen de fondo del perfil de usuario
-import usuario from "@/assets/images/avatars/avatar-1.png"; // Imagen de usuario por defecto
-
-const user = useSanctumUser();
-
-const profileHeaderData = ref()
-
-profileHeaderData.value = user.value
-
+const props = defineProps({
+  user: {
+    type: Object,
+    required: false,
+    default: () => ({}),
+  },
+})
 </script>
 
 <template>
-  <VCard v-if="profileHeaderData">
+  <VCard v-if="user">
     <VImg
-      :src="profileHeaderData.coverImg ?? imagenFondo"
-      min-height="125"
+      :style="{ backgroundColor: 'rgba(var(--v-theme-primary), 0.6)' }"
+      min-height="200"
       max-height="250"
       cover
     />
@@ -23,16 +22,15 @@ profileHeaderData.value = user.value
     <VCardText class="d-flex align-bottom flex-sm-row flex-column justify-center gap-x-6">
       <div class="d-flex h-0">
         <VAvatar
-          rounded
           size="130"
-          :image="profileHeaderData.profileImg ??  usuario"
+          :image="user.profileImg ?? usuario"
           class="user-profile-avatar mx-auto"
         />
       </div>
 
       <div class="user-profile-info w-100 mt-16 pt-6 pt-sm-0 mt-sm-0">
         <h4 class="text-h4 text-center text-sm-start font-weight-medium mb-2">
-          {{ profileHeaderData?.nombre}} {{ profileHeaderData?.apellido }}
+          {{ user?.usuario_dominio }}
         </h4>
 
         <div class="d-flex align-center justify-center justify-sm-space-between flex-wrap gap-5">
@@ -40,10 +38,11 @@ profileHeaderData.value = user.value
             <span class="d-flex gap-x-2 align-center">
               <VIcon
                 size="24"
-                icon="tabler-palette"
+                icon="tabler-briefcase-2"
+                v-tooltip="'Puesto de trabajo'"
               />
               <div class="text-body-1 font-weight-medium">
-                {{ profileHeaderData?.designation ?? 'No especificada' }}
+                {{ user?.puesto?.nombre }}
               </div>
             </span>
 
@@ -51,9 +50,10 @@ profileHeaderData.value = user.value
               <VIcon
                 size="24"
                 icon="tabler-map-pin"
+                v-tooltip="'Region'"
               />
               <div class="text-body-1 font-weight-medium">
-                {{ profileHeaderData?.direccion ?? 'No especificada' }}
+                {{ user?.region?.nombre }}
               </div>
             </span>
 
@@ -61,9 +61,10 @@ profileHeaderData.value = user.value
               <VIcon
                 size="24"
                 icon="tabler-calendar"
+                v-tooltip="'Fecha inicio de laboral'"
               />
-              <div class="text-body-1 font-weight-medium" >
-                {{ profileHeaderData?.fecha_labores  ?? 'No especificada' }}
+              <div class="text-body-1 font-weight-medium">
+                {{ user && user["fecha_labores"] ? new Date(user["fecha_labores"]).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : '' }}
               </div>
             </span>
           </div>
