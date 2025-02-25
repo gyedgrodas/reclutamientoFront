@@ -12,7 +12,7 @@ definePageMeta({
 });
 
 const { put, get  } = useClienteRequest();
-const { showToastSuccess, showToastError } = useToast();
+const { showToastSuccess, showToastError, realizarPregunta } = useToast();
 const route = useRoute();
 const id = route.params.id;
 const Usuario = ref(fields);
