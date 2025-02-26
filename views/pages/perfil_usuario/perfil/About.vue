@@ -39,8 +39,8 @@ const props = defineProps({
                 size="24"
                 class="me-2"
               />
-              <div class="text-body-1 font-weight-medium me-2">CIF:</div>
-              <div>{{ props?.data.cif }}</div>
+              <div class="text-body-1 font-weight-medium me-2">CUA:</div>
+              <div>{{ props?.data.usuariosigua?.asociado?.codigo_cliente_unico }}</div>
             </span>
           </VListItemTitle>
         </VListItem>
@@ -85,7 +85,7 @@ const props = defineProps({
                 class="me-2"
               />
               <div class="text-body-1 font-weight-medium me-2">Unidad:</div>
-              <div>{{ props?.data?.unidad?.nombre }}</div>
+              <div>{{ props?.data?.usuariosigua?.unidad?.nombre }}</div>
             </span>
           </VListItemTitle>
         </VListItem>
@@ -143,9 +143,9 @@ const props = defineProps({
         </VListItem>
       </VList>
 
-<!--      <p class="text-sm text-disabled mt-6">-->
-<!--        EQUIPOS-->
-<!--      </p>-->
+      <!--      <p class="text-sm text-disabled mt-6"> -->
+      <!--        EQUIPOS -->
+      <!--      </p> -->
 
       <!--      <VList class="card-list text-medium-emphasis"> -->
       <!--        <VListItem -->
@@ -163,32 +163,32 @@ const props = defineProps({
     </VCardText>
   </VCard>
 
-<!--  <VCard>-->
-<!--    <VCardText>-->
-<!--      <p class="text-sm text-disabled">-->
-<!--        DESCRIPCIÓN GENERAL-->
-<!--      </p>-->
+<!--  <VCard> -->
+<!--    <VCardText> -->
+<!--      <p class="text-sm text-disabled"> -->
+<!--        DESCRIPCIÓN GENERAL -->
+<!--      </p> -->
 
-      <!--      <VList class="card-list text-medium-emphasis"> -->
-      <!--        <VListItem -->
-      <!--          v-for="item in props.data.overview" -->
-      <!--          :key="item.property" -->
-      <!--        > -->
-      <!--          <VListItemTitle class="mb-3"> -->
-      <!--            <span class="d-flex align-center"> -->
-      <!--              <VIcon -->
-      <!--                :icon="item.icon" -->
-      <!--                size="24" -->
-      <!--                class="me-2" -->
-      <!--              /> -->
-      <!--              <div class="text-body-1 font-weight-medium me-2">{{ item.property }}:</div> -->
-      <!--              <div>{{ item.value }}</div> -->
-      <!--            </span> -->
-      <!--          </VListItemTitle> -->
-      <!--        </VListItem> -->
-      <!--      </VList> -->
-<!--    </VCardText>-->
-<!--  </VCard>-->
+  <!--      <VList class="card-list text-medium-emphasis"> -->
+  <!--        <VListItem -->
+  <!--          v-for="item in props.data.overview" -->
+  <!--          :key="item.property" -->
+  <!--        > -->
+  <!--          <VListItemTitle class="mb-3"> -->
+  <!--            <span class="d-flex align-center"> -->
+  <!--              <VIcon -->
+  <!--                :icon="item.icon" -->
+  <!--                size="24" -->
+  <!--                class="me-2" -->
+  <!--              /> -->
+  <!--              <div class="text-body-1 font-weight-medium me-2">{{ item.property }}:</div> -->
+  <!--              <div>{{ item.value }}</div> -->
+  <!--            </span> -->
+  <!--          </VListItemTitle> -->
+  <!--        </VListItem> -->
+  <!--      </VList> -->
+<!--    </VCardText> -->
+<!--  </VCard> -->
 </template>
 
 <style lang="scss" scoped>
