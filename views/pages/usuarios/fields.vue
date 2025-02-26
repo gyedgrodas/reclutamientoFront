@@ -28,7 +28,6 @@ const data = ref<UsuarioInterface>({
   email: null,
   nombre: null,
   apellido: null,
-  password: '$2y$12$pKyetm.tWIymTgxGKGWyeOKrZLz8oOXuLZvODfBl5odH8LJZNF0sy',
   estado: null,
   nuevoPassword: 0,
   fecha_entra_vacaciones: null,

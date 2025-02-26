@@ -63,11 +63,9 @@ const getConfiguraciones = async (): Promise<void> => {
 
     await getPreferencias();
 
-    // showToastSuccess("Configuraciones obtenidas con éxito");
-
   } catch (error) {
 
-    showToastError("Error al cargar las configuraciones");
+    console.log(error)
 
   } finally {
 
