@@ -42,7 +42,7 @@ const props = defineProps({
                 v-tooltip="'Puesto de trabajo'"
               />
               <div class="text-body-1 font-weight-medium">
-                {{ user?.puesto?.nombre }}
+                {{ user?.usuariosigua?.puesto?.nombre }}
               </div>
             </span>
 
@@ -53,7 +53,7 @@ const props = defineProps({
                 v-tooltip="'Region'"
               />
               <div class="text-body-1 font-weight-medium">
-                {{ user?.region?.nombre }}
+                {{ user?.usuariosigua?.region?.nombre }}
               </div>
             </span>
 
@@ -64,7 +64,7 @@ const props = defineProps({
                 v-tooltip="'Fecha inicio de laboral'"
               />
               <div class="text-body-1 font-weight-medium">
-                {{ user && user["fecha_labores"] ? new Date(user["fecha_labores"]).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : '' }}
+                {{ user && user.usuariosigua?.fecha_labores ? new Date(user?.usuariosigua?.fecha_labores).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : '' }}
               </div>
             </span>
           </div>

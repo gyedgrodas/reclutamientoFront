@@ -1,50 +1,45 @@
 <script lang="ts" setup>
-
 import Documentacion from './documentacion.vue'
 
 const columnas = [
-  {title: 'ID', key: 'id', sortable: true, exportable: true},
-  {title: 'Nombre', key: 'nombre', sortable: false,},
-  {title: 'usuario_dominio', key: 'usuario_dominio'},
-  {title: 'Gerencia', key: 'gerencia_id'},
-  {title: 'Acciones', key: 'Acciones', exportable: true},
-];
+  { title: 'ID', key: 'id', sortable: true, exportable: true },
+  { title: 'Nombre', key: 'nombre', sortable: false },
+  { title: 'usuario_dominio', key: 'usuario_dominio' },
+  { title: 'Gerencia', key: 'gerencia_id' },
+  { title: 'Acciones', key: 'Acciones', exportable: true },
+]
+
 const filtros = ref({
-  nombre: ''
-});
+  nombre: '',
+})
 </script>
 
 <template>
-
-  <Documentacion/>
+  <Documentacion />
 
   <DataTableComponent
     :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
-    :cantidadPorPagina="3"
-    :cantidadPorPaginaOpciones="[2,3,5]"
+    :cantidad-por-pagina="3"
+    :cantidad-por-pagina-opciones="[2, 3, 5]"
     :columnas="columnas"
     endpoint="/api/users"
     titulo="Ejemplo de DataTable"
     :filtros="filtros"
-    :relaciones="['gerencia', 'puesto']"
+    :relaciones="['usuariosigua.gerencia']"
   >
-
     <template #item.gerencia_id="{ item }">
+      <!-- Ejemplo de como usar datos de relaciones -->
 
-<!-- Ejemplo de como usar datos de relaciones -->
-
-      {{ item.gerencia.nombre }}
-
+      {{ item.usuariosigua?.gerencia?.nombre }}
     </template>
 
     <template #item.Acciones="{ item }">
-
       <VBtn
         color="primary"
         icon
         variant="text"
       >
-        <VIcon icon="tabler-eye"/>
+        <VIcon icon="tabler-eye" />
       </VBtn>
 
       <VBtn
@@ -52,7 +47,7 @@ const filtros = ref({
         icon
         variant="text"
       >
-        <VIcon icon="tabler-edit"/>
+        <VIcon icon="tabler-edit" />
       </VBtn>
 
       <VBtn
@@ -60,15 +55,10 @@ const filtros = ref({
         icon
         variant="text"
       >
-        <VIcon icon="tabler-trash"/>
+        <VIcon icon="tabler-trash" />
       </VBtn>
-
-
     </template>
-
   </DataTableComponent>
-
-
 </template>
 
 <style lang="scss" scoped>
