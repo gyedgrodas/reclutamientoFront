@@ -108,7 +108,7 @@ const askQuestions = async () => {
             .replace(/{{ url }}/g, url)
             .replace(/{{ directory }}/g, directory.split('pages/')[1]);
 
-        const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'index.ts'), 'utf-8')
+        const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'types.ts'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ fieldsInterfaz }}/g, JSON.stringify(datosJSON.columnas, null, 2));
 
@@ -136,7 +136,7 @@ const askQuestions = async () => {
 
         fs.writeFileSync(path.join(directoryViews, 'fields.vue'), Viewfields);
 
-        fs.writeFileSync(path.join(directoryTypes, 'index.ts'), interfazTemplate);
+        fs.writeFileSync(path.join(directoryTypes, 'types.ts'), interfazTemplate);
 
         const editDir = path.join(directory, 'edit');
         if (!fs.existsSync(editDir)) {
