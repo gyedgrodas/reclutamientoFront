@@ -1,17 +1,29 @@
-import fs from 'fs';
-import path from 'path';
-import readline from 'readline';
+import fs from 'fs'
+import path from 'path'
+import readline from 'readline'
+import chalk from 'chalk'
+import clipboardy from 'clipboardy';
 
 const __dirname = path.resolve();
 
-// Configura readline
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 });
 
-const question = (query) => {
-    return new Promise((resolve) => rl.question(query, resolve));
+const formatoCamposFormCreate = (campos) => {
+
+    console.log('llego al metodo');
+    let state = {};
+
+    campos.forEach(campo => {
+        state[campo] = null;
+    });
+
+    const stateText = `{ ${Object.entries(state).map(([key, value]) => `${key}: ${value}`).join(',\n')} }`;
+
+    return stateText;
+
 };
 
 const formatearCamposTable = (campos) => {
@@ -24,44 +36,26 @@ const formatearCamposTable = (campos) => {
     });
 };
 
-const formatearCamposFormCreate = (campos) => {
-
-    let state = {};
-
-    campos.forEach(campo => {
-        state[campo] = 'undefined';
-    });
-
-    const stateText = `{ ${Object.entries(state).map(([key, value]) => `${key}: ${value}`).join(',\n')} }`; // Agrega un salto de línea aquí
-    return stateText;
-
-};
-
-const objectSchema = (campos) => {
-    let esquema = {};
-
-    campos.forEach(campo => {
-        esquema[campo] = 'string().required("Este campo es requerido")';
-    });
-
-    const schemaText = `object({ ${Object.entries(esquema).map(([key, value]) => `${key}: ${value}`).join(',\n')} })`; // Agrega un salto de línea aquí
-    return schemaText;
-};
-
 const askQuestions = async () => {
     try {
-        const modelo = await question('Ingrese el nombre del directorio PascalCase (Ej: UsuarioConfiguracion): ');
-        if (!modelo) throw new Error("El nombre del directorio no puede estar vacío.");
 
-        const camposInput = await question('Ingrese los nombres de los campos separados por coma (Ej: nombre,apellido,segundo_nombre): ');
-        if (!camposInput) throw new Error("Los campos no pueden estar vacíos.");
+        let datosBackend = clipboardy.readSync(); // Leer del portapapeles
 
-        const url = await question('Ingrese la url de la API (Ejemplo: /api/user_configuracion): ');
-        if (!url) throw new Error("La url no puede estar vacía.");
+        datosBackend = datosBackend.replace(/\u0000/g, "").trim();
 
-        const camposSinFiltrar = camposInput.split(',').map(campo => campo.trim());
+        const datosJSON = JSON.parse(datosBackend);
 
-        const campos = camposSinFiltrar.filter(campo => campo !== '');
+        if( !datosJSON ) {
+
+            throw new Error('El contenido del portapapeles no es un JSON válido');
+
+        }
+
+        const modelo = datosJSON.Modelo
+        const url = datosJSON.Ruta
+        const camposInput = Object.keys(datosJSON.columnas)
+
+        const campos = camposInput.filter(campo => campo !== '');
 
         const modeloMinusculas = modelo.toLowerCase();
 
@@ -86,7 +80,9 @@ const askQuestions = async () => {
         const columnas = formatearCamposTable([...campos, 'Acciones']);
         const columnasJSON = JSON.stringify(columnas, null, 2);
 
+
         const camposFormCreate = formatoCamposFormCreate(campos);
+
 
         const modelPlurar = pluralizar(modeloMinusculas);
 
@@ -113,11 +109,11 @@ const askQuestions = async () => {
             .replace(/{{ url }}/g, url)
             .replace(/{{ directory }}/g, directory.split('pages/')[1]);
 
-        const camposInterfaz = formatoCamposInterfaz(campos);
+        // const camposInterfaz = formatoCamposInterfaz(campos);
 
         const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'index.ts'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
-            .replace(/{{ fieldsInterfaz }}/g, camposInterfaz);
+            .replace(/{{ fieldsInterfaz }}/g, datosJSON.columnas);
 
         const editTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'edit.vue'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
@@ -159,11 +155,25 @@ const askQuestions = async () => {
         }
         fs.writeFileSync(path.join(showDir, '[id].vue'), showTemplate);
 
-        console.log(`Archivos creados en ${directory}:`);
-        console.log('- index.vue');
-        console.log('- create.vue');
-        console.log('- edit/[id].vue');
-        console.log('- show/[id].vue');
+        console.log(chalk.greenBright('\n✅ Archivos generados correctamente:\n'))
+
+        console.log(chalk.blue('📂 Páginas:'))
+        console.log(chalk.cyanBright('  └── 📌 ' + directory))
+        console.log(chalk.cyan('       ├── 📄 index.vue'))
+        console.log(chalk.magentaBright('       ├── 📄 create.vue'))
+        console.log(chalk.yellowBright('       ├── 📄 edit/[id].vue'))
+        console.log(chalk.greenBright('       └── 📄️ show/[id].vue'))
+
+        console.log(chalk.blue('📂 Interfaces:'))
+        console.log(chalk.cyanBright('    └── 📌 ' + directoryTypes))
+        console.log(chalk.cyan('        └── 📄 types.ts'))
+
+        console.log(chalk.blue('📂 Vistas:'))
+        console.log(chalk.cyanBright('    └── 📌 ' + directoryViews))
+        console.log(chalk.cyan('        └── 📄 fields.vue'))
+
+        console.log(chalk.greenBright('\n ¡Generación de CRUD completada!\n'))
+
 
     } catch (error) {
         console.error(`Error: ${error.message}`);
@@ -192,9 +202,6 @@ function pluralizar(palabra) {
     }
 }
 
-askQuestions();
-
-
 function formatearCampoLabel(str) {
 
     return str
@@ -205,25 +212,6 @@ function formatearCampoLabel(str) {
 
 }
 
-
-const tiposInputFormulario = (campos) => {
-    let obj = Object.keys(campos);
-
-    let tipoInput = [];
-
-
-    obj.forEach(key => {
-        tipoInput.push({
-            label: formatearCampoLabel(campos[key]),
-            type: "text",
-            key: campos[key]
-        });
-    });
-
-    return JSON.stringify(tipoInput, null, 2);
-};
-
-
 const formatoHtmlInputsFormulario = (campos) => {
     let obj = Object.keys(campos);
 
@@ -231,36 +219,20 @@ const formatoHtmlInputsFormulario = (campos) => {
 
     obj.forEach(key => {
         inputs.push(`
-               <VCol cols="12"
-                md="6"               
-               >
-                <AppTextField
-                  v-model="data.${campos[key]}"
-                  :rules="[requiredValidator]"
-                  label="${formatearCampoLabel(campos[key])}"
-                  placeholder="Ingrese ${formatearCampoLabel(campos[key])}"
+            <VCol cols="12" md="6">
+                <VTextField
+                    :id="useId()"
+                    v-model="data.${campos[key]}"
+                    :rules="[requiredValidator]"
+                    label="${formatearCampoLabel(campos[key])}"
+                    placeholder="Ingrese ${formatearCampoLabel(campos[key])}"
+                    required
                 />
-              </VCol>   
+            </VCol>
         `);
     });
 
     return inputs.join('');
-
-};
-
-const formatoCamposInterfaz = (campos) => {
-
-    let obj = Object.keys(campos);
-
-    let camposInterfaz = [];
-
-    obj.forEach(key => {
-        camposInterfaz.push(`
-        ${campos[key]}: string;
-        `);
-    });
-
-    return camposInterfaz.join('');
 };
 
 const formatoShowInputs = (campos) => {
@@ -285,17 +257,8 @@ const formatoShowInputs = (campos) => {
     return camposInterfaz.join('');
 };
 
-const formatoCamposFormCreate = (campos) => {
+askQuestions();
 
-    let state = {};
 
-    campos.forEach(campo => {
-        state[campo] = null;
-    });
 
-    const stateText = `{ ${Object.entries(state).map(([key, value]) => `${key}: ${value}`).join(',\n')} }`; // Agrega un salto de línea aquí
-
-    return stateText;
-
-};
 
