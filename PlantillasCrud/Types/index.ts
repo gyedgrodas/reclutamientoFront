@@ -1,5 +1,3 @@
-export interface {{ model }}Interface {
-
+export interface {{ model }}Interface
   {{ fieldsInterfaz }}
 
-}
