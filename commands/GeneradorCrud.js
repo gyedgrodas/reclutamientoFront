@@ -13,7 +13,6 @@ const rl = readline.createInterface({
 
 const formatoCamposFormCreate = (campos) => {
 
-    console.log('llego al metodo');
     let state = {};
 
     campos.forEach(campo => {
@@ -109,11 +108,9 @@ const askQuestions = async () => {
             .replace(/{{ url }}/g, url)
             .replace(/{{ directory }}/g, directory.split('pages/')[1]);
 
-        // const camposInterfaz = formatoCamposInterfaz(campos);
-
         const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'index.ts'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
-            .replace(/{{ fieldsInterfaz }}/g, datosJSON.columnas);
+            .replace(/{{ fieldsInterfaz }}/g, JSON.stringify(datosJSON.columnas, null, 2));
 
         const editTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'edit.vue'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
@@ -132,7 +129,6 @@ const askQuestions = async () => {
             .replace(/{{ directory }}/g, directory.split('pages/')[1])
             .replace(/{{ url }}/g, url)
             .replace(/{{ camposForm }}/g, camposFormShow);
-
 
         fs.writeFileSync(path.join(directory, 'index.vue'), listTemplate);
 
