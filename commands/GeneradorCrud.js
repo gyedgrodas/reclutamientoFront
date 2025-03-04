@@ -85,7 +85,7 @@ const askQuestions = async () => {
 
         const modelPlurar = pluralizar(modeloMinusculas);
 
-        const listTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'index.vue'), 'utf-8')
+        const listTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'index.txt'), 'utf-8')
             .replace(/{{ modelPlural }}/g, modelPlurar)
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ headers }}/g, columnasJSON)
@@ -94,25 +94,25 @@ const askQuestions = async () => {
 
         const inputsFormulario = formatoHtmlInputsFormulario(campos);
 
-        const Viewfields = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Views', 'fields.vue'), 'utf-8')
+        const Viewfields = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Views', 'fields.txt'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ modelPlural }}/g, modelPlurar)
             .replace(/{{ camposFormCreate }}/g, camposFormCreate)
             .replace(/{{ directory }}/g, directory.split('pages/')[1])
             .replace(/{{ inputsFormulario }}/g, inputsFormulario);
 
-        const createTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'create.vue'), 'utf-8')
+        const createTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'create.txt'), 'utf-8')
             .replace(/{{ modelPlural }}/g, modelPlurar)
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ camposFormCreate }}/g, camposFormCreate)
             .replace(/{{ url }}/g, url)
             .replace(/{{ directory }}/g, directory.split('pages/')[1]);
 
-        const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'types.ts'), 'utf-8')
+        const interfazTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Types', 'types.txt'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ fieldsInterfaz }}/g, JSON.stringify(datosJSON.columnas, null, 2));
 
-        const editTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'edit.vue'), 'utf-8')
+        const editTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'edit.txt'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ modelPlural }}/g, modelPlurar)
             .replace(/{{ url }}/g, url)
@@ -121,7 +121,7 @@ const askQuestions = async () => {
 
         const camposFormShow = formatoShowInputs(campos);
 
-        const showTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'show.vue'), 'utf-8')
+        const showTemplate = fs.readFileSync(path.join(__dirname + '/PlantillasCrud/', 'Pages', 'show.txt'), 'utf-8')
             .replace(/{{ model }}/g, modelo)
             .replace(/{{ modelPlural }}/g, modelPlurar)
             .replace(/{{ camposFormCreate }}/g, camposFormCreate)
@@ -215,20 +215,21 @@ const formatoHtmlInputsFormulario = (campos) => {
 
     obj.forEach(key => {
         inputs.push(`
-            <VCol cols="12" md="6">
-                <VTextField
-                    :id="useId()"
-                    v-model="data.${campos[key]}"
-                    :rules="[requiredValidator]"
-                    label="${formatearCampoLabel(campos[key])}"
-                    placeholder="Ingrese ${formatearCampoLabel(campos[key])}"
-                    required
+               <VCol cols="12"
+                md="6"               
+               >
+                <AppTextField
+                  v-model="data.${campos[key]}"
+                  :rules="[requiredValidator]"
+                  label="${formatearCampoLabel(campos[key])}"
+                  placeholder="Ingrese ${formatearCampoLabel(campos[key])}"
                 />
-            </VCol>
+              </VCol>   
         `);
     });
 
     return inputs.join('');
+
 };
 
 const formatoShowInputs = (campos) => {

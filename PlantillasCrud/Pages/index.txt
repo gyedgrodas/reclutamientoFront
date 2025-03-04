@@ -67,7 +67,7 @@ const deleteItem = async (id: number) => {
     <template #item.Acciones="{ item }">
       <VBtn
         v-if="can('ver {{ modelPlural }}', '{{ modelPlural }}')"
-        icon="ri-eye-line"
+        icon="tabler-eye"
         variant="tonal"
         color="info"
         :to="'/{{ directory }}/show/' + item.id "
@@ -75,7 +75,7 @@ const deleteItem = async (id: number) => {
       />
       <VBtn
         v-if="can('editar {{ modelPlural }}', '{{ modelPlural }}')"
-        icon="ri-edit-box-line"
+        icon="tabler-edit"
         variant="tonal"
         color="warning"
         :to="'/{{ directory }}/edit/' + item.id "
@@ -83,7 +83,7 @@ const deleteItem = async (id: number) => {
       />
       <VBtn
         v-if="can('eliminar {{ modelPlural }}', '{{ modelPlural }}')"
-        icon="ri-delete-bin-line"
+        icon="tabler-trash"
         variant="tonal"
         color="error"
         @click="deleteItem(item.id)"

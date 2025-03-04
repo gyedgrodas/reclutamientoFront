@@ -6,7 +6,7 @@ definePageMeta({
   subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 });
 
-import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/types.ts';
+import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/types.txt';
 
 import {ref} from "vue";
 
