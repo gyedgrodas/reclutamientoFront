@@ -1,52 +1,24 @@
 <script lang="ts" setup>
+import type {
+  DataTablePropsInterface,
+  PaginatedResponseInterface,
+  QueryParamsInterface,
+  ColumnaInterface,
+} from '@/types/sistema/DataTableTypes'
+import type { SendResponseInterface } from '@/types/sistema/types';
 
-import {exportarDataFormatoCSV, exportarDataFormatoPDF, exportarDataFormatoXLSX} from "@/utils/dataTable/exports";
+const props = defineProps<DataTablePropsInterface>()
 
-const {get} = useClienteRequest();
-const {showToastError} = useToast();
+const { get, post } = useClienteRequest()
+const { paginaEspera } = useCargandoPagina()
 
-interface Columna {
-  title: string;
-  key: string;
-}
+const cantidadPorPaginaValorDefault: number[] = [10, 20, 30]
 
-interface DataTableProps {
-  endpoint: string;
-  columnas: Columna[];
-  cantidadPorPagina?: number;
-  cantidadPorPaginaOpciones?: number[];
-  botones?: string[];
-  titulo?: string;
-  filtros?: object;
-  relaciones?: string[];
-  nombreArchivoExport?: string;
-}
+const botonesDefault: string[] = ['xlsx', 'pdf', 'csv', 'reiniciar']
 
-interface PaginatedResponse {
-  current_page: number;
-  data: [];
-  last_page: number;
-  per_page: number;
-  total: number;
-}
+const fecha = new Date()
 
-interface QueryParams {
-  'page[number]'?: number;
-  'page[size]'?: number;
-  sort?: string;
-  include?: string;
-  [key: string]: string | number | undefined;
-}
-
-const props = defineProps<DataTableProps>();
-
-const cantidadPorPaginaValorDefault: number[] = [10, 20, 30];
-
-const botonesDefault: string[] = ['xlsx', 'pdf', 'csv', 'reiniciar'];
-
-const fecha = new Date();
-
-let {
+const {
   columnas,
   endpoint,
   cantidadPorPagina = 10,
@@ -55,128 +27,303 @@ let {
   relaciones,
   titulo = '',
   nombreArchivoExport = 'reporte_data' + fecha.getTime(),
+} = props
 
-} = props;
+const items = ref<[]>([])
+const currentPage = ref<number>(1)
+const totalItems = ref<number>(0)
+const loading = ref<boolean>(false)
+const search = ref<string>('')
 
-let {filtros} = toRefs(props);
-
-const items = ref<[]>([]);
-const currentPage = ref<number>(1);
-const totalItems = ref<number>(0);
-const loading = ref<boolean>(false);
-const search = ref<string>('');
-let itemsbyPage = ref<number>(cantidadPorPagina);
-let itemsbyPageOptions = ref<number[]>(cantidadPorPaginaOpciones);
+let itemsbyPage = ref<number>(cantidadPorPagina)
+let itemsbyPageOptions = ref<number[]>(cantidadPorPaginaOpciones)
 
 const orden = ref([{ key: columnas[0].key, order: 'asc' }] as const)
+
+const filtrosActivos = computed(() => {
+  const filtros: Record<string, any> = {}
+
+  props.columnas.forEach((col: ColumnaInterface) => {
+    if (col.OpcionesFiltro && tieneDatos(col.OpcionesFiltro.valor)) {
+      const backendKey = col.OpcionesFiltro.campo || col.key
+      filtros[backendKey] = col.OpcionesFiltro.valor
+    }
+  })
+
+  return filtros
+})
 
 const getItems = async (): Promise<void> => {
 
   const sortParam = orden.value.length ? (orden.value[0].order === 'asc' ? orden.value[0].key : `-${orden.value[0].key}`) : ''
 
-  let data: QueryParams = {
+  let data: QueryParamsInterface = {
     'page[number]': currentPage.value,
     'page[size]': itemsbyPage.value,
     'sort': sortParam,
     'include': relaciones?.join(','),
-  };
-
-  if (filtros.value) {
-    let key = Object.keys(filtros.value);
-
-    for (let i = 0; i < key.length; i++) {
-      console.log('key[i]', key[i]);
-      data[`filter[${key[i]}]`] = filtros.value[key[i]];
-    }
-
   }
 
+  const filtros = filtrosActivos.value
+  Object.keys(filtros).forEach(key => {
+    data[`filter[${key}]`] = filtros[key]
+  })
+
+  if (props.buscador)
+    data['filter[search]'] = search.value
+
   try {
-
-    loading.value = true;
-
-    const respuesta: {data: PaginatedResponse} = await get(endpoint, {
+    loading.value = true
+    const respuesta = await get<PaginatedResponseInterface>(endpoint, {
       params: {
         ...data,
-        search: search.value,
       },
     })
 
-    items.value = respuesta.data.data;
-    totalItems.value = respuesta.data.total;
+    if (Array.isArray(respuesta.data)) {
+      items.value = []
 
-  } catch (error: any) {
+      return
+    }
 
-    showToastError(error.response?.data?.message || error.message);
-
-  } finally {
-
-    loading.value = false;
-
+    items.value = respuesta.data.data
+    totalItems.value = respuesta.data.total
   }
-};
-getItems();
+  catch (error: any) {
+    manejaError(error)
+  }
+  finally {
+    loading.value = false
+  }
+}
 
-watch([currentPage, itemsbyPage, filtros], getItems, { deep: true });
+getItems()
+
+watch([currentPage, itemsbyPage], getItems, { deep: true })
 
 const reiniciar = () => {
+  currentPage.value = 1
+  itemsbyPage.value = cantidadPorPagina
+  orden.value = [{ key: columnas[0].key, order: 'asc' }]
+  search.value = ''
+  getItems()
+}
 
-  currentPage.value = 1;
-  itemsbyPage.value = cantidadPorPagina;
-  filtros.value = {};
-  orden.value = [{ key: columnas[0].key, order: 'asc' }];
+let timeout: number = 0
 
-  getItems();
+const obtenerValorAnidado = (obj: any, path: string): string => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj) || ''
+}
 
-};
+const obtenerDatosExport = () => {
+  const filtrosProcesados: Record<string, any> = {}
+
+  props.columnas?.forEach(columna => {
+    const opciones = columna.OpcionesFiltro
+
+    if (opciones && tieneDatos(opciones.valor)) {
+      const dbColumn = opciones.campo || columna.key
+
+      filtrosProcesados[dbColumn] = {
+        value: opciones.valor,
+        operador: opciones.operador || 'like',
+      }
+    }
+  })
+
+  if (props.buscador && tieneDatos(search.value)) {
+    filtrosProcesados['search'] = {
+      campo: 'search',
+      value: search.value,
+      operador: 'scope',
+    }
+  }
+
+  return {
+    model: props.model,
+    columns: props.columnas || [],
+    filters: filtrosProcesados,
+  }
+}
+
+const exportarExcel = async () => {
+  const datosRequest = obtenerDatosExport()
+
+  paginaEspera.value = true
+  try {
+    const response = await post<SendResponseInterface<any>>(
+      'api/exportar/excel?format=xlsx',
+      datosRequest,
+      {
+        responseType: 'blob',
+      },
+    )
+
+
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+
+    link.href = url
+
+    const nombreArchivo = `Reporte_${new Date().toISOString().slice(0, 10)}.xlsx`
+
+    link.setAttribute('download', nombreArchivo)
+
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  }
+  catch (error) {
+    manejaError(error)
+  }
+  finally {
+    paginaEspera.value = false
+  }
+}
+
+const exportarCSV = async () => {
+  const datosRequest = obtenerDatosExport()
+
+  paginaEspera.value = true
+  try {
+    const response = await post<SendResponseInterface<any>>(
+      'api/exportar/excel?format=csv',
+      datosRequest,
+      {
+        responseType: 'blob',
+      }
+    )
+
+    const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+    const url = window.URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+
+    const fecha = new Date().toISOString().slice(0, 10)
+    const nombreArchivo = `Reporte_${fecha}.csv`
+
+    link.setAttribute('download', nombreArchivo)
+    document.body.appendChild(link)
+    link.click()
+
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  }
+  catch (error) {
+    manejaError(error)
+  }
+  finally {
+    paginaEspera.value = false
+  }
+}
+
+const exportarPdf = async () => {
+  const datosRequest = obtenerDatosExport()
+
+  paginaEspera.value = true
+  try {
+    const response = await post<any>('api/exportar/pdf', datosRequest, {
+      responseType: 'blob',
+    })
+
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+
+    const fecha = new Date().toISOString().slice(0, 10)
+    const nombreArchivo = `Reporte_${fecha}.pdf`
+
+    link.setAttribute('download', nombreArchivo)
+    document.body.appendChild(link)
+    link.click()
+
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  }
+  catch (error) {
+    manejaError(error)
+  }
+  finally {
+    paginaEspera.value = false
+  }
+}
+
+const columnasVisibles = computed(() => {
+  return columnas.filter(col => col.visible !== false)
+})
+
+watch(search, () => {
+  if (timeout)
+    clearTimeout(timeout)
+  timeout = setTimeout(() => {
+    getItems()
+  }, 500)
+})
 
 defineExpose({
   getItems,
-});
-
+  items,
+  totalItems,
+})
 </script>
 
 <template>
-
   <VCard :title="titulo">
-
     <VCardText>
-
       <VRow>
-
-        <v-container fluid>
-          <v-row justify="end">
-            <!-- Botón de Reiniciar -->
+        <VContainer
+          fluid
+        >
+          <VRow justify="end">
             <VBtn
               v-if="botones.includes('reiniciar')"
-              class="mr-2 mb-3"
+              class="mr-2 mb-3 mt-3"
               variant="tonal"
               @click="reiniciar"
             >
-              <VTooltip activator="parent" location="top" start>
+              <VTooltip
+                start
+                activator="parent"
+                location="top"
+              >
                 <span>Reiniciar</span>
               </VTooltip>
-              <VIcon icon="tabler-refresh" />
+              <VIcon icon="tabler-refresh"/>
               Recargar
             </VBtn>
-
-            <!-- Menú de Exportar -->
-            <v-menu>
+            <VMenu v-if="botones.includes('csv') || botones.includes('xlsx') || botones.includes('pdf')">
               <template v-slot:activator="{ props }">
-                <v-btn color="primary" v-bind="props">
-                  <VIcon icon="tabler-table-export" start />
+                <VBtn
+                  color="primary"
+                  v-bind="props"
+                  class="mt-3"
+                >
+                  <VIcon
+                    start
+                    icon="tabler-table-export"
+                  />
                   Exportar
-                </v-btn>
+                </VBtn>
               </template>
-              <v-list dense class="pa-1 ma-1">
+              <VList
+                dense
+                class="pa-1 ma-1"
+              >
                 <VBtn
                   v-if="botones.includes('csv')"
                   class="mb-1"
                   variant="tonal"
                   block
-                  @click="exportarDataFormatoCSV(items, nombreArchivoExport, columnas)"
+                  @click="exportarCSV"
                 >
-                  <VIcon icon="tabler-file-type-csv" start />
+                  <VIcon
+                    start
+                    icon="tabler-file-type-csv"
+                  />
                   CSV
                 </VBtn>
 
@@ -185,9 +332,12 @@ defineExpose({
                   class="mb-1"
                   variant="tonal"
                   block
-                  @click="exportarDataFormatoXLSX(items, nombreArchivoExport, columnas)"
+                  @click="exportarExcel"
                 >
-                  <VIcon icon="tabler-file-type-xls" start />
+                  <VIcon
+                    start
+                    icon="tabler-file-type-xls"
+                  />
                   Excel
                 </VBtn>
 
@@ -196,22 +346,36 @@ defineExpose({
                   class="mb-1"
                   variant="tonal"
                   block
-                  @click="exportarDataFormatoPDF(items, nombreArchivoExport, columnas)"
+                  @click="exportarPdf"
                 >
-                  <VIcon icon="tabler-file-type-pdf" start />
+                  <VIcon
+                    start
+                    icon="tabler-file-type-pdf"
+                  />
                   PDF
                 </VBtn>
-              </v-list>
-            </v-menu>
-          </v-row>
-        </v-container>
-
+              </VList>
+            </VMenu>
+            <AppTextField
+              v-if="buscador"
+              v-model="search"
+              class="v-col-md-3"
+              placeholder="Buscador ..."
+              append-inner-icon="tabler-search"
+              single-line
+              hide-details
+              dense
+              outlined
+            />
+          </VRow>
+        </VContainer>
         <VDataTableServer
           v-model:items-per-page="itemsbyPage"
           v-model:page="currentPage"
-          :headers="columnas"
-          :items="items"
           v-model:sort-by="orden"
+          :headers="columnasVisibles"
+          :items="items"
+          :no-data-text="placeholder"
           :items-length="totalItems"
           :items-per-page-options="itemsbyPageOptions"
           :loading="loading"
@@ -220,27 +384,19 @@ defineExpose({
           @update:sort-by="getItems"
           @update:search="getItems"
         >
-
           <template
-            v-for="(slot,name) in $slots"
-            :key="name"
+            v-for="(slot, name) in $slots"
             v-slot:[name]="slotProps"
+            :key="name"
           >
-            <slot :name="name" v-bind="slotProps"></slot>
+            <slot :name="name" v-bind="slotProps" />
           </template>
-
         </VDataTableServer>
-
       </VRow>
-
     </VCardText>
-
   </VCard>
-
 </template>
 
 <style lang="scss" scoped>
 /* Estilos personalizados */
 </style>
-
-
