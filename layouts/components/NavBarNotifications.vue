@@ -175,7 +175,7 @@ onMounted(() => {
           <VBtn
             block
             size="small"
-            to="/usuarios/notificaciones"
+            to="/admin/usuarios/notificaciones"
           >
             Ver todas las notificaciones
           </VBtn>

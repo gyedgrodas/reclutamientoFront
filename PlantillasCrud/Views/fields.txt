@@ -1,50 +1,33 @@
 <script setup lang="ts">
+import type { VForm } from 'vuetify/lib/components/VForm'
+import type { {{ model }}Interface } from '@/types/{{ directory }}/types'
 
-import type {VForm} from "vuetify/lib/components/VForm";
 
+interface Emit {
+  (e: 'emitirDatos', value: {{ model }}Interface ): void
+}
+interface PropsInterface {
+  item: {{ model }}Interface | null
+}
+
+const props = defineProps<PropsInterface>()
 const isFormValid = ref(false)
-
 const refForm = ref<VForm>()
-
-import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/types.ts';
-
-const data = ref( <{{ model }}Interface>
+const emit = defineEmits<Emit>()
+const data = ref<{{ model }}Interface>(
   {{ camposFormCreate }}
 )
 
-interface Emit {
-
-  (e: 'emitirDatos', value: {{ model }}Interface ): void
-
-}
-
-const props = defineProps({
-    item: {
-      type: Object || null,
-      default: null
-    }
-  }
-)
-const emit = defineEmits<Emit>()
-
-if (props.item) {
-  data.value = props.item
-}
-
 const onSubmit = () => {
-
   refForm.value?.validate().then(({valid}) => {
-
     if (valid) {
-
       emit('emitirDatos', data.value)
-
     }
-
   })
-
 }
 
+if (props.item)
+  data.value = props.item
 </script>
 
 <template>
@@ -56,26 +39,32 @@ const onSubmit = () => {
   >
     <VRow>
     {{ inputsFormulario }}
-      <VCol cols="12">
+      <VCol cols="12" md=12 class="text-end">
+        <VBtn
+          type="reset"
+          color="secondary"
+          to="/{{ directory }}"
+          class="mr-2"
+        >
+          <VIcon
+            icon="tabler-cancel"
+            start size="22"
+          />
+          Cancelar
+        </VBtn>
         <VBtn
           type="submit"
           class="me-3"
         >
-          Submit
-        </VBtn>
-        <VBtn
-          type="reset"
-          variant="tonal"
-          color="error"
-          to="/{{ directory }}"
-        >
-          Cancel
+          <VIcon
+            icon="tabler-device-floppy"
+            start size="22"
+          />
+          Guardar
         </VBtn>
       </VCol>
     </VRow>
-
   </VForm>
-
 </template>
 
 <style scoped lang="scss">

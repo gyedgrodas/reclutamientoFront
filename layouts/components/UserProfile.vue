@@ -109,7 +109,7 @@ const fotoActual = computed(() => {
       <!-- 👉 Perfil -->
       <VListItem
         link
-        :to="{ name: 'perfil-usuario-tab', params: { tab: 'perfil' } }"
+        :to="{ name: 'admin-usuarios-perfil-usuario-tab', params: { tab: 'perfil' } }"
       >
         <template #prepend>
           <VIcon class="me-2" icon="tabler-user" size="22" />

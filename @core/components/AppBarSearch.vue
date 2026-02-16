@@ -1,278 +1,201 @@
 <script setup lang="ts" generic="T extends unknown">
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { VList, VListItem } from 'vuetify/components/VList'
+import { can } from '@layouts/plugins/casl'
+import { onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 interface Emit {
-  (e: 'update:isDialogVisible', value: boolean): void
+  (e: 'update:isNavegacionVisible', value: boolean): void
   (e: 'search', value: string): void
+  (e: 'redirect', value: Suggestion): void
+}
+
+interface Suggestion {
+  icon: string
+  title: string
+  url: { name: string }
+  action?: string
+  subject?: string
 }
 
 interface Props {
-  isDialogVisible: boolean
-  searchResults: T[]
+  isNavegacionVisible: boolean
+  searchResults: { title: string; content: Suggestion[] }[]
   isLoading?: boolean
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
-// 👉 Hotkey
-// eslint-disable-next-line camelcase
-const { ctrl_k, meta_k } = useMagicKeys({
-  passive: false,
-  onEventFired(e) {
-    if (e.ctrlKey && e.key === 'k' && e.type === 'keydown')
-      e.preventDefault()
-  },
-})
-
-const refSearchList = ref<VList>()
-const refSearchInput = ref<HTMLInputElement>()
 const searchQueryLocal = ref('')
+const activeIndex = ref(-1)
+const contenedorScroll = ref<HTMLElement>()
 
-// 👉 watching control + / to open dialog
-/* eslint-disable camelcase */
-watch([
-  ctrl_k, meta_k,
-], () => {
-  emit('update:isDialogVisible', true)
-})
-/* eslint-enable */
+const allFlatResults = computed(() =>
+  props.searchResults.flatMap(group => group.content)
+)
 
-// 👉 clear search result and close the dialog
-const clearSearchAndCloseDialog = () => {
-  searchQueryLocal.value = ''
-  emit('update:isDialogVisible', false)
-}
-
-// 👉 get fucus on search list
 const getFocusOnSearchList = (e: KeyboardEvent) => {
+  const total = allFlatResults.value.length
+
   if (e.key === 'ArrowDown') {
     e.preventDefault()
-    refSearchList.value?.focus('next')
-  }
-  else if (e.key === 'ArrowUp') {
+    activeIndex.value = (activeIndex.value + 1) % total
+  } else if (e.key === 'ArrowUp') {
     e.preventDefault()
-    refSearchList.value?.focus('prev')
+    activeIndex.value = (activeIndex.value - 1 + total) % total
+  } else if (e.key === 'Enter' && activeIndex.value >= 0) {
+    const selected = allFlatResults.value[activeIndex.value]
+    if (selected) emit('redirect', selected)
   }
 }
 
-const dialogModelValueUpdate = (val: boolean) => {
+watch(activeIndex, () => {
+  nextTick(() => {
+    const elementos = contenedorScroll.value?.querySelectorAll('.app-bar-search-suggestion') || []
+    const activo = elementos[activeIndex.value] as HTMLElement
+    if (activo) activo.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  })
+})
+
+const clearSearchAndCloseDialog = () => {
   searchQueryLocal.value = ''
-  emit('update:isDialogVisible', val)
+  emit('update:isNavegacionVisible', false)
 }
 
-// 👉 clear search query when redirect to another page
 watch(
-  () => props.isDialogVisible,
-  () => { searchQueryLocal.value = '' },
+  () => props.isNavegacionVisible,
+  () => {
+    searchQueryLocal.value = ''
+    activeIndex.value = -1
+  }
 )
+
+watch(searchQueryLocal, () => {
+  activeIndex.value = -1
+  emit('search', searchQueryLocal.value)
+})
+
+const manejarEscapeGlobal = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.isNavegacionVisible) {
+    e.preventDefault()
+    clearSearchAndCloseDialog()
+  }
+}
+
+const manejarAtajoGlobal = (e: KeyboardEvent) => {
+  const esCtrlK = e.ctrlKey && e.key.toLowerCase() === 'k'
+  const esMetaK = e.metaKey && e.key.toLowerCase() === 'k'
+
+  if (esCtrlK || esMetaK) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    emit('update:isNavegacionVisible', true)
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', manejarAtajoGlobal)
+  window.addEventListener('keydown', manejarEscapeGlobal)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', manejarAtajoGlobal)
+  window.removeEventListener('keydown', manejarEscapeGlobal)
+})
 </script>
 
 <template>
   <VDialog
     max-width="600"
-    :model-value="props.isDialogVisible"
-    :height="$vuetify.display.smAndUp ? '531' : '100%'"
-    :fullscreen="$vuetify.display.width < 600"
+    :model-value="props.isNavegacionVisible"
     class="app-bar-search-dialog"
-    @update:model-value="dialogModelValueUpdate"
-    @keyup.esc="clearSearchAndCloseDialog"
+    @update:model-value="val => emit('update:isNavegacionVisible', val)"
   >
-    <VCard
-      height="100%"
-      width="100%"
-      class="position-relative"
-    >
-      <VCardText
-        class="px-4"
-        style="padding-block: 1rem 1.2rem;"
-      >
-        <!-- 👉 Search Input -->
+    <VCard class="search-modal-card">
+      <VCardText>
         <VTextField
-          ref="refSearchInput"
           v-model="searchQueryLocal"
           autofocus
-          density="compact"
           variant="plain"
-          class="app-bar-search-input"
-          @keyup.esc="clearSearchAndCloseDialog"
+          density="compact"
           @keydown="getFocusOnSearchList"
-          @update:model-value="$emit('search', searchQueryLocal)"
         >
-          <!-- 👉 Prepend Inner -->
           <template #prepend-inner>
-            <div class="d-flex align-center text-high-emphasis me-1">
-              <VIcon
-                size="24"
-                icon="tabler-search"
-              />
-            </div>
+            <VIcon icon="tabler-search" />
           </template>
-
-          <!-- 👉 Append Inner -->
           <template #append-inner>
-            <div class="d-flex align-start">
-              <div
-                class="text-base text-disabled cursor-pointer me-3"
-                @click="clearSearchAndCloseDialog"
-              >
-                [esc]
-              </div>
-
-              <VIcon
-                icon="tabler-x"
-                size="24"
-                @click="clearSearchAndCloseDialog"
-              />
-            </div>
+            <VIcon icon="tabler-x" @click="clearSearchAndCloseDialog" />
           </template>
         </VTextField>
       </VCardText>
 
-      <!-- 👉 Divider -->
       <VDivider />
 
-      <!-- 👉 Perfect Scrollbar -->
-      <PerfectScrollbar
-        :options="{ wheelPropagation: false, suppressScrollX: true }"
-        class="h-100"
-      >
-        <!-- 👉 Suggestions -->
-        <div
-          v-show="!!props.searchResults && !searchQueryLocal && $slots.suggestions"
-          class="h-100"
-        >
-          <slot name="suggestions" />
-        </div>
-
-        <template v-if="!isLoading">
-          <!-- 👉 Search List -->
-          <VList
-            v-show="searchQueryLocal.length && !!props.searchResults.length"
-            ref="refSearchList"
-            density="compact"
-            class="app-bar-search-list py-0"
-          >
-            <!-- 👉 list Item /List Sub header -->
+      <PerfectScrollbar ref="contenedorScroll">
+        <template v-if="!props.isLoading">
+          <VList class="app-bar-search-list">
             <template
-              v-for="item in props.searchResults"
-              :key="item"
+              v-for="(group, groupIndex) in props.searchResults"
+              :key="group.title"
             >
-              <slot
-                name="searchResult"
-                :item="item"
+              <p class="text-disabled text-uppercase px-4 pt-4 pb-1">
+                {{ group.title }}
+              </p>
+              <VListItem
+                v-for="(item, itemIndex) in group.content"
+                :key="item.title"
+                :class="[
+                  'app-bar-search-suggestion',
+                  activeIndex === allFlatResults.indexOf(item) ? 'active' : ''
+                ]"
+                @click="$emit('redirect', item)"
+                tabindex="0"
               >
-                <VListItem>
-                  {{ item }}
-                </VListItem>
-              </slot>
+                <template #prepend>
+                  <VIcon :icon="item.icon" size="20" class="me-n1" />
+                </template>
+                <VListItemTitle>{{ item.title }}</VListItemTitle>
+              </VListItem>
             </template>
           </VList>
-
-          <!-- 👉 No Data found -->
-          <div
-            v-show="!props.searchResults.length && searchQueryLocal.length"
-            class="h-100"
-          >
-            <slot name="noData">
-              <VCardText class="h-100">
-                <div class="app-bar-search-suggestions d-flex flex-column align-center justify-center text-high-emphasis pa-12">
-                  <VIcon
-                    size="64"
-                    icon="tabler-file-alert"
-                  />
-                  <div class="d-flex align-center flex-wrap justify-center gap-2 text-h5 mt-3">
-                    <span>No Result For </span>
-                    <span>"{{ searchQueryLocal }}"</span>
-                  </div>
-
-                  <slot name="noDataSuggestion" />
-                </div>
-              </VCardText>
-            </slot>
-          </div>
         </template>
 
-        <!-- 👉 Loading -->
-        <template v-if="isLoading">
-          <VSkeletonLoader
-            v-for="i in 3"
-            :key="i"
-            type="list-item-two-line"
-          />
+        <template v-if="props.isLoading">
+          <VSkeletonLoader type="list-item-two-line" />
+        </template>
+
+        <template v-if="searchQueryLocal && !props.searchResults.length && !props.isLoading">
+          <slot name="noData">
+            <VCardText class="h-100">
+              <div class="app-bar-search-suggestions d-flex flex-column align-center justify-center text-high-emphasis pa-12">
+                <VIcon
+                  size="64"
+                  icon="tabler-file-alert"
+                />
+                <div class="d-flex align-center flex-wrap justify-center gap-2 text-h5 mt-3">
+                  <span>No hay resultados</span>
+                </div>
+
+                <slot name="noDataSuggestion" />
+              </div>
+            </VCardText>
+          </slot>
         </template>
       </PerfectScrollbar>
     </VCard>
   </VDialog>
 </template>
 
-<style lang="scss">
-.app-bar-search-suggestions {
-  .app-bar-search-suggestion {
-    &:hover {
-      color: rgb(var(--v-theme-primary));
-    }
-  }
-}
-
-.app-bar-search-dialog {
-  .app-bar-search-input {
-    .v-field__input {
-      padding-block-start: 0.2rem;
-    }
-  }
-
-  .app-bar-search-list {
-    .v-list-item,
-    .v-list-subheader {
-      font-size: 0.75rem;
-      padding-inline: 1rem;
-    }
-
-    .v-list-item {
-      border-radius: 6px;
-      margin-block-end: 0.125rem;
-      margin-inline: 0.5rem;
-
-      .v-list-item__append {
-        .enter-icon {
-          visibility: hidden;
-        }
-      }
-
-      &:hover,
-      &:active,
-      &:focus {
-        .v-list-item__append {
-          .enter-icon {
-            visibility: visible;
-          }
-        }
-      }
-    }
-
-    .v-list-subheader {
-      line-height: 1;
-      min-block-size: auto;
-      padding-block: 16px 8px;
-      padding-inline-start: 1rem;
-      text-transform: uppercase;
-    }
-  }
-}
-
-@supports selector(:focus-visible) {
-  .app-bar-search-dialog {
-    .v-list-item:focus-visible::after {
-      content: none;
-    }
-  }
-}
-</style>
-
 <style lang="scss" scoped>
-.card-list {
-  --v-card-list-gap: 16px;
+.app-bar-search-suggestion.active {
+  background-color: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+}
+.search-modal-card {
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
 }
 </style>

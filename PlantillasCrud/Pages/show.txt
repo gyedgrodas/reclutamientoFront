@@ -1,92 +1,64 @@
 <script setup lang="ts">
+import type { {{ model }}Interface } from '@/types/{{ directory }}/types'
+import type { SendResponseInterface } from '@/types/sistema/types'
 
 definePageMeta({
+  navActiveLink: '{{ navActiveLink }}',
   middleware: 'permissions',
-  action: 'ver {{ modelPlural }}', // Acción requerida
-  subject: '{{ modelPlural }}',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
-});
+  action: 'ver {{ nombreModeloPermiso }}',
+  subject: '{{ model }}',
+})
 
-import type { {{ model }}Interface } from '@/types/{{ modelPlural }}/types.txt';
+const { get } = useClienteRequest()
+const { paginaEspera } = useCargandoPagina()
 
-import {ref} from "vue";
-
-const { get } = useClienteRequest();
-
-const { showToastSuccess, showToastError } = useToast();
-
-const route = useRoute();
-
-const id = route.params.id;
-
-const { paginaEspera } = useCargandoPagina();
-
-const item = ref( <{{ model }}Interface>
+const route = useRoute()
+const id = route.params.id
+const item = ref<{{ model }}Interface>(
 {{ camposFormCreate }}
 )
 
 const get{{ model }} = async () => {
-
   try {
+    paginaEspera.value = true
+    const respuesta = await get<SendResponseInterface<{{ model }}Interface>>(`{{ url }}/${id}`)
 
-    paginaEspera.value = true;
-
-    const respuesta: { data: {{ model }}Interface } = await get('{{ url }}/' + id );
-
-    item.value = respuesta.data;
-
-
-  } catch (error: { message: string }) {
-
-    showToastError(error.message);
-
+    item.value = respuesta.data
   }
-
-  paginaEspera.value = false;
-
+  catch (error: any) {
+    manejaError(error)
+  }
+  paginaEspera.value = false
 }
 
-const puedeMostrarDatos = computed(() => {
-
-  return Object.values(item.value).some(valor => valor !== null && valor !== undefined);
-
-});
-
-get{{ model }}();
-
+get{{ model }}()
 </script>
 
 <template>
-
-  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
+  <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-4">
+    <h1>
+      Ver {{ model }}
+    </h1>
     <VBtn
       class="ml-auto"
       color="secondary"
-      to="/{{ directory }}/"
+      to="/{{ directory }}"
     >
+      <VIcon class="tabler-arrow-back-up mr-1" />
       Regresar
     </VBtn>
   </div>
 
   <VCard>
-
-    <VCardItem>
-
-      <VCardTitle>Visualizar {{ model }}</VCardTitle>
-
-    </VCardItem>
-
     <VCardText>
-
-      <VList class="card-list mt-2" v-if="puedeMostrarDatos">
-
+      <VList
+        v-if="tieneDatos(item)"
+        class="card-list mt-2"
+      >
         {{ camposForm }}
-
       </VList>
-
     </VCardText>
-
   </VCard>
-
 </template>
 
 <style scoped lang="scss">

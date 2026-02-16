@@ -1,7 +1,6 @@
 import { PROGRAMADOR_TEXT } from '@/constantes/admin/modulo-usuarios/Const-Roles'
 import type { UsuarioInterface } from '@/types/usuarios'
 import { format } from "date-fns";
-import { ESTADOS_FINALIZADOS } from "@/constantes/SolicitudCreditos/Estados";
 const { showToastError } = useToast()
 
 /**
@@ -76,79 +75,6 @@ export const haceCuantoFueHecha = (fechaRegistro: Date | string): string => {
   return partes.slice(0, 2).join(', ')
 }
 
-
-/**
- * Función que calcula la diferencia entre dos fechas y retorna un string con la diferencia
- * @param fechaRegistro
- * @param idEstado
- * @param fechaFinalizacion
- */
-export const tiempoTranscurridoSolicitud = (
-  fechaRegistro: Date | string,
-  idEstado?: number, // Ahora es opcional
-  fechaFinalizacion?: Date | string | null
-): string => {
-  // 1. Convertir fecha de inicio
-  const fechaInicio: Date = fechaRegistro instanceof Date ? fechaRegistro : new Date(fechaRegistro);
-
-  // 2. Determinar la fecha de fin
-  let fechaFin: Date;
-
-  /**
-   * Lógica:
-   * - Si recibimos un idEstado Y ese estado está en la lista de finalizados
-   * Y además tenemos una fechaFinalizacion válida, usamos esa fecha.
-   * - En cualquier otro caso (si no hay estado, no es finalizado o no hay fechaFin),
-   * usamos la fecha actual (ahora).
-   */
-  if (idEstado !== undefined && ESTADOS_FINALIZADOS.includes(idEstado) && fechaFinalizacion) {
-    fechaFin = fechaFinalizacion instanceof Date ? fechaFinalizacion : new Date(fechaFinalizacion);
-  } else {
-    fechaFin = new Date();
-  }
-
-  // Verificar validez de fechas
-  if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-    return 'Fecha inválida';
-  }
-
-  const diferenciaMs: number = fechaFin.getTime() - fechaInicio.getTime();
-
-  // Evitar resultados negativos si la fecha de registro es futura
-  if (diferenciaMs < 0) return '0 segundos';
-
-  // --- Tu lógica original de cálculos ---
-  const segundoMs = 1000;
-  const minutoMs = segundoMs * 60;
-  const horaMs = minutoMs * 60;
-  const diaMs = horaMs * 24;
-  const mesMs = diaMs * 30;
-  const anioMs = mesMs * 12;
-
-  const años = Math.floor(diferenciaMs / anioMs);
-  const restoAnio = diferenciaMs % anioMs;
-  const meses = Math.floor(restoAnio / mesMs);
-  const restoMes = restoAnio % mesMs;
-  const dias = Math.floor(restoMes / diaMs);
-  const restoDia = restoMes % diaMs;
-  const horas = Math.floor(restoDia / horaMs);
-  const restoHora = restoDia % horaMs;
-  const minutos = Math.floor(restoHora / minutoMs);
-  const restoMinuto = restoHora % minutoMs;
-  const segundos = Math.floor(restoMinuto / segundoMs);
-
-  const partes: string[] = [];
-  if (años > 0) partes.push(`${años} año${años > 1 ? 's' : ''}`);
-  if (meses > 0) partes.push(`${meses} mes${meses > 1 ? 'es' : ''}`);
-  if (dias > 0) partes.push(`${dias} día${dias > 1 ? 's' : ''}`);
-  if (horas > 0) partes.push(`${horas} hora${horas > 1 ? 's' : ''}`);
-  if (minutos > 0) partes.push(`${minutos} minuto${minutos > 1 ? 's' : ''}`);
-  if (segundos > 0) partes.push(`${segundos} segundo${segundos > 1 ? 's' : ''}`);
-
-  if (partes.length === 0) return '0 segundos';
-
-  return partes.slice(0, 2).join(', ');
-};
 
 
 export const entornoActual = (): String => {

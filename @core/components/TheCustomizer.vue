@@ -139,46 +139,6 @@
                 />
               </div>
 
-              <div
-                :class="vuetifyTheme.current.value.colors.primary === customPrimaryColor ? 'active' : ''"
-                :style="vuetifyTheme.current.value.colors.primary === customPrimaryColor ? `outline-color: ${customPrimaryColor}; outline-width:2px;` : ''"
-                class="primary-color-wrapper cursor-pointer d-flex align-center"
-                style="
-              border-radius: 0.375rem;
-              outline: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-              padding-block: 0.5rem;
-              padding-inline: 0.625rem;"
-              >
-                <VBtn
-                  :color="vuetifyTheme.current.value.colors.primary === customPrimaryColor ? customPrimaryColor : $vuetify.theme.current.dark ? '#8692d029' : '#4b465c29'"
-                  icon
-                  size="30"
-                  style="border-radius: 0.375rem;"
-                  variant="flat"
-                >
-                  <VIcon
-                    :color="vuetifyTheme.current.value.colors.primary === customPrimaryColor ? 'rgb(var(--v-theme-on-primary))' : ''"
-                    icon="tabler-color-picker"
-                    size="20"
-                  />
-                </VBtn>
-
-                <VMenu
-                  :close-on-content-click="false"
-                  activator="parent"
-                >
-                  <VList>
-                    <VListItem>
-                      <VColorPicker
-                        v-model="customPrimaryColor"
-                        :modes="['hex']"
-                        mode="hex"
-                        @update:model-value="setPrimaryColor({ main: customPrimaryColor, darken: customPrimaryColor })"
-                      />
-                    </VListItem>
-                  </VList>
-                </VMenu>
-              </div>
             </div>
           </div>
 
@@ -268,6 +228,7 @@
               v-model:selected-radio="currentLayout"
               :grid-column="{ cols: '4' }"
               :radio-content="layouts"
+
             >
               <template #label="item">
                 <span class="text-sm text-medium-emphasis">{{ item.label }}</span>
@@ -419,13 +380,23 @@ const configStore = useConfigStore();
 // 👉 Primary Color
 const vuetifyTheme = useTheme();
 
-const colors: { main: string; darken: string }[] = [
-  {main: staticPrimaryColor, darken: staticPrimaryDarkenColor},
-  {main: '#0D9394', darken: '#0C8485'},
-  {main: '#FFB400', darken: '#E6A200'},
-  {main: '#FF4C51', darken: '#E64449'},
-  {main: '#16B1FF', darken: '#149FE6'},
-];
+const colors = computed<{ main: string; darken: string }[]>(() => {
+  const isDark = vuetifyTheme.current.value.dark
+
+  if (isDark) {
+    return [
+      { main: staticPrimaryColor, darken: staticPrimaryDarkenColor },
+      { main: '#8DC63F', darken: '#7DB238' },
+      { main: '#8A8585', darken: '#8A8585' },
+    ]
+  }
+
+  return [
+    { main: staticPrimaryColor, darken: staticPrimaryDarkenColor },
+    { main: '#8DC63F', darken: '#7DB238' },
+    { main: '#23304A', darken: '#23304A' },
+  ]
+})
 
 const customPrimaryColor = ref('#663131');
 

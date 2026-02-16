@@ -1,27 +1,19 @@
+<script lang="ts" setup>
+import type { UsuarioInterface } from '@/types/usuarios'
+
+const { user } = useSanctumAuth<UsuarioInterface>()
+
+const color = computed<string>(() => {
+  return useCookie(`${user.id}_tema_color`) as string
+});
+</script>
+
 <template>
   <div :class="`loading-container ${color}`">
-    <img alt="" src="../assets/guayacan_logo.svg" style="width: 250px">
+    <img alt="" src="/guayacan_logo.svg" style="width: 250px">
     <h3 class="loading-text" style="margin-left: 17px">Por favor, espera...</h3>
   </div>
 </template>
-
-<script lang="ts" setup>
-import {computed} from "vue";
-
-interface User {
-  id: string;
-}
-
-const {user} = useSanctumAuth() as { user: User };
-
-const color = computed<string>(() => {
-
-  return useCookie(user.id + "tema_color") as string;
-
-});
-
-</script>
-
 
 <style scoped>
 .loading-container {
