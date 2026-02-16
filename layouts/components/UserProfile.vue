@@ -1,151 +1,131 @@
 <script setup lang="ts">
-import avatar1 from '@images/avatars/avatar-1.png'
 import {useCargandoPagina} from "@/composables/useCargandoPagina";
+import usuario from '@images/avatars/usuario.png'
+import type { UsuarioInterface } from '@/types/usuarios/index'
+import {useIsMobile} from "@/composables/useIsMobile";
+const {paginaEspera} = useCargandoPagina()
 
-const { logout } = useSanctumAuth()
+const { post } = useClienteRequest()
+const { isAuthenticated, refreshIdentity } = useSanctumAuth()
+const { isMobile } = useIsMobile()
 
-
-//crear un funcion para cerrar sesion y eliminar la cookie
-const cerrarSesion = async () => {
-  try {
-    await logout()
-    //eliminar la Local storage de userAbilityRules
-    localStorage.removeItem('userAbilityRules')
-  } catch (error) {
-    console.error('An error occurred while logging out:', error)
+interface RespuestaRequest {
+  data?: {
+    azure_logout_url?: string
   }
+  message?: string
 }
 
+const cerrarSesion = async (): Promise<void> => {
+  try {
+    if (!isAuthenticated.value) return;
 
-const user = useSanctumUser()
+    paginaEspera.value = true;
+
+    const res:RespuestaRequest = await post('api/auth/logout', {});
+
+    if (res?.data?.azure_logout_url) {
+      window.location.href = res.data.azure_logout_url;
+    } else {
+      const cookie = useCookie<string>('sanctum.token.cookie');
+      cookie.value = '';
+
+      await refreshIdentity();
+    }
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+  } finally {
+    paginaEspera.value = false;
+  }
+};
+
+const user = useSanctumUser<UsuarioInterface>()
+
+const fotoActual = computed(() => {
+  return user.value?.foto_perfil || usuario
+})
+
 </script>
 
 <template>
-  <VBadge
-    dot
-    location="bottom right"
-    offset-x="3"
-    offset-y="3"
-    bordered
-    color="success"
-  >
-    <VAvatar
-      class="cursor-pointer"
-      color="primary"
-      variant="tonal"
-    >
-      <VImg :src="avatar1" />
+  <VMenu min-width="180px" max-width="220px" location="bottom end" offset="10">
+    <template #activator="{ props }">
+      <!-- Contenedor principal -->
+      <div v-bind="props" class="d-flex align-center cursor-pointer">
+        <!-- Avatar con Badge -->
+        <VBadge
+          dot
+          location="bottom right"
+          offset-x="3"
+          offset-y="3"
+          bordered
+          color="success"
+        >
+          <VAvatar color="primary" variant="tonal" :size="isMobile ? '28' : '40'">
+            <VImg :src="fotoActual" />
+          </VAvatar>
+        </VBadge>
 
-      <!-- SECTION Menu -->
-      <VMenu
-        activator="parent"
-        width="230"
-        location="bottom end"
-        offset="14px"
+        <!-- Nombre del usuario -->
+        <VListItemTitle
+          class="text-subtitle-1 font-weight-medium ms-3"
+          v-show="!isMobile"
+        >
+          {{ user?.usuario_dominio }}
+        </VListItemTitle>
+
+        <!-- Ícono de flecha -->
+        <VIcon
+          v-show="!isMobile"
+          class="ms-2"
+          icon="tabler-chevron-down"
+          size="20"
+        />
+      </div>
+    </template>
+
+    <!-- Menú desplegable -->
+    <VList>
+      <!-- 👉 User Avatar & Name en el menú -->
+      <VListItem>
+        <template #prepend>
+          <VAvatar color="primary" variant="tonal" :size="isMobile ? '28' : '40'">
+            <VImg :src="fotoActual" />
+          </VAvatar>
+        </template>
+        <VListItemTitle class="font-weight-semibold">
+          {{ user?.usuario_dominio }}
+        </VListItemTitle>
+        <VListItemSubtitle
+          class="text-wrap text-truncate"
+          :title="user?.puesto_nombre"
+        >
+          {{ user?.puesto_nombre }}
+        </VListItemSubtitle>
+      </VListItem>
+
+      <VDivider class="my-2" />
+
+      <!-- 👉 Perfil -->
+      <VListItem
+        link
+        :to="{ name: 'perfil-usuario-tab', params: { tab: 'perfil' } }"
       >
-        <VList>
-          <!-- 👉 User Avatar & Name -->
-          <VListItem>
-            <template #prepend>
-              <VListItemAction start>
-                <VBadge
-                  dot
-                  location="bottom right"
-                  offset-x="3"
-                  offset-y="3"
-                  color="success"
-                >
-                  <VAvatar
-                    color="primary"
-                    variant="tonal"
-                  >
-                    <VImg :src="avatar1" />
-                  </VAvatar>
-                </VBadge>
-              </VListItemAction>
-            </template>
+        <template #prepend>
+          <VIcon class="me-2" icon="tabler-user" size="22" />
+        </template>
+        <VListItemTitle>Perfil</VListItemTitle>
+      </VListItem>
 
-            <VListItemTitle class="font-weight-semibold">
-              {{ user?.nombre || user?.usuario_dominio }}
-            </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
-          </VListItem>
+      <VDivider class="my-2" />
 
-          <VDivider class="my-2" />
-
-          <!-- 👉 Profile -->
-          <VListItem
-            link
-            :to="{ name: 'admin-usuarios-perfil-usuario-tab', params: { tab: 'perfil' } }"
-          >
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-user"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Perfil</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 Settings -->
-<!--          <VListItem link>-->
-<!--            <template #prepend>-->
-<!--              <VIcon-->
-<!--                class="me-2"-->
-<!--                icon="tabler-settings"-->
-<!--                size="22"-->
-<!--              />-->
-<!--            </template>-->
-
-<!--            <VListItemTitle>Settings</VListItemTitle>-->
-<!--          </VListItem>-->
-
-          <!-- 👉 Pricing -->
-<!--          <VListItem link>-->
-<!--            <template #prepend>-->
-<!--              <VIcon-->
-<!--                class="me-2"-->
-<!--                icon="tabler-currency-dollar"-->
-<!--                size="22"-->
-<!--              />-->
-<!--            </template>-->
-
-<!--            <VListItemTitle>Pricing</VListItemTitle>-->
-<!--          </VListItem>-->
-
-          <!-- 👉 FAQ -->
-<!--          <VListItem link>-->
-<!--            <template #prepend>-->
-<!--              <VIcon-->
-<!--                class="me-2"-->
-<!--                icon="tabler-help"-->
-<!--                size="22"-->
-<!--              />-->
-<!--            </template>-->
-
-<!--            <VListItemTitle>FAQ</VListItemTitle>-->
-<!--          </VListItem>-->
-
-          <!-- Divider -->
-          <VDivider class="my-2" />
-
-          <!-- 👉 Logout -->
-          <VListItem @click="cerrarSesion">
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-logout"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Logout</VListItemTitle>
-          </VListItem>
-        </VList>
-      </VMenu>
-      <!-- !SECTION -->
-    </VAvatar>
-  </VBadge>
+      <!-- 👉 Cerrar Sesión -->
+      <VListItem @click="cerrarSesion">
+        <template #prepend>
+          <VIcon class="me-2" icon="tabler-logout" size="22" />
+        </template>
+        <VListItemTitle>Cerrar Sesión</VListItemTitle>
+      </VListItem>
+    </VList>
+  </VMenu>
 </template>
