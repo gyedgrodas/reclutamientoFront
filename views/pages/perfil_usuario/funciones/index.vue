@@ -1,10 +1,8 @@
 <script setup lang="ts">
 
 
-const router = useRoute('perfil-usuario-tab')
+const router = useRoute('admin-usuarios-perfil-usuario-tab')
 const projectData = ref([])
-
-
 
 const moreList = [
   { title: 'Rename Project', value: 'Rename Project' },

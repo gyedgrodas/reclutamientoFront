@@ -5,14 +5,14 @@ import Funciones from '@/views/pages/perfil_usuario/funciones/index.vue'
 import Equipo from '@/views/pages/perfil_usuario/seguridad/index.vue'
 
 definePageMeta({
-  navActiveLink: 'perfil-usuario-tab',
+  navActiveLink: 'admin-usuarios-perfil-usuario-tab',
   key: 'tab',
 })
 
 const { paginaEspera } = useCargandoPagina()
 const usuario = useSanctumUser()
 const { get } = useClienteRequest()
-const route = useRoute('perfil-usuario-tab')
+const route = useRoute('admin-usuarios-perfil-usuario-tab')
 
 const activeTab = computed({
   get: () => route.params.tab,
@@ -74,7 +74,7 @@ onMounted(() => {
         v-for="item in tabs"
         :key="item.icon"
         :value="item.tab"
-        :to="{ name: 'perfil-usuario-tab', params: { tab: item.tab } }"
+        :to="{ name: 'admin-usuarios-perfil-usuario-tab', params: { tab: item.tab } }"
       >
         <VIcon
           size="20"

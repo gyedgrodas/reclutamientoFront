@@ -76,7 +76,7 @@ const user = useSanctumUser()
           <!-- 👉 Profile -->
           <VListItem
             link
-            :to="{ name: 'perfil-usuario-tab', params: { tab: 'perfil' } }"
+            :to="{ name: 'admin-usuarios-perfil-usuario-tab', params: { tab: 'perfil' } }"
           >
             <template #prepend>
               <VIcon
