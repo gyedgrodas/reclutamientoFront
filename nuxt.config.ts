@@ -1,4 +1,4 @@
-import {fileURLToPath} from 'node:url'
+import { fileURLToPath } from 'node:url'
 import svgLoader from 'vite-svg-loader'
 import vuetify from 'vite-plugin-vuetify'
 
@@ -7,17 +7,17 @@ export default defineNuxtConfig({
   app: {
     head: {
       titleTemplate: '%s - Guayacan',
-      title: 'Go Credit',
+      title: 'Creditos',
 
       link: [{
         rel: 'icon',
         type: 'image/x-icon',
-        href: `${process.env.NUXT_APP_BASE_URL}/favicon.ico`,
+        href: '/logoGuayacan.svg',
       }],
     },
   },
 
-  // ssr: false,
+  ssr: false,
   runtimeConfig: {
     // Private keys are only available on the server
     AUTH_ORIGIN: process.env.AUTH_ORIGIN,
@@ -25,20 +25,31 @@ export default defineNuxtConfig({
 
     // Public keys that are exposed to the client.
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
-      apiBaseUrlSigua: process.env.NUXT_PUBLIC_API_BASE_URL_SIGUA || '/api',
+      entorno: process.env.APP_ENV || 'local',
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'api',
+      apiBaseUrlSigua: process.env.NUXT_PUBLIC_API_BASE_URL_SIGUA || 'api',
+      appUrl: process.env.APP_URL || "http://localhost:3000/",
+
+      REVERB_APP_ID: process.env.REVERB_APP_ID,
+      REVERB_APP_KEY: process.env.REVERB_APP_KEY,
+      REVERB_HOST: process.env.REVERB_HOST.replace(/\/$/, ''), // Elimina barra final
+      REVERB_PORT: process.env.REVERB_PORT || '', // Deja vacío si no se necesita puerto explícito
+      REVERB_SCHEME: process.env.REVERB_SCHEME?.replace(':', '') || 'http', // Evita doble protocolo
+      REVERB_PATH: process.env.REVERB_PATH || '/app',
+      mapsKey: process.env.MAPS_KEY,
     },
   },
 
+  routeRules: {},
+
+
   sanctum: {
     mode: 'token',
-    baseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+    baseUrl: '/services',
     userStateKey: 'sanctum.user.identity',
     redirectIfAuthenticated: true,
     redirectIfUnauthenticated: true,
     endpoints: {
-      csrf: '/sanctum/csrf-cookie',
-      login: '/api/auth/login',
       logout: '/api/auth/logout',
       user: '/api/user',
     },
@@ -129,7 +140,7 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    define: {'process.env': {}},
+    define: { 'process.env': {} },
 
     resolve: {
       alias: {
