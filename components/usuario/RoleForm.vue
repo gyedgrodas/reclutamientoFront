@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { defineEmits, defineProps, nextTick, ref, watch } from 'vue'
+import { defineProps, nextTick, ref, watch } from 'vue'
 import type { VForm } from 'vuetify/components/VForm'
-import DualListbox from '@/components/DualListbox.vue'
+import SeleccionPermisos from '@/views/pages/usuarios/SeleccionPermisos.vue'
 
 const props = defineProps({
   visible: Boolean,
@@ -27,34 +27,18 @@ interface Permission {
 }
 
 // Campos y referencias del formulario
-const permisosDisponibles = ref([])
-const permisoSeleccionadoAhora = ref([])
+
 const permisosSeleccionadosAntes = ref([])
 const refForm = ref<VForm>()
 const name = ref('')
 const guardName = ref('api')
-const permisos = ref<Permission []>([])
 const isFormValid = ref(false)
-
-const cargarPermisosDisponibles = async () => {
-  try {
-    const response: any = await get('/api/permisos')
-
-    permisosDisponibles.value = response.data.data
-    console.log('Permisos disponibles:', permisosDisponibles.value)
-  }
-  catch (error) {
-    showToastError('Error al cargar los permisos')
-    console.error('Error al cargar los permisos:', error)
-  }
-}
 
 // Limpiar el formulario
 const limpiarFormulario = () => {
   name.value = ''
 
   // guardName.value = ''
-  permisos.value = []
 }
 
 const cargarPermisosRol = async (rolId: number) => {
@@ -65,7 +49,6 @@ const cargarPermisosRol = async (rolId: number) => {
   }
   catch (error) {
     showToastError('Error al cargar los permisos del rol')
-    console.error('Error al cargar los permisos del rol:', error)
   }
 }
 
@@ -73,18 +56,17 @@ const cargarPermisosRol = async (rolId: number) => {
 watch(
   () => props.visible,
   async isVisible => {
-    console.log('isVisible:', props)
-    limpiarFormulario()
-    if (isVisible && props.mode === 'edit' && props.rol) {
-      name.value = props.rol.name || ''
-      cargarPermisosRol(props.rol.id)
+    if (isVisible) {
+      limpiarFormulario()
 
-      // guardName.value = props.rol.guard_name || ''
-      // permisoSeleccionado.value = props.rol.permissions || []
-    }
-
-    else if (!isVisible) {
-      await nextTick()
+      if (props.mode === 'edit' && props.rol) {
+        name.value = props.rol.name || ''
+        await cargarPermisosRol(props.rol.id)
+      }
+    } else {
+      // RESET TOTAL al cerrar
+      permisosSeleccionadosAntes.value = []
+      name.value = ''
     }
   },
   { immediate: true },
@@ -99,7 +81,7 @@ const guardarRol = async () => {
         id: props.rol?.id || null,
         name: name.value,
         guard_name: guardName.value,
-        permisos: permisoSeleccionadoAhora.value.slice(),
+        permisos: permisosSeleccionadosAntes.value.slice(),
       }
 
       if (props.mode === 'create') {
@@ -127,12 +109,6 @@ const guardarRol = async () => {
     paginaEspera.value = false
   })
 }
-
-const actualizarPermisoSeleccionados = (permisoSeleccionados: any) => {
-  permisoSeleccionadoAhora.value = permisoSeleccionados
-}
-
-cargarPermisosDisponibles()
 </script>
 
 <template>
@@ -162,26 +138,37 @@ cargarPermisosDisponibles()
             label="Guard Name"
             disabled
           />
-          <DualListbox
-            :items-disponibles="permisosDisponibles"
-            :items-seleccionados="permisosSeleccionadosAntes"
-            tipo="Permisos"
-            @update:selected="actualizarPermisoSeleccionados"
+          <VRow>
+            <VCol cols="12">
+              <h2 class="text-center">
+                {{ `Selección de Permisos` }}
+              </h2>
+            </VCol>
+          </VRow>
+          <SeleccionPermisos
+            v-model:permisos-seleccionados="permisosSeleccionadosAntes"
+            :permisos-seleccionados="permisosSeleccionadosAntes"
           />
         </VForm>
       </VCardText>
       <VCardActions>
         <VBtn
-          color="error"
-          @click="visible = false"
+          color="secondary"
+          class="mt-6 mr-1"
+          variant="elevated"
+          @click="emit('cerrar')"
         >
+          <VIcon icon="tabler-cancel" start size="22" />
           Cancelar
         </VBtn>
         <VBtn
           color="primary"
+          class="mt-6"
+          variant="elevated"
           @click="guardarRol"
         >
-          {{ mode === "create" ? "Crear" : "Actualizar" }}
+          <VIcon icon="tabler-device-floppy" start size="22"/>
+          {{ mode === "create" ? "Crear" : "Guardar" }}
         </VBtn>
       </VCardActions>
     </VCard>

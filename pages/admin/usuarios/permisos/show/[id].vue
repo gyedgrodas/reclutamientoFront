@@ -1,10 +1,16 @@
 <script setup lang="ts">
-
 import { ref } from 'vue'
 
 const { showToastError } = useToast()
 const { get } = useClienteRequest()
 const { paginaEspera } = useCargandoPagina()
+
+definePageMeta({
+  navActiveLink: 'usuarios-permisos',
+  middleware: 'permissions',
+  action: 'editar permiso', // Acción requerida
+  subject: 'Permission',
+})
 
 const route = useRoute()
 
@@ -53,9 +59,10 @@ cargarRoles()
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
     <VBtn
       class="ml-auto"
-      color="primary"
+      color="secondary"
       to="/usuarios/permisos"
     >
+      <VIcon class="tabler-arrow-back-up mr-1" />
       Regresar
     </VBtn>
   </div>
@@ -72,7 +79,7 @@ cargarRoles()
           <AppTextField
             v-model="permisos.name"
             label="Nombre"
-            readonly
+            disabled
           />
         </VCol>
         <VCol
@@ -82,7 +89,7 @@ cargarRoles()
           <AppTextField
             v-model="permisos.guard_name"
             label="Guard Name"
-            readonly
+            disabled
           />
         </VCol>
       </VRow>

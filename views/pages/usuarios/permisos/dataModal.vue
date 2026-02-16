@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { defineProps, onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import type { VForm } from 'vuetify/lib/components/VForm'
-import DualListbox from '@/components/DualListbox.vue'
+import SeleccionRoles from '@/views/pages/usuarios/SeleccionRoles.vue'
 
 const props = defineProps<Props>()
 const emit = defineEmits(['actualizarAbrirModal', 'actualizarTabla'])
@@ -27,22 +27,8 @@ const localItem = ref({
   roles: [],
 })
 
-const rolesDisponibles = ref([])
 const sujetosDisponibles = ref([])
-const roleSeleccionadoAhora = ref([])
 const rolesSeleccionadosAntes = ref<any[]>([])
-
-const cargarRolesDisponibles = async () => {
-  try {
-    const response: any = await get('/api/roles')
-
-    rolesDisponibles.value = response.data.data
-  }
-  catch (error) {
-    showToastError('Error al cargar los roles')
-    console.error('Error al cargar los permisos:', error)
-  }
-}
 
 const cargarSujetos = async () => {
   try {
@@ -76,7 +62,6 @@ const cargarRolPermiso = async () => {
 }
 
 onMounted(async () => {
-  await cargarRolesDisponibles()
   await cargarSujetos()
 })
 
@@ -99,11 +84,6 @@ const cerrarModal = () => {
   emit('actualizarAbrirModal', false)
 }
 
-// Actualizar los roles seleccionados
-const actualizarPermisoSeleccionados = (permisoSeleccionados: any) => {
-  roleSeleccionadoAhora.value = permisoSeleccionados
-}
-
 // Crear o editar un permiso
 const onSubmit = async () => {
   refForm.value?.validate().then(async ({ valid }) => {
@@ -112,7 +92,7 @@ const onSubmit = async () => {
 
         return
 
-      localItem.value.roles = roleSeleccionadoAhora.value
+      localItem.value.roles = rolesSeleccionadosAntes.value
 
       try {
         if (localItem.value.id) {
@@ -177,24 +157,36 @@ const onSubmit = async () => {
             </VCol>
           </VRow>
 
-          <DualListbox
-            :items-disponibles="rolesDisponibles"
-            :items-seleccionados="rolesSeleccionadosAntes"
-            tipo="Roles"
-            @update:selected="actualizarPermisoSeleccionados"
+          <VRow>
+            <VCol cols="12">
+              <h2 class="text-center">
+                {{ `Selector de Roles` }}
+              </h2>
+            </VCol>
+          </VRow>
+
+          <SeleccionRoles
+            v-model:roles-seleccionados="rolesSeleccionadosAntes"
+            :roles-seleccionados="rolesSeleccionadosAntes"
           />
         </VCardText>
         <VCardActions>
           <VBtn
-            color="error"
+            color="secondary"
+            class="mt-6 mr-1"
+            variant="elevated"
             @click="cerrarModal"
           >
+            <VIcon icon="tabler-cancel" start size="22" />
             Cancelar
           </VBtn>
           <VBtn
-            color="success"
+            color="primary"
+            class="mt-6"
+            variant="elevated"
             @click="onSubmit"
           >
+            <VIcon icon="tabler-device-floppy" start size="22"/>
             Guardar
           </VBtn>
         </VCardActions>

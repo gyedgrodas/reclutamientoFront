@@ -6,9 +6,10 @@ import {ref} from "vue";
 import {useTheme} from "vuetify";
 
 definePageMeta({
+  navActiveLink: 'usuarios',
   middleware: 'permissions',
   action: 'editar usuarios', // Acción requerida
-  subject: 'usuarios',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+  subject: 'User',  // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 });
 
 const { put, get  } = useClienteRequest();
@@ -32,7 +33,7 @@ const actualizarUsuario = async ( Usuario: UsuarioInterface ): Promise<void> => 
       });
       console.log("Respuesta del backend:", respuesta);
       showToastSuccess(respuesta.message);
-      navigateTo('/usuarios');
+      navigateTo('/admin/usuarios');
 
     } catch (error) {
       showToastError(error.message);
@@ -172,12 +173,13 @@ const restablecerCodigo2fa = async (user_id) => {
 
 <template>
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
-    <h1>Gestión de Roles</h1>
+    <h1>Gestión de Usuarios</h1>
     <VBtn
       class="ml-auto"
-      prepend-icon="tabler-arrow-left"
-      to="/usuarios/"
+      color="secondary"
+      to="/admin/usuarios/"
     >
+      <VIcon class="tabler-arrow-back-up mr-1" />
       Regresar
     </VBtn>
   </div>

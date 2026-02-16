@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { defineExpose, ref } from 'vue'
+import { ref } from 'vue'
 import DataModal from '@/views/pages/usuarios/permisos/dataModal.vue'
+import { can } from '@layouts/plugins/casl'
+import { MODEL_TYPE_PERMISSION } from '@/constantes/ModelTypes'
+import type { ColumnaInterface } from '@/types/sistema/DataTableTypes';
+import type DataTable from "@/components/form-elements/DataTableComponent.vue";
 
 const { deleted, get } = useClienteRequest()
 
@@ -10,25 +14,11 @@ const { paginaEspera } = useCargandoPagina()
 const allPermisos = ref([])
 const dialog = ref(false)
 const isEditing = ref(false)
-const dataTable = ref(null)
+const dataTable = ref<InstanceType<typeof DataTable> | null>(null)
 
 const filtros = ref({
-  name: [],
+  name: null,
 })
-
-const buscarPermisos = async (searchTerm: string) => {
-  try {
-    const url = searchTerm ? `/api/permisos?filter[name]=${searchTerm} ` : '/api/permisos'
-    const response: any = await get(url)
-
-    allPermisos.value = Array.isArray(response.data) ? response.data : response.data.data
-
-    console.log('permisos encontrados:', allPermisos.value)
-  }
-  catch (error) {
-    console.error('Error al buscar permisos:', error)
-  }
-}
 
 const dialogItem = ref<{ id: number | null; name: string; guard_name: string }>({
   id: null,
@@ -46,13 +36,23 @@ const closeDialog = (value: boolean) => {
   dialog.value = value
 }
 
-const columnas = [
-  { title: 'NOMBRE', key: 'name', sortable: true },
+const columnas = computed<ColumnaInterface[]>(() => [
+  {
+    title: 'Nombre',
+    key: 'name',
+    sortable: true,
+    exportable: true,
+    OpcionesFiltro: {
+      campo: 'id',
+      operador: 'in',
+      valor: filtros.value.name,
+    },
+  },
   { title: 'SUJETO', key: 'subject', sortable: true },
   { title: 'GUARD NAME', key: 'guard_name', sortable: true },
-  { title: 'Roles', key: 'roles', sortable: false, exportable: false },
+  { title: 'Roles', key: 'roles_separados_coma', sortable: false, exportable: true },
   { title: 'ACCIONES', key: 'actions', sortable: false, exportable: false },
-]
+])
 
 const deleteItem = async (item: any) => {
   try {
@@ -78,6 +78,22 @@ const deleteItem = async (item: any) => {
   }
 }
 
+const filtrar = (): void => {
+  paginaEspera.value = true
+  setTimeout(() => {
+    dataTable.value?.getItems()
+    paginaEspera.value = false
+  }, 500);
+}
+const limpiarFiltros = (): void => {
+  paginaEspera.value = true
+  filtros.value.name = null
+  setTimeout(() => {
+    dataTable.value?.getItems()
+    paginaEspera.value = false
+  }, 100);
+}
+
 defineExpose({
   openDialog,
 })
@@ -88,23 +104,52 @@ defineExpose({
     <VCardText class="d-flex flex-wrap gap-6 mb-4">
       <div class="app-user-search-filter d-flex align-center flex-wrap gap-6">
         <div style="inline-size: 25rem;">
-          <AppAutocomplete
-            v-model="filtros.name"
-            :items="allPermisos"
+          <VLabel>Permiso:</VLabel>
+          <SelectorPro
+            v-model:item-selected="filtros.name"
+            url="/api/permisos"
+            placeholder="Escribe para buscar..."
+            item-value="id"
             item-title="name"
-            chips
-            multiple
-            closable-chips
-            :clearable="true"
-            placeholder="Seleccionar roles"
-            @update:search="buscarPermisos"
+            :campos-a-filtrar="['name']"
+            :multiple="true"
           />
         </div>
+      </div>
+    </VCardText>
+    <VCardText class="d-flex justify-end">
+      <div class="d-flex gap-2">
+        <VBtn
+          type="reset"
+          color="secondary"
+          @click="limpiarFiltros"
+        >
+          <VIcon
+            icon="tabler-clear-all"
+            start
+            size="22"
+          />
+          Limpiar
+        </VBtn>
+
+        <VBtn
+          type="submit"
+          color="primary"
+          @click="filtrar"
+        >
+          <VIcon
+            icon="tabler-filter"
+            start
+            size="22"
+          />
+          Filtrar
+        </VBtn>
       </div>
     </VCardText>
   </VCard>
   <!-- Tabla de datos -->
   <DataTableComponent
+    :model="MODEL_TYPE_PERMISSION"
     ref="dataTable"
     :botones="['csv', 'xlsx', 'pdf', 'reiniciar']"
     :cantidad-por-pagina="5"
@@ -115,7 +160,7 @@ defineExpose({
     :relaciones="['roles']"
   >
     <!-- Columna personalizada de permisos -->
-    <template #item.roles="{ item }">
+    <template #item.roles_separados_coma="{ item }">
       <div class="d-flex flex-wrap gap-2 py-2">
         <!-- Se agregó pb-2 -->
         <VChip
@@ -140,23 +185,30 @@ defineExpose({
     <template #item.actions="{ item }">
       <div class="d-flex gap-1">
         <VBtn
+          v-if="can('ver permisos', 'Permission')"
           icon="tabler-eye"
-          variant="text"
-          color="primary"
+          variant="tonal"
+          v-tooltip="'Ver'"
+          color="info"
           :to="`/usuarios/permisos/show/${item.id}`"
         />
-        <IconBtn @click="openDialog(true, item)">
-          <VIcon
-            icon="tabler-edit"
-            color="primary"
-          />
-        </IconBtn>
-        <IconBtn @click="deleteItem(item)">
-          <VIcon
-            icon="tabler-trash"
-            color="error"
-          />
-        </IconBtn>
+        <VBtn
+          v-if="can('editar permisos', 'Permission')"
+          icon="tabler-edit"
+          variant="tonal"
+          v-tooltip="'Editar'"
+          color="warning"
+          @click="openDialog(true, item)"
+        />
+        <VBtn
+          v-if="can('eliminar permisos', 'Permission')"
+          icon="tabler-trash"
+          variant="tonal"
+          v-tooltip="'Eliminar'"
+          color="error"
+          @click="deleteItem(item)"
+        />
+
       </div>
     </template>
   </datatablecomponent>

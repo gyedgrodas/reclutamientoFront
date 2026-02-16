@@ -5,6 +5,13 @@ const { showToastError } = useToast()
 const { get } = useClienteRequest()
 const { paginaEspera } = useCargandoPagina()
 
+definePageMeta({
+  navActiveLink: 'usuarios-roles',
+  middleware: 'permissions',
+  action: 'ver rol', // Acción requerida
+  subject: 'Role',
+})
+
 const route = useRoute()
 
 const id = route.params.id
@@ -52,9 +59,10 @@ cargarPermisosRol()
   <div class="d-flex flex-wrap justify-end justify-sm-space-between gap-y-4 gap-x-6 mb-6">
     <VBtn
       class="ml-auto"
-      color="primary"
+      color="secondary"
       to="/usuarios/roles"
     >
+      <VIcon class="tabler-arrow-back-up mr-1" />
       Regresar
     </VBtn>
   </div>
@@ -71,7 +79,7 @@ cargarPermisosRol()
           <AppTextField
             v-model="roles.name"
             label="Nombre"
-            readonly
+            disabled
           />
         </VCol>
         <VCol
@@ -81,7 +89,7 @@ cargarPermisosRol()
           <AppTextField
             v-model="roles.guard_name"
             label="Guard Name"
-            readonly
+            disabled
           />
         </VCol>
       </VRow>

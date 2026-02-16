@@ -2,7 +2,8 @@
 import type { VForm } from 'vuetify/components/VForm'
 import { ref } from 'vue'
 import type { UsuarioInterface } from '@/types/usuarios'
-import DualListbox from '@/components/DualListbox.vue'
+import SeleccionRoles from '@/views/pages/usuarios/SeleccionRoles.vue'
+import SeleccionPermisos from '@/views/pages/usuarios/SeleccionPermisos.vue'
 
 const props = defineProps({
   item: {
@@ -17,6 +18,7 @@ const isFormValid = ref(false)
 const refForm = ref<VForm>()
 const { getCatalogos, catalogos } = useCatalogo()
 const { showToastError } = useToast()
+const { paginaEspera } = useCargandoPagina()
 
 const data = ref<UsuarioInterface>({
   usuario_dominio: null,
@@ -78,10 +80,19 @@ const puedeMostrarDatos = computed(() => {
 
 const loadCatalogs = async () => {
   try {
-    await getCatalogos(['puestos', 'unidades', 'regiones', 'gerencias', 'roles', 'permissions'])
+    paginaEspera.value = true
+    // await getCatalogos(['puestos'])
+    // await getCatalogos(['unidades'])
+    // await getCatalogos(['regiones'])
+    // await getCatalogos(['gerencias'])
+    // await getCatalogos(['roles'])
+    // await getCatalogos(['permissions'])
   }
   catch (error) {
-    showToastError(error?.message)
+    manejaError(error)
+  }
+  finally {
+    paginaEspera.value = false
   }
 }
 
@@ -152,7 +163,7 @@ const restablecerCodigo = () => {
             <SelectorBuscador
               title="Buscar Asociado"
               placeholder="Ingrese el nombre del asociado"
-              Endpoint="/api/asociados/buscar/select2/"
+              Endpoint="/api/asociados/buscar"
               requerido
               @data="llenarData"
             />
@@ -162,7 +173,18 @@ const restablecerCodigo = () => {
         <VExpansionPanels v-model="panel">
           <!-- SECTION INFORMACION PERSONAL -->
           <VExpansionPanel>
-            <VExpansionPanelTitle>Información Personal</VExpansionPanelTitle>
+            <VExpansionPanelTitle>
+              Información Personal
+              <VChip
+                :label="false"
+                color="primary"
+                start
+                prepend-icon="tabler-alert-triangle"
+                style="margin-left: 15px"
+              >
+                Esta sección se edita desde el portal SIGUA
+              </VChip>
+            </VExpansionPanelTitle>
             <VExpansionPanelText>
               <VRow>
 <!--                <VCol-->
@@ -219,7 +241,7 @@ const restablecerCodigo = () => {
 
                 <VCol
                   cols="12"
-                  md="6"
+                  md="12"
                 >
                   <AppAutocomplete
                     v-model="data.estado"
@@ -227,6 +249,7 @@ const restablecerCodigo = () => {
                     :rules="[requiredValidator]"
                     label="Estado"
                     placeholder="Seleccione Estado"
+                    :disabled="data.isDisabled || data.isDisabledEdit"
                   />
                 </VCol>
               </VRow>
@@ -235,98 +258,98 @@ const restablecerCodigo = () => {
           <!-- !SECTION Delivery Address -->
 
           <!-- SECTION INFORMACION LABORAL -->
-          <VExpansionPanel>
-            <VExpansionPanelTitle>Información Laboral</VExpansionPanelTitle>
-            <VExpansionPanelText>
-              <VRow>
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppDateTimePicker
-                    v-model="data.fecha_puestoactual"
-                    :rules="[requiredValidator]"
-                    label="Fecha de Puesto Actual"
-                    placeholder="aaaa/mm/dd"
-                  />
-                </VCol>
+<!--          <VExpansionPanel>-->
+<!--            <VExpansionPanelTitle>Información Laboral</VExpansionPanelTitle>-->
+<!--            <VExpansionPanelText>-->
+<!--              <VRow>-->
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppDateTimePicker-->
+<!--                    v-model="data.fecha_puestoactual"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Fecha de Puesto Actual"-->
+<!--                    placeholder="aaaa/mm/dd"-->
+<!--                  />-->
+<!--                </VCol>-->
 
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppAutocomplete
-                    v-model="data.puesto_id"
-                    :items="catalogos.puestos"
-                    :rules="[requiredValidator]"
-                    label="Puesto"
-                    placeholder="Seleccione una opción..."
-                    item-title="nombre"
-                    item-value="id"
-                    clearable
-                    eager
-                  />
-                </VCol>
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppAutocomplete-->
+<!--                    v-model="data.puesto_id"-->
+<!--                    :items="catalogos.puestos"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Puesto"-->
+<!--                    placeholder="Seleccione una opción..."-->
+<!--                    item-title="nombre"-->
+<!--                    item-value="id"-->
+<!--                    clearable-->
+<!--                    eager-->
+<!--                  />-->
+<!--                </VCol>-->
 
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppDateTimePicker
-                    v-model="data.fecha_labores"
-                    :rules="[requiredValidator]"
-                    label="Fecha de Ingreso en la Institución"
-                    placeholder="dd-mm-yyyy"
-                  />
-                </VCol>
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppDateTimePicker-->
+<!--                    v-model="data.fecha_labores"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Fecha de Ingreso en la Institución"-->
+<!--                    placeholder="dd-mm-yyyy"-->
+<!--                  />-->
+<!--                </VCol>-->
 
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppAutocomplete
-                    v-model="data.unidad_id"
-                    :items="catalogos.unidades"
-                    :rules="[requiredValidator]"
-                    label="Unidad"
-                    placeholder="Seleccione una opción..."
-                    item-title="nombre"
-                    item-value="id"
-                  />
-                </VCol>
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppAutocomplete-->
+<!--                    v-model="data.unidad_id"-->
+<!--                    :items="catalogos.unidades"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Unidad"-->
+<!--                    placeholder="Seleccione una opción..."-->
+<!--                    item-title="nombre"-->
+<!--                    item-value="id"-->
+<!--                  />-->
+<!--                </VCol>-->
 
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppAutocomplete
-                    v-model="data.region_id"
-                    :items="catalogos.regiones"
-                    :rules="[requiredValidator]"
-                    label="Region"
-                    placeholder="Seleccione una opción..."
-                    item-title="nombre"
-                    item-value="id"
-                  />
-                </VCol>
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppAutocomplete-->
+<!--                    v-model="data.region_id"-->
+<!--                    :items="catalogos.regiones"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Region"-->
+<!--                    placeholder="Seleccione una opción..."-->
+<!--                    item-title="nombre"-->
+<!--                    item-value="id"-->
+<!--                  />-->
+<!--                </VCol>-->
 
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <AppAutocomplete
-                    v-model="data.gerencia_id"
-                    :items="catalogos.gerencias"
-                    :rules="[requiredValidator]"
-                    label="Gerencia"
-                    placeholder="Seleccione una opción..."
-                    item-title="nombre"
-                    item-value="id"
-                  />
-                </VCol>
-              </VRow>
-            </VExpansionPanelText>
-          </VExpansionPanel>
+<!--                <VCol-->
+<!--                  cols="12"-->
+<!--                  md="6"-->
+<!--                >-->
+<!--                  <AppAutocomplete-->
+<!--                    v-model="data.gerencia_id"-->
+<!--                    :items="catalogos.gerencias"-->
+<!--                    :rules="[requiredValidator]"-->
+<!--                    label="Gerencia"-->
+<!--                    placeholder="Seleccione una opción..."-->
+<!--                    item-title="nombre"-->
+<!--                    item-value="id"-->
+<!--                  />-->
+<!--                </VCol>-->
+<!--              </VRow>-->
+<!--            </VExpansionPanelText>-->
+<!--          </VExpansionPanel>-->
           <!-- !SECTION Delivery Options -->
 
           <!-- SECTION ROLES -->
@@ -335,18 +358,28 @@ const restablecerCodigo = () => {
 
             <VExpansionPanelText>
               <!-- AGREGAR EL EL COMPONENTE PARA ROLES Y PERMISOS -->
-              <DualListbox
-                :items-disponibles="catalogos.roles.data"
-                :items-seleccionados="rolesSeleccionados"
-                tipo="Roles"
-                @update:selected="guardarRolesSeleccionados"
+              <VRow>
+                <VCol cols="12">
+                  <h2 class="text-center">
+                    {{ `Selector de Roles` }}
+                  </h2>
+                </VCol>
+              </VRow>
+              <SeleccionRoles
+                v-model:roles-seleccionados="data.roles"
+                :roles-seleccionados="data.roles"
               />
               <VDivider class="my-4" />
-              <DualListbox
-                :items-disponibles="catalogos.permissions.data"
-                :items-seleccionados="permisosSeleccionados"
-                tipo="Permisos"
-                @update:selected="guardarPermisosSeleccionados"
+              <VRow>
+                <VCol cols="12">
+                  <h2 class="text-center">
+                    {{ `Selector de Permisos` }}
+                  </h2>
+                </VCol>
+              </VRow>
+              <SeleccionPermisos
+                v-model:permisos-seleccionados="data.permissions"
+                :permisos-seleccionados="data.permissions"
               />
             </VExpansionPanelText>
           </VExpansionPanel>
@@ -399,23 +432,23 @@ const restablecerCodigo = () => {
         </VExpansionPanels>
       </VCol>
 
-      <VCol
-        v-if="puedeMostrarDatos"
-        cols="12"
-      >
+      <VCol cols="12" md="12" class="text-end" v-if="puedeMostrarDatos">
+        <VBtn
+          color="secondary"
+          class="mt-6 mr-1"
+          to="/admin/usuarios"
+
+        >
+          <VIcon icon="tabler-cancel" start size="22"/>
+          Cancelar
+        </VBtn>
+
         <VBtn
           type="submit"
-          class="me-3"
+          class="mt-6 "
         >
+          <VIcon icon="tabler-device-floppy" start size="22"/>
           {{ nombreBoton }}
-        </VBtn>
-        <VBtn
-          type="reset"
-          variant="tonal"
-          color="error"
-          to="/usuarios"
-        >
-          Cancelar
         </VBtn>
       </VCol>
     </VRow>

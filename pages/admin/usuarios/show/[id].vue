@@ -7,6 +7,11 @@ import Perfil from '@/views/pages/perfil_usuario/perfil/index.vue'
 import Funciones from '@/views/pages/perfil_usuario/funciones/index.vue'
 import Seguridad from '@/views/pages/perfil_usuario/seguridad/index.vue'
 
+definePageMeta({
+  navActiveLink: 'usuarios',
+  action: 'ver usuarios', // Acción requerida
+  subject: 'User', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+})
 
 const { get } = useClienteRequest()
 

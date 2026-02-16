@@ -4,9 +4,10 @@ import fields from '@/views/pages/usuarios/fields.vue'
 import type { UsuarioInterface } from '@/types/usuarios/index.ts'
 
 definePageMeta({
+  navActiveLink: 'usuarios',
   middleware: 'permissions',
   action: 'crear usuarios', // Acción requerida
-  subject: 'usuarios', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
+  subject: 'User', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
 })
 
 const { post } = useClienteRequest()
