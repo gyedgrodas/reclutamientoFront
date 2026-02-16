@@ -1,22 +1,23 @@
 <script lang="ts" setup>
 // import navItems from '@/navigation/vertical'
-import {themeConfig} from '@themeConfig'
-
-const vuetifyTheme = useTheme()
-import {useTheme} from "vuetify";
-
-const navItems = useState('menu')
-console.log(navItems)
+import { useTheme } from 'vuetify'
+import { themeConfig } from '@themeConfig'
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
+import NavSearchBar from '@/layouts/components/NavSearchBar.vue'
+import NavBarNotifications from '@/layouts/components/NavBarNotifications.vue'
 
 // @layouts plugin
 import {VerticalNavLayout} from '@layouts'
 import {can} from "@layouts/plugins/casl";
+
+const vuetifyTheme = useTheme()
+
+const navItems = useState('menu')
 
 </script>
 
@@ -36,7 +37,9 @@ import {can} from "@layouts/plugins/casl";
           />
         </IconBtn>
 
-        <NavbarThemeSwitcher/>
+
+        <NavSearchBar class="ms-lg-n3"/>
+
 
         <VSpacer/>
 
@@ -44,20 +47,21 @@ import {can} from "@layouts/plugins/casl";
           v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
           :languages="themeConfig.app.i18n.langConfig"
         />
-        <UserProfile/>
+        <NavBarNotifications class="me-1" />
+        <NavbarThemeSwitcher class="me-2" />
+        <UserProfile />
       </div>
     </template>
 
     <!-- 👉 Pages -->
-    <slot/>
+    <slot />
 
     <!-- 👉 Footer -->
     <template #footer>
-      <Footer/>
+      <Footer />
     </template>
 
     <!-- 👉 Customizer -->
-    <TheCustomizer v-if="can('ver preferencias', 'preferencias')"/>
+    <TheCustomizer v-if="can('ver preferencias', 'UserPreferencia')"/>
   </VerticalNavLayout>
-
 </template>

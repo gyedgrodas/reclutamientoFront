@@ -1,123 +1,208 @@
 <script setup lang="ts">
 import Shepherd from 'shepherd.js'
-import { withQuery } from 'ufo'
-import type { RouteLocationRaw } from 'vue-router'
-import type { SearchResults } from '@db/app-bar-search/types'
-import { useConfigStore } from '@core/stores/config'
+import {useConfigStore} from '@core/stores/config'
+import {can} from '@layouts/plugins/casl'
+import type {RouteLocationRaw} from 'vue-router'
+import {useIsMobile} from "@/composables/useIsMobile";
+import {Icon} from "@iconify/vue";
 
-interface Suggestion {
+
+const props = withDefaults(
+  defineProps<{
+    texto?: string
+    icono?: string
+    variante?: 'menu' | 'navbar'   // define el tipo de botón
+    deshabilitado?: boolean        // controla text-disabled
+  }>(),
+  {
+    texto: 'Buscar',
+    icono: 'tabler-search',
+    variante: 'navbar',
+    deshabilitado: true,
+  }
+)
+
+
+interface Sugerencia {
   icon: string
   title: string
   url: RouteLocationRaw
+  action?: string
+  subject?: string
 }
 
-defineOptions({
-  inheritAttrs: false,
-})
+interface ItemMenu {
+  titulo: string
+  icono?: string
+  ruta?: string
+  action?: string
+  subject?: string
+  titulo_seccion?: string
+  children?: ItemMenu[]
+}
+
+interface GrupoSugerencias {
+  title: string
+  content: Sugerencia[]
+}
+
+defineOptions({inheritAttrs: false})
 
 const configStore = useConfigStore()
+const mostrarBuscador = ref(false)
+const estaCargando = ref(false)
+const elementosMenu = useState<ItemMenu[]>('menu', () => [])
+const textoBusqueda = ref('')
+const {isMobile} = useIsMobile()
 
-interface SuggestionGroup {
-  title: string
-  content: Suggestion[]
+
+
+function procesarRutaBuscador(link: any): any {
+  // 1. Si no hay ruta, no podemos procesar nada
+  if (!link.ruta || typeof link.ruta !== "string") {
+    return { name: 'index' };
+  }
+
+  // 2. Lógica para rutas con parámetros (Ej: "credito", "Transunion" o IDs)
+  if (link.parametros) {
+    // Convertimos 'admin-configuraciones' a '/admin/configuraciones'
+    const expectedPathBase = "/" + link.ruta.replace(/-/g, '/');
+
+    // Construimos la ruta absoluta: "/admin/configuraciones/credito"
+    // Esto asegura que el buscador te lleve al lugar exacto sin errores de JSON
+    return `${expectedPathBase}/${link.parametros}`;
+  }
+
+  // 3. Si no tiene parámetros, retornamos el nombre para que Nuxt lo resuelva
+  // Ej: { name: "admin-configuraciones" }
+  return { name: link.ruta };
+}
+// 🔄 Aplana recursivamente los hijos
+function aplanarMenu(menu: ItemMenu[]): Sugerencia[] {
+  const resultado: Sugerencia[] = []
+
+  for (const item of menu) {
+    if (item.ruta) {
+      resultado.push({
+        icon: item.icono || 'tabler-menu',
+        title: item.titulo,
+        url: procesarRutaBuscador(item.ruta),
+        action: item.action,
+        subject: item.subject,
+      })
+    }
+    if (item.children) {
+      resultado.push(...aplanarMenu(item.children))
+    }
+  }
+
+  return resultado
 }
 
-// 👉 Is App Search Bar Visible
-const isAppSearchBarVisible = ref(false)
-const isLoading = ref(false)
+// 🔠 Agrupa por secciones + ítems sueltos
+function agruparPorSeccion(menu: ItemMenu[]): GrupoSugerencias[] {
+  const grupos: GrupoSugerencias[] = []
+  let grupoActual: GrupoSugerencias | null = null
 
-// 👉 Default suggestions
+  const grupoGeneral: GrupoSugerencias = {
+    title: 'General',
+    content: [],
+  }
 
-const suggestionGroups: SuggestionGroup[] = [
-  {
-    title: 'Popular Searches',
-    content: [
-      { icon: 'tabler-chart-bar', title: 'Analytics', url: { name: 'dashboards-analytics' } },
-      { icon: 'tabler-chart-donut-3', title: 'CRM', url: { name: 'dashboards-crm' } },
-      { icon: 'tabler-shopping-cart', title: 'eCommerce', url: { name: 'dashboards-ecommerce' } },
-      { icon: 'tabler-truck', title: 'Logistics', url: { name: 'dashboards-logistics' } },
-    ],
-  },
-  {
-    title: 'Apps & Pages',
-    content: [
-      { icon: 'tabler-calendar', title: 'Calendar', url: { name: 'apps-calendar' } },
-      { icon: 'tabler-lock', title: 'Roles & Permissions', url: { name: 'apps-roles' } },
-      { icon: 'tabler-settings', title: 'Account Settings', url: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
-      { icon: 'tabler-copy', title: 'Dialog Examples', url: { name: 'pages-dialog-examples' } },
-    ],
-  },
-  {
-    title: 'User Interface',
-    content: [
-      { icon: 'tabler-typography', title: 'Typography', url: { name: 'pages-typography' } },
-      { icon: 'tabler-menu-2', title: 'Accordion', url: { name: 'components-expansion-panel' } },
-      { icon: 'tabler-info-triangle', title: 'Alert', url: { name: 'components-alert' } },
-      { icon: 'tabler-checkbox', title: 'Cards', url: { name: 'pages-cards-card-basic' } },
-    ],
-  },
-  {
-    title: 'Forms & Tables',
-    content: [
-      { icon: 'tabler-circle-dot', title: 'Radio', url: { name: 'forms-radio' } },
-      { icon: 'tabler-file-invoice', title: 'Form Layouts', url: { name: 'forms-form-layouts' } },
-      { icon: 'tabler-table', title: 'Table', url: { name: 'tables-data-table' } },
-      { icon: 'tabler-edit', title: 'Editor', url: { name: 'forms-editors' } },
-    ],
-  },
-]
+  for (const item of menu) {
+    if (item.titulo_seccion) {
+      grupoActual = {
+        title: item.titulo_seccion,
+        content: [],
+      }
+      grupos.push(grupoActual)
+    } else {
+      const destino = grupoActual ?? grupoGeneral
 
-// 👉 No Data suggestion
-const noDataSuggestions: Suggestion[] = [
-  {
-    title: 'Analytics',
-    icon: 'tabler-chart-bar',
-    url: { name: 'dashboards-analytics' },
-  },
-  {
-    title: 'CRM',
-    icon: 'tabler-chart-donut-3',
-    url: { name: 'dashboards-crm' },
-  },
-  {
-    title: 'eCommerce',
-    icon: 'tabler-shopping-cart',
-    url: { name: 'dashboards-ecommerce' },
-  },
-]
+      if (item.ruta) {
+        destino.content.push({
+          icon: item.icono || 'tabler-menu',
+          title: item.titulo,
+          url: {name: item.ruta},
+          action: item.action,
+          subject: item.subject,
+        })
+      }
 
-const searchQuery = ref('')
+      if (item.children) {
+        destino.content.push(...aplanarMenu(item.children))
+      }
+    }
+  }
 
+  if (grupoGeneral.content.length) {
+    grupos.unshift(grupoGeneral)
+  }
+
+  return grupos
+}
+
+// 🔍 Sugerencias agrupadas por búsqueda
+const gruposSugerencias = computed(() => {
+  const agrupados = agruparPorSeccion(elementosMenu.value)
+
+  const conPermisos = agrupados.map(grupo => ({
+    title: grupo.title,
+    content: grupo.content.filter(item =>
+      item.url.name && can(item.action, item.subject)
+    ),
+  })).filter(grupo => grupo.content.length)
+
+  if (!textoBusqueda.value) return conPermisos
+
+  return conPermisos
+    .map(grupo => ({
+      title: grupo.title,
+      content: grupo.content.filter(item =>
+        item.title.toLowerCase().includes(textoBusqueda.value.toLowerCase())
+      ),
+    }))
+    .filter(grupo => grupo.content.length)
+})
+
+// 🔄 En filas de 2 columnas
+const filasGruposSugerencias = computed(() => {
+  const filas: GrupoSugerencias[][] = []
+  const grupos = gruposSugerencias.value
+
+  for (let i = 0; i < grupos.length; i += 2) {
+    filas.push(grupos.slice(i, i + 2))
+  }
+
+  return filas
+})
+
+// 🔁 Redirección
 const router = useRouter()
-const searchResult = ref<SearchResults[]>([])
-
-const fetchResults = async () => {
-  isLoading.value = true
-
-  const { data } = await useApi<any>(withQuery('/app-bar/search', { q: searchQuery.value }))
-
-  searchResult.value = data.value
-
-  // ℹ️ simulate loading: we have used setTimeout for better user experience your can remove it
-  setTimeout(() => {
-    isLoading.value = false
-  }, 500)
+const irASugerencia = (sugerencia: Sugerencia) => {
+  router.push(sugerencia.url as string)
+  cerrarBuscador()
 }
 
-watch(searchQuery, fetchResults)
-
-const closeSearchBar = () => {
-  isAppSearchBarVisible.value = false
-  searchQuery.value = ''
+const cerrarBuscador = () => {
+  mostrarBuscador.value = false
+  textoBusqueda.value = ''
 }
 
-// 👉 redirect the selected page
-const redirectToSuggestedPage = (selected: Suggestion) => {
-  router.push(selected.url as string)
-  closeSearchBar()
-}
+watch(mostrarBuscador, visible => {
+  if (!visible) textoBusqueda.value = ''
+})
 
-const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/AppBarSearch.vue'))
+// ⛔ Fallback de sugerencias
+const sugerenciasPorDefecto = computed(() => [
+  {
+    title: 'Inicio',
+    icon: 'tabler-home',
+    url: {name: 'index'},
+  },
+])
+
+const BuscadorApp = defineAsyncComponent(() => import('@core/components/AppBarSearch.vue'))
 </script>
 
 <template>
@@ -125,38 +210,60 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
     class="d-flex align-center cursor-pointer"
     v-bind="$attrs"
     style="user-select: none;"
-    @click="isAppSearchBarVisible = !isAppSearchBarVisible"
   >
-    <!-- 👉 Search Trigger button -->
-    <!-- close active tour while opening search bar using icon -->
-    <IconBtn @click="Shepherd.activeTour?.cancel()">
-      <VIcon icon="tabler-search" />
-    </IconBtn>
-
     <span
       v-if="configStore.appContentLayoutNav === 'vertical'"
-      class="d-none d-md-flex align-center text-disabled ms-2"
-      @click="Shepherd.activeTour?.cancel()"
+      :class="[
+      'd-md-flex align-center ms-2',
+      deshabilitado ? 'text-disabled' : ''
+      ]"
+      @click="($event.stopPropagation(), mostrarBuscador = !mostrarBuscador)"
     >
-      <span class="me-2">Search</span>
-      <span class="meta-key">&#8984;K</span>
+      <!-- menu Movil -->
+      <div v-if="variante === 'menu'" class="menu-content">
+        <Icon
+          class="nav-item-icon"
+          :icon="props.icono"
+          :class="{ 'is-active': mostrarBuscador }"
+        />
+        <span
+          class="menu-text"
+          :class="{ 'is-active': mostrarBuscador }"
+        >
+          {{ props.texto }}
+        </span>
+      </div>
+
+      <!-- 📱 Mobile: solo ícono -->
+      <template v-else>
+        <span class="me-2">{{ props.texto }}</span>
+        <VIcon
+          v-if="isMobile"
+          :icon="props.icono"
+        />
+        <span v-else class="meta-key">&#8984;K</span>
+      </template>
     </span>
+
   </div>
 
-  <!-- 👉 App Bar Search -->
-  <LazyAppBarSearch
-    v-model:isDialogVisible="isAppSearchBarVisible"
-    :search-results="searchResult"
-    :is-loading="isLoading"
-    @search="searchQuery = $event"
+  <BuscadorApp
+    v-model:isNavegacionVisible="mostrarBuscador"
+    :search-results="gruposSugerencias"
+    :is-loading="estaCargando"
+    @search="textoBusqueda = $event"
+    @redirect="irASugerencia($event)"
   >
-    <!-- suggestion -->
+    <!-- 🔍 Resultados -->
     <template #suggestions>
-      <VCardText class="app-bar-search-suggestions pa-12">
-        <VRow v-if="suggestionGroups">
+      <div v-if="gruposSugerencias.length">
+        <VRow
+          v-for="(fila, idx) in filasGruposSugerencias"
+          :key="idx"
+        >
           <VCol
-            v-for="suggestion in suggestionGroups"
-            :key="suggestion.title"
+            v-for="grupo in fila"
+            :key="grupo.title"
             cols="12"
             sm="6"
           >
@@ -164,18 +271,21 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
               class="custom-letter-spacing text-disabled text-uppercase py-2 px-4 mb-0"
               style="font-size: 0.75rem; line-height: 0.875rem;"
             >
-              {{ suggestion.title }}
+              {{ grupo.title }}
             </p>
             <VList class="card-list">
               <VListItem
-                v-for="item in suggestion.content"
+                v-for="item in grupo.content"
                 :key="item.title"
                 class="app-bar-search-suggestion mx-4 mt-2"
-                @click="redirectToSuggestedPage(item)"
+                @click="irASugerencia(item)"
               >
-                <VListItemTitle>{{ item.title }}</VListItemTitle>
+                <VListItemTitle v-if="can(item.action, item.subject)">
+                  {{ item.title }}
+                </VListItemTitle>
                 <template #prepend>
                   <VIcon
+                    v-if="can(item.action, item.subject)"
                     :icon="item.icon"
                     size="20"
                     class="me-n1"
@@ -185,65 +295,32 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
             </VList>
           </VCol>
         </VRow>
-      </VCardText>
-    </template>
-
-    <!-- no data suggestion -->
-    <template #noDataSuggestion>
-      <div class="mt-9">
-        <span class="d-flex justify-center text-disabled mb-2">Try searching for</span>
-        <h6
-          v-for="suggestion in noDataSuggestions"
-          :key="suggestion.title"
-          class="app-bar-search-suggestion text-h6 font-weight-regular cursor-pointer py-2 px-4"
-          @click="redirectToSuggestedPage(suggestion)"
-        >
-          <VIcon
-            size="20"
-            :icon="suggestion.icon"
-            class="me-2"
-          />
-          <span>{{ suggestion.title }}</span>
-        </h6>
       </div>
     </template>
 
-    <!-- search result -->
-    <template #searchResult="{ item }">
-      <VListSubheader class="text-disabled custom-letter-spacing font-weight-regular ps-4">
-        {{ item.title }}
-      </VListSubheader>
-      <VListItem
-        v-for="list in item.children"
-        :key="list.title"
-        :to="list.url"
-        @click="closeSearchBar"
-      >
-        <template #prepend>
+    <!-- 🧭 Sugerencias por defecto si no hay resultados -->
+    <template #noDataSuggestion>
+      <div class="mt-9">
+        <span class="d-flex justify-center text-disabled mb-2">Accesos rápidos</span>
+        <h6
+          v-for="sugerencia in sugerenciasPorDefecto"
+          :key="sugerencia.title"
+          class="app-bar-search-suggestion text-h6 font-weight-regular cursor-pointer py-2 px-4"
+          @click="irASugerencia(sugerencia)"
+        >
           <VIcon
             size="20"
-            :icon="list.icon"
-            class="me-n1"
+            :icon="sugerencia.icon"
+            class="me-2"
           />
-        </template>
-        <template #append>
-          <VIcon
-            size="20"
-            icon="tabler-corner-down-left"
-            class="enter-icon flip-in-rtl"
-          />
-        </template>
-        <VListItemTitle>
-          {{ list.title }}
-        </VListItemTitle>
-      </VListItem>
+          {{ sugerencia.title }}
+        </h6>
+      </div>
     </template>
-  </LazyAppBarSearch>
+  </BuscadorApp>
 </template>
 
 <style lang="scss">
-@use "@styles/variables/vuetify.scss";
-
 .meta-key {
   border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-radius: 6px;
@@ -262,5 +339,17 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
   .card-list {
     --v-card-list-gap: 8px;
   }
+}
+
+.app-bar-search-suggestion {
+  transition: background 0.2s;
+}
+
+.app-bar-search-suggestion:hover {
+  background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
+.menu-content .is-active {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 </style>

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { can } from '@layouts/plugins/casl'
 
 import { themeConfig } from '@themeConfig'
 
@@ -10,8 +9,12 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 import { HorizontalNavLayout } from '@layouts'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+import NavSearchBar from "@/layouts/components/NavSearchBar.vue";
+import NavBarNotifications from "@/layouts/components/NavBarNotifications.vue";
 
 const navItems = useState('menu')
+
+import {can} from "@layouts/plugins/casl";
 </script>
 
 <template>
@@ -28,13 +31,14 @@ const navItems = useState('menu')
           {{ themeConfig.app.title }}
         </h1>
       </NuxtLink>
+      <NavSearchBar class="ms-lg-n3"/>
       <VSpacer />
 
       <NavBarI18n
         v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
         :languages="themeConfig.app.i18n.langConfig"
       />
-
+      <NavBarNotifications class="me-1" />
       <NavbarThemeSwitcher class="me-2" />
       <UserProfile />
     </template>
@@ -48,6 +52,6 @@ const navItems = useState('menu')
     </template>
 
     <!-- 👉 Customizer -->
-    <TheCustomizer v-if="can('ver preferencias', 'preferencias')" />
+    <TheCustomizer v-if="can('ver preferencias', 'UserPreferencia')"/>
   </HorizontalNavLayout>
 </template>
