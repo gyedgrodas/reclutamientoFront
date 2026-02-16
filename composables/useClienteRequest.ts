@@ -8,12 +8,18 @@ export const useClienteRequest = () => {
   const options = useSanctumConfig()
   const tokenCookie = useCookie('sanctum.token.cookie')
 
+
+  const deviceId = useCookie('x-device-id', {
+    maxAge: 60 * 60 * 24 * 365,
+    default: () => generateUUID()
+  })
   // Crear instancia de Axios con configuración base
   const axiosInstance: AxiosInstance = axios.create({
-    baseURL: config.public.apiBaseUrl,
+    baseURL:  '/services',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
       'Authorization': tokenCookie.value ? `Bearer ${tokenCookie.value}` : '',
     },
   })
@@ -50,23 +56,29 @@ export const useClienteRequest = () => {
     options: AxiosRequestConfig = {},
   ) => {
     try {
+      const currentId = deviceId.value;
       const isFormData = data instanceof FormData
 
       const response = await axiosInstance.request<T>({
         method,
         url,
         data,
+        responseType: options.responseType ?? "json",
         headers: {
           ...options.headers,
           ...(isFormData ? { 'Content-Type': 'multipart/form-data' } : {}), // Axios maneja el boundary automáticamente
+          'X-Device-Id': currentId,
         },
         ...options,
       })
 
+      if (options.responseType === "blob") {
+        return response;
+      }
+
       return response.data
     }
     catch (error) {
-      console.error(`Error en ${method} ${url}:`, error)
       throw error
     }
   }
