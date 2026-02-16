@@ -1,0 +1,15 @@
+export const SUPER_ADMINISTRADOR = 1
+export const ADMINISTRADOR = 2
+export const DEV = 3
+export const ALL_EMPLEADOS = 4
+export const ASESOR_DE_CREDITOS = 5
+export const VERIFICADOR_DOCUMENTAL = 6
+export const VERIFICADOR_LLAMADA = 7
+export const JEFE_DE_CREDITOS = 8
+export const SUBJEFE_DE_CREDITOS = 9
+export const JEFE_DE_AGENCIA = 10
+export const SUBJEFE_DE_AGENCIA = 11
+export const AUXILIAR_DE_ARCHIVO = 12
+export const JEFE_DE_DIGITALIZACION_Y_ARCHIVO = 13
+export const SUPERVISOR_DE_AGENCIAS = 14
+export const VENDEDOR_DE_CAMPO = 15

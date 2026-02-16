@@ -4,7 +4,6 @@ import EjemploDataTable from '@/views/pages/ejemplos/dataTable/ejemploDataTable.
 const { showToastInfo, showToastSuccess, showToastWarning, showToastError } = useToast()
 const { paginaEspera, cargandoPagina } = useCargandoPagina()
 const { getCatalogos, catalogos } = useCatalogo()
-const { files, serverConfig } = useFileUpload('/api/media')
 
 const mostrarToastInfo = () => {
   showToastInfo('Hello from second page')
@@ -180,20 +179,6 @@ onMounted(loadCatalogs)
     </VCardText>
   </VCard>
 
-  <VCard class="mb-12">
-    <VCardTitle>File input</VCardTitle>
-    <VCardText>
-      <FileInput
-        v-model="files"
-        label-idle="Arrastra y suelta tus archivos aquí o haz clic para seleccionarlos"
-        allow-multiple
-        max-files="2"
-        name="documentos"
-        :server="serverConfig"
-        :files="preloadedFiles"
-      />
-    </VCardText>
-  </VCard>
   <VCard class="mb-12">
     <VCardTitle>Notificación de correo</VCardTitle>
     <VCardText>
