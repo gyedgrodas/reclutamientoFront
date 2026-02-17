@@ -1,37 +1,75 @@
 <script lang="ts" setup>
 
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
-import {useGenerateImageVariant} from '@core/composable/useGenerateImageVariant'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
+import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
-import {VNodeRenderer} from '@layouts/components/VNodeRenderer'
-import {themeConfig} from '@themeConfig'
+import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+import { themeConfig } from '@themeConfig'
+import { autenticar } from '@/utils/auth/funciones'
 
 const {refreshIdentity} = useSanctumAuth();
-const {post} = useClienteRequest();
+const {post, get} = useClienteRequest()
+const route = useRoute();
+const FondoOscuro = ref<string | null>(null)
+const FondoClaro = ref<string | null>(null)
 
 definePageMeta({
+  sanctum: {
+    excluded: true,
+  },
   layout: 'blank',
   public: true,
 });
 
+
+const configuration = useRuntimeConfig();
+
+const iniciarConAC = ():void => {
+
+  if(configuration.public.entorno == 'local') {
+
+    window.location.href = 'http://localhost:8000/auth/redirect';
+
+  } else {
+
+    window.location.href = `${configuration.public.apiBaseUrl}auth/redirect`;
+
+  }
+
+};
+
+const ObtenerFondo = async () => {
+  try {
+    const res = await get('api/auth/fondo/login');
+    if (res.data.claro) {
+      FondoClaro.value = res.data.claro.url;
+    }
+    if (res.data.oscuro) {
+      FondoOscuro.value = res.data.oscuro.url;
+    }
+  } catch (error: any) {
+    console.error('Error al obtener fondo:', error);
+  }
+}
+
+
+
 const isPasswordVisible = ref(false);
 
 const authThemeImg = useGenerateImageVariant(
-  authV2LoginIllustrationLight,
-  authV2LoginIllustrationDark,
-  authV2LoginIllustrationBorderedLight,
-  authV2LoginIllustrationBorderedDark,
-  true);
+  FondoClaro,
+  FondoOscuro,
+  false
+).value
+
+
+console.log('authThemeImg:', authThemeImg.value);
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
 
 const refVForm = ref();
 const msgError = ref('');
+const loading = ref(false);
 
 const form = ref({
   usuario_dominio: '',
@@ -45,6 +83,7 @@ const errors = ref({
 
 interface RespuestaSolicitud {
   token?: string;
+  client_token?: string;
   data: {
     user_id: string;
     registrar_doble_factor: boolean;
@@ -53,53 +92,39 @@ interface RespuestaSolicitud {
 
 const onSubmit = async (): Promise<void> => {
 
-  const {valid: isValid} = await refVForm.value?.validate();
+  const { valid: isValid } = await refVForm.value?.validate();
 
   if (isValid) {
-
+    loading.value = true
     try {
 
       const res: RespuestaSolicitud = await post('api/auth/login', form.value);
 
       if (noVieneToken(res)) {
-
         const valorUser = useState<string | null>('user_id', () => null);
 
         valorUser.value = res.data.user_id;
-
         if (debeRegistrarDobleFactor(res)) {
-
           useState<boolean>('registrar_doble_factor', () => true)
-
           navigateTo('/auth/RegistrarFactorAutenticacion')
 
           return
-
-        } else {
-
+        }
+        else {
           navigateTo('/auth/DobleFactorAutenticacion')
 
           return
         }
 
       } else {
-
-        const isSecure = useRequestURL().protocol.startsWith("https");
-
-        const cookie = useCookie('sanctum.token.cookie', {secure: isSecure});
-
-        cookie.value = res.token;
-
-        await refreshIdentity();
-
-        navigateTo('/')
-
+        autenticar(res.token, res.client_token);
+        loading.value = false
       }
 
-    } catch (error: unknown) {
-
+    }
+    catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-
+      loading.value = false
       msgError.value = err.response?.data?.message ?? 'Ocurrió un error inesperado.';
 
     }
@@ -107,14 +132,26 @@ const onSubmit = async (): Promise<void> => {
 };
 
 const noVieneToken = (res: RespuestaSolicitud): boolean => {
-
   return !res.token
-
 }
 
 const debeRegistrarDobleFactor = (res: RespuestaSolicitud): boolean => {
-
   return res.data.registrar_doble_factor
+}
+
+onMounted(() => {
+   ObtenerFondo()
+  if(route.query?.error)
+    msgError.value = <string>route.query.error;
+  else
+    msgError.value = '';
+});
+
+if(route.query?.token) {
+
+  let token = route.query?.token as string;
+
+  autenticar(token);
 
 }
 
@@ -134,7 +171,7 @@ watch(form, () => {
     </div>
   </a>
 
-  <VRow
+  <VRow v-if="!route.query?.token"
     class="auth-wrapper bg-surface"
     no-gutters
   >
@@ -148,9 +185,12 @@ watch(form, () => {
           style="padding-inline: 6.25rem;"
         >
           <VImg
+            v-if="authThemeImg"
             :src="authThemeImg"
+            :key="authThemeImg"
             class="auth-illustration mt-16 mb-2"
-            max-width="613"
+            max-width="5000"
+            max-height="700"
           />
         </div>
 
@@ -165,10 +205,25 @@ watch(form, () => {
     </VCol>
 
     <VCol
-      class="auth-card-v2 d-flex align-center justify-center"
+      class="auth-card-v2 d-flex align-center justify-center position-relative"
       cols="12"
       md="4"
     >
+      <VOverlay
+        v-model="loading"
+        class="align-center justify-center"
+        contained
+        persistent
+        scroll-strategy="none"
+      >
+<!--        <VProgressCircular-->
+<!--          indeterminate-->
+<!--          color="primary"-->
+<!--          size="50"-->
+<!--        />-->
+        <div class="loader" />
+
+      </VOverlay>
       <VCard
         :max-width="500"
         class="mt-12 mt-sm-0 pa-6"
@@ -222,68 +277,70 @@ watch(form, () => {
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
                   class="mb-8"
                 />
-
-<!--                <div class="d-flex align-center flex-wrap justify-space-between my-6">-->
-<!--                  <VCheckbox-->
-<!--                    v-model="form.remember"-->
-<!--                    label="Remember me"-->
-<!--                  />-->
-<!--                  <a-->
-<!--                    class="text-primary"-->
-<!--                    href="javascript:void(0)"-->
-<!--                  >-->
-<!--                    Forgot Password?-->
-<!--                  </a>-->
-<!--                </div>-->
-
                 <VBtn
                   block
                   type="submit"
                 >
                   Iniciar Sesión
                 </VBtn>
+
+                <VBtn
+                  block
+                  class="mt-2"
+                  color="info"
+                  variant="outlined"
+                  @click="iniciarConAC"
+                >
+                  <VIcon
+                    class="tabler-brand-windows"
+                    color="info"
+                    size="20"
+                  />
+                  Inicia sesión con AC
+                </VBtn>
               </VCol>
-
-              <!-- create account -->
-<!--              <VCol-->
-<!--                class="text-body-1 text-center"-->
-<!--                cols="12"-->
-<!--              >-->
-<!--                <span class="d-inline-block">-->
-<!--                  New on our platform?-->
-<!--                </span>-->
-<!--                <a-->
-<!--                  class="text-primary ms-1 d-inline-block text-body-1"-->
-<!--                  href="javascript:void(0)"-->
-<!--                >-->
-<!--                  Create an account-->
-<!--                </a>-->
-<!--              </VCol>-->
-
-<!--              <VCol-->
-<!--                class="d-flex align-center"-->
-<!--                cols="12"-->
-<!--              >-->
-<!--                <VDivider/>-->
-<!--                <span class="mx-4">or</span>-->
-<!--                <VDivider/>-->
-<!--              </VCol>-->
-
-<!--              &lt;!&ndash; auth providers &ndash;&gt;-->
-<!--              <VCol-->
-<!--                class="text-center"-->
-<!--                cols="12"-->
-<!--              >-->
-<!--&lt;!&ndash;                <AuthProvider/>&ndash;&gt;-->
-<!--              </VCol>-->
             </VRow>
           </VForm>
         </VCardText>
       </VCard>
     </VCol>
   </VRow>
+
+  <PaginaCargando v-if="route.query?.token"/>
+
 </template>
 
 <style lang="scss">
 @use "@core/scss/template/pages/page-auth.scss";
+.loader {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: inline-block;
+  border-top: 4px solid #013e71;
+  border-right: 4px solid transparent;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+.loader::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border-left: 4px solid #19ac00;
+  border-bottom: 4px solid transparent;
+  animation: rotation 0.5s linear infinite reverse;
+}
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 </style>
