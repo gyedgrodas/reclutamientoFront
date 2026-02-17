@@ -64,13 +64,14 @@ function procesarRutaBuscador(link: any): any {
   }
 
   // 2. Lógica para rutas con parámetros (Ej: "credito", "Transunion" o IDs)
-  if (link.parametros) {
+  if (link.params) {
+    console.log('params',link.params)
     // Convertimos 'admin-configuraciones' a '/admin/configuraciones'
     const expectedPathBase = "/" + link.ruta.replace(/-/g, '/');
 
     // Construimos la ruta absoluta: "/admin/configuraciones/credito"
     // Esto asegura que el buscador te lleve al lugar exacto sin errores de JSON
-    return `${expectedPathBase}/${link.parametros}`;
+    return `${expectedPathBase}/${link.params}`;
   }
 
   // 3. Si no tiene parámetros, retornamos el nombre para que Nuxt lo resuelva
@@ -86,7 +87,7 @@ function aplanarMenu(menu: ItemMenu[]): Sugerencia[] {
       resultado.push({
         icon: item.icono || 'tabler-menu',
         title: item.titulo,
-        url: procesarRutaBuscador(item.ruta),
+        url: procesarRutaBuscador(item),
         action: item.action,
         subject: item.subject,
       })
@@ -144,6 +145,7 @@ function agruparPorSeccion(menu: ItemMenu[]): GrupoSugerencias[] {
 
 // 🔍 Sugerencias agrupadas por búsqueda
 const gruposSugerencias = computed(() => {
+  console.log(elementosMenu.value)
   const agrupados = agruparPorSeccion(elementosMenu.value)
 
   const conPermisos = agrupados.map(grupo => ({
