@@ -7,8 +7,7 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import { autenticar } from '@/utils/auth/funciones'
 
-const {refreshIdentity} = useSanctumAuth();
-const {post, get} = useClienteRequest()
+const { post, get } = useClienteRequest()
 const route = useRoute();
 const FondoOscuro = ref<string | null>(null)
 const FondoClaro = ref<string | null>(null)
@@ -24,20 +23,6 @@ definePageMeta({
 
 const configuration = useRuntimeConfig();
 
-const iniciarConAC = ():void => {
-
-  if(configuration.public.entorno == 'local') {
-
-    window.location.href = 'http://localhost:8000/auth/redirect';
-
-  } else {
-
-    window.location.href = `${configuration.public.apiBaseUrl}auth/redirect`;
-
-  }
-
-};
-
 const ObtenerFondo = async () => {
   try {
     const res = await get('api/auth/fondo/login');
@@ -51,8 +36,6 @@ const ObtenerFondo = async () => {
     console.error('Error al obtener fondo:', error);
   }
 }
-
-
 
 const isPasswordVisible = ref(false);
 
@@ -138,6 +121,12 @@ const noVieneToken = (res: RespuestaSolicitud): boolean => {
 const debeRegistrarDobleFactor = (res: RespuestaSolicitud): boolean => {
   return res.data.registrar_doble_factor
 }
+
+const loginWithMicrosoft = () => {
+  if (process.client) {
+    window.location.href = "/api/microsoft/login";
+  }
+};
 
 onMounted(() => {
    ObtenerFondo()
@@ -289,7 +278,7 @@ watch(form, () => {
                   class="mt-2"
                   color="info"
                   variant="outlined"
-                  @click="iniciarConAC"
+                  @click="loginWithMicrosoft"
                 >
                   <VIcon
                     class="tabler-brand-windows"

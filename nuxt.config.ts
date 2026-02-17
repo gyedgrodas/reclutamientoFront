@@ -23,6 +23,14 @@ export default defineNuxtConfig({
     AUTH_ORIGIN: process.env.AUTH_ORIGIN,
     AUTH_SECRET: process.env.AUTH_SECRET,
 
+    oauth: {
+      microsoft: {
+        clientId: process.env.NUXT_OAUTH_MICROSOFT_CLIENT_ID,
+        clientSecret: process.env.NUXT_OAUTH_MICROSOFT_CLIENT_SECRET,
+        tenant: process.env.NUXT_OAUTH_MICROSOFT_TENANT,
+      },
+    },
+
     // Public keys that are exposed to the client.
     public: {
       entorno: process.env.APP_ENV || 'local',
