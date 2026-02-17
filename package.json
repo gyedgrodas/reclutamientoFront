@@ -50,7 +50,6 @@
     "pdf-lib": "^1.17.1",
     "pinia": "2.2.0",
     "prismjs": "1.29.0",
-    "puppeteer": "^24.1.1",
     "pusher-js": "^8.4.0",
     "roboto-fontface": "0.10.0",
     "shepherd.js": "13.0.1",
