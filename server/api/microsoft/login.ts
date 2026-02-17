@@ -3,9 +3,9 @@ export default defineEventHandler(async (event) => {
   let origin = getRequestURL(event).origin;
 
   // Forzar HTTPS en desarrollo si es necesario
-  if (origin.startsWith("http://localhost")) {
-    origin = origin.replace("http://", "https://");
-  }
+  // if (origin.startsWith("http://localhost")) {
+  //   origin = origin.replace("http://", "https://");
+  // }
 
   const state = Math.random().toString(36).substring(7);
 
