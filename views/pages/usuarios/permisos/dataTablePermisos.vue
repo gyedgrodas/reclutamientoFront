@@ -190,7 +190,7 @@ defineExpose({
           variant="tonal"
           v-tooltip="'Ver'"
           color="info"
-          :to="`/usuarios/permisos/show/${item.id}`"
+          :to="`/admin/usuarios/permisos/show/${item.id}`"
         />
         <VBtn
           v-if="can('editar permisos', 'Permission')"

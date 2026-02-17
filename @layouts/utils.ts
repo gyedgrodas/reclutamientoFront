@@ -34,9 +34,9 @@ export const getComputedNavLinkToProp = computed(() => {
           // Extraemos parámetros de la DB (JSON o Objeto)
           const expectedPathBase = "/" + link.ruta.replace(/-/g, '/');
           // Asignamos el objeto de navegación con sus parámetros
-          if (link.parametros) {
+          if (link.params) {
             // Si el parámetro es un texto simple como 'credito', lo enviamos como 'id' o el nombre del segmento dinámico
-            const expectedFullPath = `${expectedPathBase}/${link.parametros}`;
+            const expectedFullPath = `${expectedPathBase}/${link.params}`;
 
             props.to = expectedFullPath; // <--- Asignamos el string completo
 
@@ -51,8 +51,8 @@ export const getComputedNavLinkToProp = computed(() => {
           // Nos aseguramos de que empiece con / para evitar rutas relativas duplicadas
           props.to = link.ruta.startsWith('/') ? link.ruta : `/${link.ruta}`
 
-          if(link.parametros){
-            const expectedFullPath = `${expectedPathBase}/${link.parametros}`;
+          if(link.params){
+            const expectedFullPath = `${expectedPathBase}/${link.params}`;
             props.to = expectedFullPath;
           }
 
@@ -101,9 +101,9 @@ export const isNavLinkActive = (link: NavLink, router: Router) => {
 
   if (!resolveRoutedName) return false
 
-  if (link.ruta && typeof link.ruta === "string" && link.parametros) {
+  if (link.ruta && typeof link.ruta === "string" && link.params) {
     const expectedPathBase = "/" + link.ruta.replace(/-/g, '/')
-    const expectedFullPath = `${expectedPathBase}/${link.parametros}`
+    const expectedFullPath = `${expectedPathBase}/${link.params}`
 
     // Se activa si es la ruta exacta del parámetro o una subruta de este (ej: /edit)
     if (currentPath === expectedFullPath || currentPath.startsWith(expectedFullPath + "/")) {

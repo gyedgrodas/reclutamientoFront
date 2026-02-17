@@ -212,7 +212,7 @@ const limpiarFiltros = (): void => {
           icon="tabler-eye"
           variant="tonal"
           v-tooltip="'Ver'"
-          :to="`/usuarios/roles/show/${item.id}`"
+          :to="`/admin/usuarios/roles/show/${item.id}`"
           color="info"
         />
         <VBtn
