@@ -1,124 +1,49 @@
-<script lang="ts" setup>
-import { useRoute } from 'vue-router'
-import { ref } from 'vue'
-import UserProfileHeader from '@/views/pages/perfil_usuario/perfilUsuarioHeader.vue'
-import { useCargandoPagina } from '@/composables/useCargandoPagina'
-import Perfil from '@/views/pages/perfil_usuario/perfil/index.vue'
-import Funciones from '@/views/pages/perfil_usuario/funciones/index.vue'
-import Seguridad from '@/views/pages/perfil_usuario/seguridad/index.vue'
+<script setup lang="ts">
+import type { UsuarioGestion } from '@/types/usuarios/gestion'
 
-definePageMeta({
-  navActiveLink: 'usuarios',
-  action: 'ver usuarios', // Acción requerida
-  subject: 'User', // Sujeto requerido (esto puede ser el nombre de un recurso o algo más específico)
-})
+definePageMeta({ navActiveLink: 'admin-usuarios', middleware: 'permissions', action: 'listar usuarios', subject: 'User' })
 
 const { get } = useClienteRequest()
-
-const { paginaEspera } = useCargandoPagina()
-
-const activarPaginaCargando = () => {
-  paginaEspera.value = true
-}
-
-const desactivarPaginaCargando = () => {
-  paginaEspera.value = false
-}
-
 const route = useRoute()
+const usuario = ref<UsuarioGestion | null>(null)
+const cargando = ref(true)
 
-const tabs = [
-  { title: 'Perfil', icon: 'tabler-user-check', tab: 'perfil' },
-  { title: 'Seguridad', icon: 'tabler-users', tab: 'seguridad' },
-  { title: 'Funciones', icon: 'tabler-layout-grid', tab: 'funciones' },
-]
-
-// Estado de la pestaña activa
-const activeTab = ref(localStorage.getItem('activeTab') || 'perfil')
-
-// Actualizar la pestaña activa guardada en localStorage
-const updateActiveTab = (tab: unknown) => {
-  localStorage.setItem('activeTab', tab as string)
-}
-
-const dataUser = ref()
-
-const mostrarUsuario = async () => {
-  activarPaginaCargando()
-
-  const userId = route.params.id
-  if (!userId) {
-    console.error('No se proporcionó un ID de usuario.')
-
-    return
-  }
-
+const cargar = async () => {
+  cargando.value = true
   try {
-    const response = await get(`/api/users/${userId}`)
-    if (response && response.data)
-      dataUser.value = response.data
+    const respuesta = await get<{ data: UsuarioGestion }>(`/api/users/${route.params.id}`)
 
-    else
-      console.warn('No se encontraron datos para este usuario.')
+    usuario.value = respuesta.data
   }
   catch (error) {
-    console.error('Error al obtener un usuario:', error)
+    manejaError(error)
   }
   finally {
-    desactivarPaginaCargando()
+    cargando.value = false
   }
 }
 
-// Llamar a mostrarUsuario al montar el componente
-onMounted(() => {
-  mostrarUsuario()
-})
+onMounted(cargar)
 </script>
 
 <template>
-  <div>
-    <UserProfileHeader :user="dataUser" />
-
-    <VTabs
-      v-model="activeTab"
-      class="v-tabs-pill my-2"
-      @update:model-value="updateActiveTab"
-    >
-      <VTab
-        v-for="item in tabs"
-        :key="item.icon"
-        :value="item.tab"
-      >
-        <VIcon
-          size="20"
-          start
-          :icon="item.icon"
-        />
-        {{ item.title }}
-      </VTab>
-    </VTabs>
-
-    <ClientOnly>
-      <VWindow
-        v-model="activeTab"
-        class="disable-tab-transition"
-        :touch="false"
-      >
-        <!-- Perfil -->
-        <VWindowItem value="perfil">
-          <Perfil :user="dataUser" />
-        </VWindowItem>
-
-        <!-- Equipo -->
-        <VWindowItem value="seguridad">
-          <Seguridad />
-        </VWindowItem>
-
-        <!-- Funciones -->
-        <VWindowItem value="funciones">
-          <Funciones />
-        </VWindowItem>
-      </VWindow>
-    </ClientOnly>
-  </div>
+  <VCard title="Detalle del usuario">
+    <VCardText>
+      <VProgressLinear v-if="cargando" indeterminate />
+      <VRow v-else-if="usuario">
+        <VCol cols="12" md="6"><strong>Usuario:</strong> {{ usuario.usuario_dominio }}</VCol>
+        <VCol cols="12" md="6"><strong>Nombre:</strong> {{ usuario.nombres }} {{ usuario.apellidos }}</VCol>
+        <VCol cols="12" md="6"><strong>Correo:</strong> {{ usuario.correo }}</VCol>
+        <VCol cols="12" md="6"><strong>Estado:</strong> {{ usuario.estado === 'activo' ? 'Activo' : 'Inactivo' }}</VCol>
+        <VCol cols="12" md="6"><strong>Correo verificado:</strong> {{ usuario.correo_verificado_en ? formatearFecha(usuario.correo_verificado_en) : 'No verificado' }}</VCol>
+        <VCol cols="12" md="6"><strong>Doble factor:</strong> {{ usuario.two_factor_habilitado ? 'Habilitado' : 'No habilitado' }}</VCol>
+        <VCol cols="12" md="6"><strong>Creado:</strong> {{ usuario.creado_en ? formatearFecha(usuario.creado_en) : '—' }}</VCol>
+        <VCol cols="12" md="6"><strong>Actualizado:</strong> {{ usuario.actualizado_en ? formatearFecha(usuario.actualizado_en) : '—' }}</VCol>
+        <VCol cols="12"><strong>Roles:</strong> {{ usuario.roles.map(rol => rol.name).join(', ') || 'Sin roles' }}</VCol>
+        <VCol cols="12"><strong>Permisos directos:</strong> {{ usuario.permissions.map(permiso => permiso.name).join(', ') || 'Sin permisos directos' }}</VCol>
+      </VRow>
+      <div v-else>No fue posible cargar el usuario. <VBtn variant="text" @click="cargar">Reintentar</VBtn></div>
+      <VBtn class="mt-4" color="secondary" variant="tonal" to="/admin/usuarios">Regresar</VBtn>
+    </VCardText>
+  </VCard>
 </template>

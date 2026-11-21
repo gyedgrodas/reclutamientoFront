@@ -16,10 +16,10 @@ const getNotificaciones = async () => {
 
   try {
 
-    const response: {data: { data: NotificacionInterface[], total: number } } = await get('api/usuarios/notificacions/obtener/noLeidas')
+    // const response: {data: { data: NotificacionInterface[], total: number } } = await get('api/usuarios/notificacions/obtener/noLeidas')
 
-    notificacionesNoLeidas.value = response.data.data
-    totalNotificacionesSinLeerCount.value = response.data.total
+    // notificacionesNoLeidas.value = response.data.data
+    // totalNotificacionesSinLeerCount.value = response.data.total
 
   }
   catch (error) {

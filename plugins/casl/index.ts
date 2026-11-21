@@ -12,7 +12,7 @@ export default defineNuxtPlugin(nuxtApp => {
     user,
     () => {
       const roles = user.value?.roles || []
-      const isSuperAdmin = roles.includes('Super Administrador')
+      const isSuperAdmin = roles.includes('admin') || roles.includes('SuperAdministrador') || roles.includes('Super Administrador')
 
       if (isSuperAdmin)
         ability.update([{ action: 'manage', subject: 'all' }])

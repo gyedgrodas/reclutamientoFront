@@ -109,6 +109,14 @@ const reiniciar = () => {
   getItems()
 }
 
+const filtrar = async () => {
+  await nextTick()
+  if (currentPage.value !== 1)
+    currentPage.value = 1
+  else
+    await getItems()
+}
+
 let timeout: number = 0
 
 const obtenerValorAnidado = (obj: any, path: string): string => {
@@ -266,6 +274,7 @@ watch(search, () => {
 
 defineExpose({
   getItems,
+  filtrar,
   items,
   totalItems,
 })
