@@ -64,7 +64,7 @@ const cargarDatos = async () => {
 
     vacantes.value = desempaquetarLista<Vacante>(respVacantes)
     postulaciones.value = desempaquetarLista<Postulacion>(respPostulaciones)
-    etapas.value = desempaquetarLista<EtapaReclutamiento>(respEtapas)
+    etapas.value = desempaquetarLista<EtapaReclutamiento>(respEtapas).filter(etapa => etapa.estado !== 'Inactivo')
     actividadReciente.value = desempaquetarLista<ActividadRecientePostulacion>(respActividad)
 
     if (postulacionActiva.value) {

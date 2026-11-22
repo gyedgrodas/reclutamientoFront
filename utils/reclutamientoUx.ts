@@ -132,7 +132,7 @@ export const proximaAccionSugerida = (etapaNombre: string, estado: string): stri
   if (n.includes('rrhh'))
     return 'Consolidar informe de competencias y coordinar entrevista técnica con jefatura.'
   if (n.includes('técnica') || n.includes('tecnica') || n.includes('entrevista'))
-    return 'Recopilar dictamen del líder solicitante y avanzar a verificación de referencias.'
+    return 'Recopilar dictamen del líder solicitante y preparar la oferta laboral.'
   if (n.includes('referencia'))
     return 'Validar referencias laborales y preparar propuesta económica.'
   if (n.includes('oferta'))

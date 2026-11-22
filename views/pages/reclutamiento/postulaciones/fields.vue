@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { requiredValidator } from '@core/utils/validators'
 import type { Candidato, DatosPostulacion, EtapaReclutamiento, Postulacion, UsuarioResumen, Vacante } from '@/types/reclutamiento'
+import EvaluacionCorreoFields from '@/views/pages/reclutamiento/postulaciones/EvaluacionCorreoFields.vue'
 
 const props = defineProps<{ postulacion?: Postulacion; guardando: boolean }>()
 const emit = defineEmits<{ (e: 'guardar', datos: DatosPostulacion): void }>()
@@ -33,7 +34,12 @@ const datos = reactive<DatosPostulacion>({
   fecha_ultima_actualizacion: props.postulacion?.fecha_ultima_actualizacion ?? null,
   estado: props.postulacion?.estado || 'En proceso',
   observaciones: props.postulacion?.observaciones ?? null,
+  evaluacion_url: props.postulacion?.evaluacion_url ?? null,
+  evaluacion_limite_at: props.postulacion?.evaluacion_limite_at ?? null,
 })
+
+const esEvaluacion = computed(() => etapas.value
+  .find(etapa => etapa.id === datos.etapa_reclutamiento_id)?.nombre.toLowerCase().includes('psicom'))
 
 const normalizarId = (id: number | null | undefined) => id == null ? null : String(id)
 
@@ -54,7 +60,9 @@ watch(hayMovimiento, aplica => {
     observacionMovimiento.value = ''
 })
 
-const lista = <T>(response: any): T[] => Array.isArray(response?.data) ? response.data : (response?.data?.data || [])
+function lista<T>(response: any): T[] {
+  return Array.isArray(response?.data) ? response.data : (response?.data?.data || [])
+}
 
 const cargar = async () => {
   try {
@@ -67,7 +75,7 @@ const cargar = async () => {
 
     candidatos.value = lista<Candidato>(c)
     vacantes.value = lista<Vacante>(v)
-    etapas.value = lista<EtapaReclutamiento>(e).sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
+    etapas.value = lista<EtapaReclutamiento>(e).filter(etapa => etapa.estado !== 'Inactivo').sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
     responsables.value = lista<UsuarioResumen>(r)
 
     if (!props.postulacion && !datos.etapa_reclutamiento_id && etapas.value.length)
@@ -225,6 +233,13 @@ onMounted(cargar)
       </VCol>
 
       <VCol cols="12">
+        <EvaluacionCorreoFields
+          v-if="esEvaluacion"
+          v-model:url="datos.evaluacion_url"
+          v-model:limite="datos.evaluacion_limite_at"
+          :disabled="guardando"
+          class="mb-4"
+        />
         <AppTextarea
           v-model="datos.observaciones"
           label="Observaciones generales del expediente"
@@ -285,5 +300,5 @@ onMounted(cargar)
 </template>
 
 <style scoped>
-@import '@/assets/styles/reclutamiento-talent.scss';
+@import '@styles/reclutamiento-talent.scss';
 </style>

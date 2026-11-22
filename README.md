@@ -33,3 +33,22 @@ npm run dev
 ```sh
 npm run build
 ```
+
+### Oferta laboral y correos del proceso
+
+En el detalle de seguimiento de una postulación, la pestaña **Oferta y correos**
+permite preparar las condiciones de la oferta, registrar la respuesta recibida
+por correo y consultar los envíos del proceso. Aceptar una oferta no cambia
+automáticamente la postulación a contratada.
+
+La evaluación psicométrica requiere el enlace de la prueba y el plazo en
+horario de Guatemala. Las entrevistas virtuales con RRHH esperan un enlace
+de Meet válido antes de preparar el correo. La cuenta compartida necesita
+autorizar `gmail.send` además de Calendar; el backend procesa los correos
+mediante su tarea programada, no desde el navegador.
+
+Pruebas de los componentes de oferta y comunicaciones (sin correos reales):
+
+```powershell
+node --test tests\reclutamiento-comunicaciones.test.cjs
+```

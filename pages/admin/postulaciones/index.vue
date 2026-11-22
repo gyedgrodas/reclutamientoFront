@@ -49,8 +49,9 @@ const vacantes = ref<Vacante[]>([])
 const todasLasPostulaciones = ref<Postulacion[]>([])
 const cargandoTablero = ref(false)
 
-const desempaquetar = <T>(respuesta: any): T[] =>
-  Array.isArray(respuesta?.data) ? respuesta.data : (respuesta?.data?.data || [])
+function desempaquetar<T>(respuesta: any): T[] {
+  return Array.isArray(respuesta?.data) ? respuesta.data : (respuesta?.data?.data || [])
+}
 
 const cargarDatos = async () => {
   cargandoTablero.value = true
@@ -61,7 +62,7 @@ const cargarDatos = async () => {
       get<any>('/api/postulaciones?include=candidato,vacante.puesto,vacante.unidad,etapaReclutamiento,responsable&sort=-id&page[size]=100'),
     ])
 
-    etapas.value = desempaquetar<EtapaReclutamiento>(etapasResp)
+    etapas.value = desempaquetar<EtapaReclutamiento>(etapasResp).filter(etapa => etapa.estado !== 'Inactivo')
     vacantes.value = desempaquetar<Vacante>(vacantesResp)
     todasLasPostulaciones.value = desempaquetar<Postulacion>(postResp)
 

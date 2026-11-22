@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { can } from '@layouts/plugins/casl'
+import { useAbility } from '@casl/vue'
 import type {
   IntegracionGoogleCalendarEstado,
   RespuestaAutorizarGoogleCalendar,
@@ -25,6 +25,8 @@ const emit = defineEmits<{
 
 const { get, post, deleted } = useClienteRequest()
 const { showToastError, showToastSuccess, showToastWarning } = useToast()
+const ability = useAbility()
+const can = (action: string, subject: string) => ability.can(action, subject)
 
 const puedeVer = computed(() =>
   can('ver entrevistas', 'Entrevista') || can('administrar google calendar', 'Entrevista'),
@@ -290,7 +292,8 @@ defineExpose({
               </VChip>
             </div>
             <p class="text-caption text-medium-emphasis mb-0 mt-1">
-              Autorización OAuth segura gestionada desde el servidor, sin contraseñas ni tokens en el navegador. Requiere autorizar una <strong>cuenta personal autorizada</strong> de Google con acceso a Calendar/Meet (usada de forma compartida por el sistema, sin datos personales ni envío de invitaciones).
+              Autorización OAuth segura gestionada desde el servidor, sin contraseñas ni tokens en el navegador.
+              Calendar crea los enlaces de Meet sin invitaciones; Gmail envía por separado los correos del proceso al candidato.
             </p>
           </div>
         </div>
@@ -359,6 +362,18 @@ defineExpose({
 
       <!-- Detalle de estado -->
       <template v-else-if="estado">
+        <VAlert
+          v-if="estado.conectada && !estado.correo_habilitado"
+          type="warning"
+          variant="tonal"
+          class="mb-3"
+        >
+          Calendar está conectado, pero falta autorizar el envío de correos.
+          Habilite Gmail API en Google Cloud, declare el permiso gmail.send y reconecte la misma cuenta desde aquí.
+        </VAlert>
+        <VChip v-if="estado.correo_habilitado" color="success" class="mb-3">
+          Gmail autorizado para enviar correos
+        </VChip>
         <VAlert
           v-if="!estado.configurada"
           type="warning"

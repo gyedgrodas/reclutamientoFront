@@ -175,6 +175,8 @@ export interface Postulacion {
   fecha_ultima_actualizacion: string | null
   estado: EstadoPostulacion
   observaciones: string | null
+  evaluacion_url?: string | null
+  evaluacion_limite_at?: string | null
   candidato?: Candidato
   vacante?: Vacante
   etapa_reclutamiento?: EtapaReclutamiento
@@ -192,6 +194,36 @@ export interface DatosPostulacion {
   estado: EstadoPostulacion
   observaciones: string | null
   observacion_movimiento?: string
+  evaluacion_url?: string | null
+  evaluacion_limite_at?: string | null
+}
+
+export interface OfertaLaboral {
+  id: number
+  postulacion_id: number
+  moneda: 'GTQ' | 'USD'
+  monto_bruto: string
+  periodicidad: string
+  descripcion: string
+  puesto: string
+  fecha_inicio: string
+  fecha_vencimiento: string
+  condiciones: string
+  estado: 'Borrador' | 'Enviada' | 'Aceptada' | 'Rechazada'
+  enviada_at?: string | null
+  respondida_at?: string | null
+  observaciones?: string | null
+}
+
+export interface ComunicacionPostulacion {
+  id: number
+  tipo: string
+  estado: string
+  destinatario: string | null
+  asunto: string | null
+  error_mensaje?: string | null
+  enviada_at?: string | null
+  created_at: string
 }
 
 export interface MovimientoPostulacion {
@@ -285,6 +317,8 @@ export interface IntegracionGoogleCalendarEstado {
   estado: EstadoIntegracionGoogleCalendar
   calendario: string
   scope: string
+  correo_habilitado?: boolean
+  correo_scope?: string
   conectada_at: string | null
   actualizada_at?: string | null
   conectada_por: UsuarioMinimoIntegracion | null

@@ -3,6 +3,8 @@ import { useAbility } from '@casl/vue'
 import type { Entrevista, EstadoPostulacion, EtapaReclutamiento, Postulacion } from '@/types/reclutamiento'
 import EntrevistasPostulacionPanel from '@/views/pages/reclutamiento/entrevistas/EntrevistasPostulacionPanel.vue'
 import HistorialPostulacion from '@/views/pages/reclutamiento/postulaciones/HistorialPostulacion.vue'
+import OfertaComunicacionesPanel from '@/views/pages/reclutamiento/postulaciones/OfertaComunicacionesPanel.vue'
+import EvaluacionCorreoFields from '@/views/pages/reclutamiento/postulaciones/EvaluacionCorreoFields.vue'
 import {
   UMBRAL_DIAS_ATENCION,
   colorPuntoEtapa,
@@ -41,7 +43,7 @@ const abierto = computed({
 })
 
 const puedeVerEntrevistas = computed(() => can('ver entrevistas', 'Entrevista'))
-const tabActiva = ref<'seguimiento' | 'entrevistas' | 'historial'>('seguimiento')
+const tabActiva = ref<'seguimiento' | 'entrevistas' | 'historial' | 'oferta'>('seguimiento')
 
 const catalogoEtapas = ref<EtapaReclutamiento[]>([])
 const mostrarCambioRapido = ref(false)
@@ -60,17 +62,24 @@ const formMovimiento = reactive<{
   etapa_reclutamiento_id: number | null
   estado: EstadoPostulacion
   observacion_movimiento: string
+  evaluacion_url: string | null
+  evaluacion_limite_at: string | null
 }>({
   etapa_reclutamiento_id: null,
   estado: 'En proceso',
   observacion_movimiento: '',
+  evaluacion_url: null,
+  evaluacion_limite_at: null,
 })
 
 const etapasDisponibles = computed(() => {
   const fuente = props.etapas?.length ? props.etapas : catalogoEtapas.value
 
-  return [...fuente].sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
+  return fuente.filter(etapa => etapa.estado !== 'Inactivo').sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
 })
+
+const seleccionEsEvaluacion = computed(() => etapasDisponibles.value
+  .find(etapa => etapa.id === formMovimiento.etapa_reclutamiento_id)?.nombre.toLowerCase().includes('psicom'))
 
 const sincronizarFormulario = () => {
   if (!props.postulacion)
@@ -81,6 +90,8 @@ const sincronizarFormulario = () => {
   formMovimiento.etapa_reclutamiento_id = props.postulacion.etapa_reclutamiento_id ?? etapaActual?.id ?? null
   formMovimiento.estado = props.postulacion.estado
   formMovimiento.observacion_movimiento = ''
+  formMovimiento.evaluacion_url = props.postulacion.evaluacion_url ?? null
+  formMovimiento.evaluacion_limite_at = props.postulacion.evaluacion_limite_at ?? null
   mostrarCambioRapido.value = false
 }
 
@@ -139,6 +150,8 @@ const hayCambioSeleccionado = computed(() => {
 
   return Number(formMovimiento.etapa_reclutamiento_id) !== Number(etapaOriginal)
     || formMovimiento.estado !== props.postulacion.estado
+    || formMovimiento.evaluacion_url !== (props.postulacion.evaluacion_url ?? null)
+    || formMovimiento.evaluacion_limite_at !== (props.postulacion.evaluacion_limite_at ?? null)
 })
 
 const prepararAvanceRapido = () => {
@@ -163,6 +176,12 @@ const aplicarActualizacion = async () => {
     const payload: Record<string, any> = {
       etapa_reclutamiento_id: formMovimiento.etapa_reclutamiento_id,
       estado: formMovimiento.estado,
+      ...(seleccionEsEvaluacion.value
+        ? {
+            evaluacion_url: formMovimiento.evaluacion_url,
+            evaluacion_limite_at: formMovimiento.evaluacion_limite_at,
+          }
+        : {}),
       ...(nota ? { observacion_movimiento: nota } : {}),
     }
 
@@ -301,6 +320,13 @@ const coloresEstado: Record<string, string> = {
             prepend-icon="tabler-calendar-event"
           >
             Entrevistas
+          </VTab>
+          <VTab
+            v-if="can('ver postulaciones', 'Postulacion')"
+            value="oferta"
+            prepend-icon="tabler-mail"
+          >
+            Oferta y correos
           </VTab>
           <VTab
             v-if="can('ver postulaciones', 'Postulacion')"
@@ -479,6 +505,17 @@ const coloresEstado: Record<string, string> = {
                     />
                   </VCol>
                   <VCol cols="12">
+                    <EvaluacionCorreoFields
+                      v-if="seleccionEsEvaluacion"
+                      v-model:url="formMovimiento.evaluacion_url"
+                      v-model:limite="formMovimiento.evaluacion_limite_at"
+                      :disabled="guardando"
+                      class="mb-3"
+                    />
+                    <VAlert type="info" variant="tonal" density="compact" class="mb-3">
+                      Los cambios a evaluación psicométrica, oferta y cierre preparan un correo automático al candidato.
+                      En entrevista con RRHH se envía al tener fecha y enlace de Meet disponibles.
+                    </VAlert>
                     <AppTextarea
                       v-model="formMovimiento.observacion_movimiento"
                       label="Acuerdo o nota del movimiento (opcional)"
@@ -518,6 +555,10 @@ const coloresEstado: Record<string, string> = {
         />
 
         <!-- Pestaña 3: Historial de movimientos integrado -->
+        <OfertaComunicacionesPanel
+          v-else-if="tabActiva === 'oferta' && abierto && can('ver postulaciones', 'Postulacion')"
+          :postulacion="postulacion"
+        />
         <HistorialPostulacion
           v-else-if="tabActiva === 'historial' && abierto && can('ver postulaciones', 'Postulacion')"
           :postulacion-id="postulacion.id"
