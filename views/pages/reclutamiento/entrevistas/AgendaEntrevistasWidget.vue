@@ -2,9 +2,14 @@
 import { can } from '@layouts/plugins/casl'
 import type { AgendaEntrevistas, Entrevista } from '@/types/reclutamiento'
 import {
+  colorEstadoGoogleCalendar,
+  esUrlGoogleMeetValida,
+  etiquetaEstadoGoogleCalendar,
   extraerMensajeErrorApi,
   formatearFechaCortaGuatemala,
   formatearHoraGuatemala,
+  formatearRangoHorarioGuatemala,
+  iconoEstadoGoogleCalendar,
   iconoModalidadEntrevista,
 } from '@/utils/entrevistasGuatemala'
 import { inicialesPersona, nombreCompletoPersona } from '@/utils/reclutamientoUx'
@@ -328,6 +333,7 @@ onBeforeUnmount(() => {
               :color="tabActiva === 'pendientes' ? 'warning' : 'primary'"
               variant="tonal"
               class="font-weight-bold flex-shrink-0"
+              :title="`Horario en Guatemala (${formatearRangoHorarioGuatemala(item.fecha_hora, item.fecha_fin, item.duracion_minutos)})`"
             >
               {{ formatearHoraGuatemala(item.fecha_hora) }}
             </VChip>
@@ -361,13 +367,48 @@ onBeforeUnmount(() => {
           </div>
 
           <div
+            v-if="item.google_calendar && item.google_calendar.estado !== 'NoAplica'"
+            class="d-flex flex-wrap align-center gap-2 mt-2"
+          >
+            <VChip
+              size="x-small"
+              :color="colorEstadoGoogleCalendar(item.google_calendar.estado)"
+              variant="tonal"
+              :prepend-icon="iconoEstadoGoogleCalendar(item.google_calendar.estado)"
+              class="font-weight-bold"
+            >
+              {{ etiquetaEstadoGoogleCalendar(item.google_calendar.estado) }}
+            </VChip>
+            <span
+              v-if="item.google_calendar.estado === 'Error' && item.google_calendar.error?.mensaje"
+              class="text-caption text-error text-truncate"
+              :title="item.google_calendar.error.mensaje"
+            >
+              {{ item.google_calendar.error.mensaje }}
+            </span>
+          </div>
+
+          <div
             v-if="item.lugar"
             class="text-caption text-disabled text-truncate mt-1"
           >
             {{ item.lugar }}
           </div>
 
-          <div class="d-flex justify-end mt-3">
+          <div class="d-flex flex-wrap justify-end gap-2 mt-3">
+            <VBtn
+              v-if="item.estado === 'Programada' && esUrlGoogleMeetValida(item.google_calendar?.meet_url)"
+              size="x-small"
+              color="success"
+              variant="flat"
+              prepend-icon="tabler-video"
+              append-icon="tabler-external-link"
+              :href="item.google_calendar!.meet_url!"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir Meet
+            </VBtn>
             <VBtn
               size="x-small"
               :color="tabActiva === 'pendientes' ? 'warning' : 'primary'"

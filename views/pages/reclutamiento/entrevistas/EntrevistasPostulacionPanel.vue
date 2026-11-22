@@ -11,19 +11,28 @@ import type {
   UsuarioResumen,
 } from '@/types/reclutamiento'
 import {
+  DURACION_ENTREVISTA_MINUTOS,
   MODALIDADES_ENTREVISTA,
   RECOMENDACIONES_ENTREVISTA,
   colorEstadoEntrevista,
+  colorEstadoGoogleCalendar,
   colorRecomendacionEntrevista,
   construirIsoGuatemala,
+  entrevistaGoogleRequiereAtencion,
+  esUrlGoogleMeetValida,
   esUrlValida,
+  etiquetaEstadoGoogleCalendar,
   extraerErroresCamposApi,
   extraerFechaHoraGuatemala,
   extraerMensajeErrorApi,
   fechaHoraSugeridaGuatemala,
+  formatearDuracionMinutos,
   formatearFechaHoraGuatemala,
+  formatearRangoHorarioGuatemala,
+  iconoEstadoGoogleCalendar,
   iconoModalidadEntrevista,
   placeholderLugarModalidad,
+  puedeReintentarGoogleCalendar,
 } from '@/utils/entrevistasGuatemala'
 import { nombreCompletoPersona, permiteProgramarEntrevistaEnEtapa } from '@/utils/reclutamientoUx'
 
@@ -38,7 +47,7 @@ const emit = defineEmits<{
 }>()
 
 const { get, post, put } = useClienteRequest()
-const { showToastSuccess } = useToast()
+const { showToastError, showToastSuccess, showToastWarning } = useToast()
 
 const puedeVer = computed(() => can('ver entrevistas', 'Entrevista'))
 const puedeGestionar = computed(() => can('gestionar entrevistas', 'Entrevista'))
@@ -69,6 +78,7 @@ type ModoFormulario = 'crear' | 'editar' | 'resultado' | 'cancelar' | null
 const modoFormulario = ref<ModoFormulario>(null)
 const entrevistaActiva = ref<Entrevista | null>(null)
 const guardando = ref(false)
+const reintentandoMeetId = ref<number | null>(null)
 const errorAccion = ref<string | null>(null)
 const erroresCampos = ref<Record<string, string[]>>({})
 
@@ -617,7 +627,18 @@ const guardarProgramacion = async () => {
       ? await put<{ data: Entrevista; message?: string }>(`/api/entrevistas/${entrevistaActiva.value!.id}`, payload)
       : await post<{ data: Entrevista; message?: string }>(`/api/postulaciones/${props.postulacionId}/entrevistas`, payload)
 
-    showToastSuccess(respuesta.message || (esEdicion ? 'Entrevista reprogramada con éxito.' : 'Entrevista programada con éxito.'))
+    if (entrevistaGoogleRequiereAtencion(respuesta.data)) {
+      const detalleGoogle = respuesta.data?.google_calendar?.error?.mensaje
+
+      const mensajeBase = respuesta.message
+        || (esEdicion ? 'Entrevista reprogramada, pero Google Meet requiere atención.' : 'Entrevista guardada, pero Google Meet requiere atención.')
+
+      showToastWarning(detalleGoogle && !mensajeBase.includes(detalleGoogle) ? `${mensajeBase} ${detalleGoogle}` : mensajeBase)
+    }
+    else {
+      showToastSuccess(respuesta.message || (esEdicion ? 'Entrevista reprogramada con éxito.' : 'Entrevista programada con éxito.'))
+    }
+
     cerrarFormulario()
     if (respuesta.data)
       emit('entrevistaActualizada', respuesta.data)
@@ -706,7 +727,11 @@ const confirmarCancelacion = async () => {
       payload,
     )
 
-    showToastSuccess(respuesta.message || 'Entrevista cancelada con éxito.')
+    if (entrevistaGoogleRequiereAtencion(respuesta.data))
+      showToastWarning(respuesta.message || 'Entrevista cancelada, pero no fue posible eliminar el evento en Google Calendar.')
+    else
+      showToastSuccess(respuesta.message || 'Entrevista cancelada con éxito.')
+
     cerrarFormulario()
     if (respuesta.data)
       emit('entrevistaActualizada', respuesta.data)
@@ -720,6 +745,63 @@ const confirmarCancelacion = async () => {
     guardando.value = false
   }
 }
+
+const reintentarGoogleMeet = async (entrevista: Entrevista) => {
+  if (reintentandoMeetId.value !== null || !puedeGestionar.value || !puedeReintentarGoogleCalendar(entrevista))
+    return
+
+  reintentandoMeetId.value = entrevista.id
+
+  try {
+    const respuesta = await post<{ success?: boolean; data?: Entrevista; message?: string }>(
+      `/api/entrevistas/${entrevista.id}/google-calendar/sincronizar`,
+      {},
+    )
+
+    if (respuesta?.success === false || !respuesta?.data) {
+      showToastError(respuesta?.message || 'No fue posible reintentar la sincronización con Google Meet.')
+
+      return
+    }
+
+    const actualizada = respuesta.data
+    const gc = actualizada.google_calendar
+
+    if (gc?.estado === 'Sincronizada' && esUrlGoogleMeetValida(gc.meet_url))
+      showToastSuccess(respuesta.message || 'Enlace de Google Meet sincronizado correctamente.')
+    else
+      showToastWarning(respuesta.message || gc?.error?.mensaje || 'La sincronización con Google Meet aún requiere atención.')
+
+    emit('entrevistaActualizada', actualizada)
+    await cargarEntrevistas()
+  }
+  catch (error: any) {
+    const status = error?.response?.status
+
+    const msg = extraerMensajeErrorApi(
+      error,
+      status === 409
+        ? 'Ya hay una sincronización con Google Calendar en curso para esta entrevista.'
+        : 'No fue posible sincronizar el enlace de Google Meet.',
+    )
+
+    if (status === 409 || status === 422)
+      showToastWarning(msg)
+    else
+      showToastError(msg)
+  }
+  finally {
+    reintentandoMeetId.value = null
+  }
+}
+
+const horarioProgramacionPreview = computed<string | null>(() => {
+  const iso = construirIsoGuatemala(formProgramacion.fecha, formProgramacion.hora)
+  if (!iso)
+    return null
+
+  return formatearRangoHorarioGuatemala(iso, null, DURACION_ENTREVISTA_MINUTOS)
+})
 
 const conteoProgramadas = computed(() => entrevistas.value.filter(e => e.estado === 'Programada').length)
 
@@ -966,6 +1048,26 @@ onBeforeUnmount(() => {
                 :rules="[requiredValidator]"
                 :error-messages="erroresCampos.modalidad"
               />
+            </VCol>
+
+            <VCol
+              v-if="formProgramacion.modalidad === 'Virtual'"
+              cols="12"
+            >
+              <VAlert
+                type="info"
+                variant="tonal"
+                density="compact"
+                icon="tabler-video"
+              >
+                <div class="text-caption">
+                  <strong>Google Meet automático · Duración fija de 1 hora (60 min)</strong>
+                  <template v-if="horarioProgramacionPreview">
+                    ({{ horarioProgramacionPreview }} GT)
+                  </template>
+                  . Si la cuenta compartida de Google está conectada, el enlace de Meet se generará automáticamente al guardar (sin enviar datos personales ni invitaciones). El campo <em>Lugar o enlace</em> sigue disponible como respaldo manual.
+                </div>
+              </VAlert>
             </VCol>
 
             <VCol cols="12">
@@ -1313,16 +1415,28 @@ onBeforeUnmount(() => {
               >
                 {{ entrevista.recomendacion }}
               </VChip>
+              <VChip
+                v-if="entrevista.google_calendar && entrevista.google_calendar.estado !== 'NoAplica'"
+                size="x-small"
+                :color="colorEstadoGoogleCalendar(entrevista.google_calendar.estado)"
+                variant="tonal"
+                :prepend-icon="iconoEstadoGoogleCalendar(entrevista.google_calendar.estado)"
+                class="font-weight-bold"
+              >
+                {{ etiquetaEstadoGoogleCalendar(entrevista.google_calendar.estado) }}
+              </VChip>
             </div>
 
-            <div class="d-flex align-center gap-1 mt-2 text-body-2 font-weight-bold">
+            <div class="d-flex flex-wrap align-center gap-1 mt-2 text-body-2 font-weight-bold">
               <VIcon
                 icon="tabler-clock"
                 size="15"
                 class="text-primary flex-shrink-0"
               />
               <span>{{ formatearFechaHoraGuatemala(entrevista.fecha_hora) }}</span>
-              <span class="text-caption text-disabled font-weight-regular">(GT)</span>
+              <span class="text-caption text-medium-emphasis font-weight-regular">
+                ({{ formatearRangoHorarioGuatemala(entrevista.fecha_hora, entrevista.fecha_fin, entrevista.duracion_minutos) }} GT · {{ formatearDuracionMinutos(entrevista.duracion_minutos) }})
+              </span>
             </div>
           </div>
 
@@ -1331,6 +1445,31 @@ onBeforeUnmount(() => {
             v-if="entrevista.estado === 'Programada' && puedeGestionar"
             class="d-flex flex-wrap gap-1"
           >
+            <VBtn
+              v-if="esUrlGoogleMeetValida(entrevista.google_calendar?.meet_url)"
+              size="x-small"
+              color="success"
+              variant="flat"
+              prepend-icon="tabler-video"
+              append-icon="tabler-external-link"
+              :href="entrevista.google_calendar!.meet_url!"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir Meet
+            </VBtn>
+            <VBtn
+              v-if="puedeReintentarGoogleCalendar(entrevista)"
+              size="x-small"
+              color="warning"
+              variant="tonal"
+              prepend-icon="tabler-refresh"
+              :loading="reintentandoMeetId === entrevista.id"
+              :disabled="reintentandoMeetId !== null && reintentandoMeetId !== entrevista.id"
+              @click="reintentarGoogleMeet(entrevista)"
+            >
+              Reintentar Meet
+            </VBtn>
             <VBtn
               size="x-small"
               color="success"
@@ -1359,7 +1498,52 @@ onBeforeUnmount(() => {
               Cancelar
             </VBtn>
           </div>
+          <div
+            v-else-if="entrevista.estado === 'Programada' && esUrlGoogleMeetValida(entrevista.google_calendar?.meet_url)"
+            class="d-flex flex-wrap gap-1"
+          >
+            <VBtn
+              size="x-small"
+              color="success"
+              variant="flat"
+              prepend-icon="tabler-video"
+              append-icon="tabler-external-link"
+              :href="entrevista.google_calendar!.meet_url!"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir Meet
+            </VBtn>
+          </div>
         </div>
+
+        <!-- Estado / error de sincronización Google Meet -->
+        <VAlert
+          v-if="entrevista.google_calendar && (entrevista.google_calendar.estado === 'Error' || entrevista.google_calendar.estado === 'MeetPendiente' || entrevista.google_calendar.estado === 'Pendiente')"
+          :type="entrevista.google_calendar.estado === 'Error' ? 'error' : 'warning'"
+          variant="tonal"
+          density="compact"
+          class="mt-2"
+        >
+          <div class="text-caption">
+            <strong>{{ etiquetaEstadoGoogleCalendar(entrevista.google_calendar.estado) }}</strong>
+            <template v-if="entrevista.google_calendar.error?.mensaje">
+              : {{ entrevista.google_calendar.error.mensaje }}
+            </template>
+            <template v-else-if="entrevista.google_calendar.estado === 'MeetPendiente'">
+              : Google Calendar aceptó el evento, pero aún no ha generado el enlace de Meet.
+            </template>
+            <template v-else>
+              : La sincronización con Google Calendar está pendiente.
+            </template>
+            <span
+              v-if="entrevista.google_calendar.proximo_intento_at"
+              class="d-block mt-1"
+            >
+              Próximo reintento automático: {{ formatearFechaHoraGuatemala(entrevista.google_calendar.proximo_intento_at) }} (GT)
+            </span>
+          </div>
+        </VAlert>
 
         <div class="d-flex flex-wrap gap-x-4 gap-y-1 mt-2 text-caption text-medium-emphasis">
           <div class="d-flex align-center gap-1">

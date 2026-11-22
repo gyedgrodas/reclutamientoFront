@@ -251,10 +251,75 @@ export type ModalidadEntrevista = 'Presencial' | 'Virtual' | 'Telefónica'
 export type EstadoEntrevista = 'Programada' | 'Realizada' | 'Cancelada'
 export type RecomendacionEntrevista = 'Avanzar' | 'En revisión' | 'No continuar'
 
+export type EstadoIntegracionGoogleCalendar =
+  | 'NoConfigurada'
+  | 'Desconectada'
+  | 'Conectada'
+  | 'RequiereReautorizacion'
+  | 'Error'
+
+export type EstadoSincronizacionGoogleCalendar =
+  | 'NoAplica'
+  | 'Pendiente'
+  | 'Sincronizando'
+  | 'MeetPendiente'
+  | 'Sincronizada'
+  | 'Error'
+  | 'Eliminada'
+
+export interface ErrorGoogleCalendar {
+  codigo: string
+  mensaje: string
+  at?: string | null
+}
+
+export interface UsuarioMinimoIntegracion {
+  id: number
+  nombres: string
+  apellidos: string
+}
+
+export interface IntegracionGoogleCalendarEstado {
+  configurada: boolean
+  conectada: boolean
+  estado: EstadoIntegracionGoogleCalendar
+  calendario: string
+  scope: string
+  conectada_at: string | null
+  actualizada_at?: string | null
+  conectada_por: UsuarioMinimoIntegracion | null
+  ultimo_error: ErrorGoogleCalendar | null
+  puede_administrar: boolean
+  soporta_desconexion?: boolean
+  sincronizaciones_pendientes: number
+  sincronizaciones_con_error: number
+  advertencias: string[]
+}
+
+export interface RespuestaAutorizarGoogleCalendar {
+  url: string
+  expira_at: string | null
+}
+
+export interface GoogleCalendarEntrevista {
+  estado: EstadoSincronizacionGoogleCalendar
+  meet_url: string | null
+  event_id: string | null
+  sincronizado_at: string | null
+  intentos: number
+  proximo_intento_at: string | null
+  error: {
+    codigo: string
+    mensaje: string
+  } | null
+}
+
 export interface Entrevista {
   id: number
   postulacion_id: number
   fecha_hora: string
+  fecha_fin?: string | null
+  duracion_minutos?: number | null
   entrevistador_id: number
   entrevistador?: UsuarioResumen
   modalidad: ModalidadEntrevista
@@ -264,6 +329,7 @@ export interface Entrevista {
   puntuacion: number | null
   observaciones: string | null
   motivo_cancelacion: string | null
+  google_calendar?: GoogleCalendarEntrevista | null
   postulacion?: Postulacion
   created_at: string | null
   updated_at: string | null

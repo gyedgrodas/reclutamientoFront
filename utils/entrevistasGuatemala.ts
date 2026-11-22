@@ -1,11 +1,15 @@
 import type {
+  Entrevista,
   EstadoEntrevista,
+  EstadoIntegracionGoogleCalendar,
+  EstadoSincronizacionGoogleCalendar,
   ModalidadEntrevista,
   RecomendacionEntrevista,
 } from '@/types/reclutamiento'
 
 export const ZONA_GUATEMALA = 'America/Guatemala'
 export const OFFSET_GUATEMALA = '-06:00'
+export const DURACION_ENTREVISTA_MINUTOS = 60
 
 export const MODALIDADES_ENTREVISTA: ModalidadEntrevista[] = [
   'Presencial',
@@ -169,7 +173,7 @@ export const colorRecomendacionEntrevista = (recomendacion?: RecomendacionEntrev
 
 export const placeholderLugarModalidad = (modalidad: ModalidadEntrevista): string => {
   if (modalidad === 'Virtual')
-    return 'Ej. Enlace de Teams, Meet o Zoom'
+    return 'Opcional: enlace alternativo (Google Meet se genera automáticamente si está conectado)'
   if (modalidad === 'Telefónica')
     return 'Ej. Número telefónico o extensión'
 
@@ -180,7 +184,232 @@ export const esUrlValida = (valor?: string | null): boolean => {
   if (!valor)
     return false
 
-  return /^https?:\/\/\S+$/i.test(valor.trim())
+  try {
+    const parsed = new URL(valor.trim())
+
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+  }
+  catch {
+    return false
+  }
+}
+
+export const esUrlGoogleMeetValida = (valor?: string | null): boolean => {
+  if (!valor)
+    return false
+
+  try {
+    const parsed = new URL(valor.trim())
+
+    return parsed.protocol === 'https:'
+      && parsed.hostname.toLowerCase() === 'meet.google.com'
+      && parsed.pathname.length > 1
+  }
+  catch {
+    return false
+  }
+}
+
+export const esUrlAutorizacionGoogleValida = (valor?: string | null): boolean => {
+  if (!valor)
+    return false
+
+  try {
+    const parsed = new URL(valor.trim())
+
+    return parsed.protocol === 'https:'
+      && parsed.hostname.toLowerCase() === 'accounts.google.com'
+  }
+  catch {
+    return false
+  }
+}
+
+export const calcularFechaFinIso = (
+  inicioIso?: string | null,
+  finIso?: string | null,
+  duracionMinutos?: number | null,
+): string | null => {
+  if (finIso) {
+    const fin = new Date(finIso)
+    if (!Number.isNaN(fin.getTime()))
+      return fin.toISOString()
+  }
+
+  if (!inicioIso)
+    return null
+
+  const inicio = new Date(inicioIso)
+  if (Number.isNaN(inicio.getTime()))
+    return null
+
+  const minutos = typeof duracionMinutos === 'number' && duracionMinutos > 0
+    ? duracionMinutos
+    : DURACION_ENTREVISTA_MINUTOS
+
+  return new Date(inicio.getTime() + minutos * 60 * 1000).toISOString()
+}
+
+export const formatearDuracionMinutos = (duracionMinutos?: number | null): string => {
+  const minutos = typeof duracionMinutos === 'number' && duracionMinutos > 0
+    ? duracionMinutos
+    : DURACION_ENTREVISTA_MINUTOS
+
+  if (minutos === 60)
+    return '1 hora'
+  if (minutos % 60 === 0)
+    return `${minutos / 60} horas`
+
+  return `${minutos} min`
+}
+
+export const formatearRangoHorarioGuatemala = (
+  inicioIso?: string | null,
+  finIso?: string | null,
+  duracionMinutos?: number | null,
+): string => {
+  if (!inicioIso)
+    return '--:--'
+
+  const horaInicio = formatearHoraGuatemala(inicioIso)
+  const finCalculado = calcularFechaFinIso(inicioIso, finIso, duracionMinutos)
+  if (!finCalculado)
+    return horaInicio
+
+  return `${horaInicio} - ${formatearHoraGuatemala(finCalculado)}`
+}
+
+export const etiquetaEstadoGoogleCalendar = (estado?: EstadoSincronizacionGoogleCalendar | null): string => {
+  switch (estado) {
+    case 'Sincronizada':
+      return 'Meet sincronizado'
+    case 'MeetPendiente':
+      return 'Enlace Meet pendiente'
+    case 'Pendiente':
+      return 'Sincronización pendiente'
+    case 'Sincronizando':
+      return 'Sincronizando...'
+    case 'Error':
+      return 'Error de sincronización'
+    case 'Eliminada':
+      return 'Evento eliminado'
+    case 'NoAplica':
+    default:
+      return 'No aplica'
+  }
+}
+
+export const colorEstadoGoogleCalendar = (estado?: EstadoSincronizacionGoogleCalendar | null): string => {
+  switch (estado) {
+    case 'Sincronizada':
+      return 'success'
+    case 'MeetPendiente':
+    case 'Pendiente':
+      return 'warning'
+    case 'Sincronizando':
+      return 'info'
+    case 'Error':
+      return 'error'
+    case 'Eliminada':
+    case 'NoAplica':
+    default:
+      return 'secondary'
+  }
+}
+
+export const iconoEstadoGoogleCalendar = (estado?: EstadoSincronizacionGoogleCalendar | null): string => {
+  switch (estado) {
+    case 'Sincronizada':
+      return 'tabler-video'
+    case 'MeetPendiente':
+    case 'Pendiente':
+      return 'tabler-clock-pause'
+    case 'Sincronizando':
+      return 'tabler-refresh'
+    case 'Error':
+      return 'tabler-alert-triangle'
+    case 'Eliminada':
+      return 'tabler-video-off'
+    case 'NoAplica':
+    default:
+      return 'tabler-minus'
+  }
+}
+
+export const etiquetaEstadoIntegracionGoogle = (estado?: EstadoIntegracionGoogleCalendar | null): string => {
+  switch (estado) {
+    case 'Conectada':
+      return 'Conectada'
+    case 'Desconectada':
+      return 'Desconectada'
+    case 'RequiereReautorizacion':
+      return 'Requiere reautorización'
+    case 'Error':
+      return 'Con error'
+    case 'NoConfigurada':
+    default:
+      return 'No configurada'
+  }
+}
+
+export const colorEstadoIntegracionGoogle = (estado?: EstadoIntegracionGoogleCalendar | null): string => {
+  switch (estado) {
+    case 'Conectada':
+      return 'success'
+    case 'Desconectada':
+      return 'secondary'
+    case 'RequiereReautorizacion':
+      return 'warning'
+    case 'Error':
+      return 'error'
+    case 'NoConfigurada':
+    default:
+      return 'secondary'
+  }
+}
+
+export const mensajeCallbackGoogleCalendar = (codigo?: string | null): string => {
+  switch (codigo) {
+    case 'state_invalido':
+      return 'La solicitud de autorización de Google no es válida. Intenta iniciar la conexión nuevamente.'
+    case 'state_expirado':
+      return 'La solicitud de autorización expiró (máximo 10 minutos). Inicia el proceso de conexión nuevamente.'
+    case 'acceso_denegado':
+      return 'La autorización fue cancelada o denegada en Google.'
+    case 'sin_refresh_token':
+      return 'Google no devolvió permiso permanente de renovación. Reautoriza la cuenta personal autorizada concediendo el acceso solicitado.'
+    case 'scope_insuficiente':
+      return 'Debe conceder acceso a los eventos del calendario.'
+    case 'intercambio_fallido':
+      return 'No fue posible completar el intercambio de autorización con Google. Intenta nuevamente.'
+    case 'no_configurada':
+      return 'La integración de Google Calendar no está configurada en el servidor.'
+    default:
+      return 'No fue posible completar la conexión con Google Calendar.'
+  }
+}
+
+export const puedeReintentarGoogleCalendar = (entrevista?: Entrevista | null): boolean => {
+  if (!entrevista || entrevista.modalidad !== 'Virtual' || entrevista.estado !== 'Programada')
+    return false
+
+  const estado = entrevista.google_calendar?.estado
+
+  return estado === 'Error' || estado === 'MeetPendiente' || estado === 'Pendiente'
+}
+
+export const entrevistaGoogleRequiereAtencion = (entrevista?: Entrevista | null): boolean => {
+  if (!entrevista)
+    return false
+
+  const estado = entrevista.google_calendar?.estado
+  if (!estado || estado === 'NoAplica' || estado === 'Sincronizada' || estado === 'Eliminada')
+    return false
+
+  if (entrevista.modalidad === 'Virtual' && entrevista.estado === 'Programada')
+    return true
+
+  return estado === 'Error'
 }
 
 export const extraerErroresCamposApi = (error: any): Record<string, string[]> => {

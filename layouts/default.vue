@@ -27,6 +27,7 @@ switchToVerticalNavOnLtOverlayNavBreakpoint();
 injectSkinClasses();
 
 const menu = useState('menu', () => []);
+const opcionesMenu = ref<any[]>([])
 
 
 const currentLayout = computed(() => {
@@ -91,12 +92,16 @@ const currentLayout = computed(() => {
       ? { ...item, children: asegurarOpcionesVisibles(item.children) }
       : item)
 
+  watchEffect(() => {
+    menu.value = asegurarOpcionesReclutamiento(opcionesMenu.value)
+  })
+
   const getOpcionesMenu = async (): Promise<void> => {
     try {
       const res = await get("api/menu_opciones", {
         params: { per_page: -1 },
       });
-      menu.value = asegurarOpcionesReclutamiento(res.data.data);
+      opcionesMenu.value = res.data.data;
       return res;
     }
     catch (error) {

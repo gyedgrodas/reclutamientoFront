@@ -12,22 +12,34 @@ import type {
   Entrevista,
   EstadoEntrevista,
   EtapaReclutamiento,
+  IntegracionGoogleCalendarEstado,
   ModalidadEntrevista,
   Postulacion,
   RespuestaCalendarioEntrevistas,
 } from '@/types/reclutamiento'
+import GoogleCalendarIntegracionCard from '@/views/pages/reclutamiento/entrevistas/GoogleCalendarIntegracionCard.vue'
 import DetalleSeguimientoDialog from '@/views/pages/reclutamiento/postulaciones/DetalleSeguimientoDialog.vue'
 import {
   MODALIDADES_ENTREVISTA,
+  calcularFechaFinIso,
   colorEstadoEntrevista,
+  colorEstadoGoogleCalendar,
+  colorEstadoIntegracionGoogle,
   colorRecomendacionEntrevista,
+  esUrlGoogleMeetValida,
   esUrlValida,
+  etiquetaEstadoGoogleCalendar,
+  etiquetaEstadoIntegracionGoogle,
   extraerFechaHoraGuatemala,
   extraerMensajeErrorApi,
+  formatearDuracionMinutos,
   formatearFechaCortaGuatemala,
   formatearFechaHoraGuatemala,
   formatearHoraGuatemala,
+  formatearRangoHorarioGuatemala,
+  iconoEstadoGoogleCalendar,
   iconoModalidadEntrevista,
+  puedeReintentarGoogleCalendar,
 } from '@/utils/entrevistasGuatemala'
 import {
   inicialesPersona,
@@ -35,12 +47,20 @@ import {
   obtenerEtapaNombre,
 } from '@/utils/reclutamientoUx'
 
-const { get } = useClienteRequest()
-const { showToastError } = useToast()
+const route = useRoute()
+const router = useRouter()
+const { get, post } = useClienteRequest()
+const { showToastError, showToastSuccess, showToastWarning } = useToast()
 const { mdAndUp } = useDisplay()
 
 const puedeVer = computed(() => can('ver entrevistas', 'Entrevista'))
 const puedeGestionar = computed(() => can('gestionar entrevistas', 'Entrevista'))
+
+const mostrarPanelGoogle = ref(false)
+const estadoGoogleCalendar = ref<IntegracionGoogleCalendarEstado | null>(null)
+const callbackGoogleEstado = ref<'conectado' | 'error' | null>(null)
+const callbackGoogleCodigo = ref<string | null>(null)
+const reintentandoMeetDetalle = ref(false)
 
 const MAX_DIAS_POR_TRAMO = 42
 const TAMANO_PAGINA = 100
@@ -216,6 +236,9 @@ const eventosCalendario = computed<EventInput[]>(() => {
     if (!partes.fecha || !partes.hora)
       continue
 
+    const finIso = calcularFechaFinIso(entrevista.fecha_hora, entrevista.fecha_fin, entrevista.duracion_minutos)
+    const partesFin = finIso ? extraerFechaHoraGuatemala(finIso) : { fecha: '', hora: '' }
+
     const candidato = nombreCompletoPersona(entrevista.postulacion?.candidato)
     const puesto = entrevista.postulacion?.vacante?.puesto?.nombre
     const titulo = puesto ? `${candidato} · ${puesto}` : candidato
@@ -224,6 +247,7 @@ const eventosCalendario = computed<EventInput[]>(() => {
       id: String(entrevista.id),
       title: titulo,
       start: `${partes.fecha}T${partes.hora}:00`,
+      end: partesFin.fecha && partesFin.hora ? `${partesFin.fecha}T${partesFin.hora}:00` : undefined,
       allDay: false,
       classNames: claseEventoCalendario(entrevista),
       extendedProps: {
@@ -437,8 +461,8 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   height: 'auto',
   dayMaxEvents: 3,
   moreLinkText: cantidad => `+${cantidad} más`,
-  defaultTimedEventDuration: '00:00:00',
-  displayEventEnd: false,
+  defaultTimedEventDuration: '01:00:00',
+  displayEventEnd: true,
   navLinks: true,
   editable: false,
   selectable: false,
@@ -472,6 +496,76 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   eventClick: alHacerClicEvento,
 }))
 
+const procesarCallbackGoogle = () => {
+  const resultado = typeof route.query.google_calendar === 'string' ? route.query.google_calendar : null
+  if (resultado !== 'conectado' && resultado !== 'error')
+    return
+
+  callbackGoogleEstado.value = resultado
+  callbackGoogleCodigo.value = typeof route.query.codigo === 'string' ? route.query.codigo : null
+  mostrarPanelGoogle.value = true
+
+  const queryLimpio = { ...route.query }
+
+  delete queryLimpio.google_calendar
+  delete queryLimpio.codigo
+  router.replace({ query: queryLimpio })
+}
+
+const limpiarCallbackGoogle = () => {
+  callbackGoogleEstado.value = null
+  callbackGoogleCodigo.value = null
+}
+
+const reintentarGoogleMeetDetalle = async () => {
+  const entrevista = entrevistaSeleccionada.value
+  if (!entrevista || reintentandoMeetDetalle.value || !puedeGestionar.value || !puedeReintentarGoogleCalendar(entrevista))
+    return
+
+  reintentandoMeetDetalle.value = true
+
+  try {
+    const respuesta = await post<{ success?: boolean; data?: Entrevista; message?: string }>(
+      `/api/entrevistas/${entrevista.id}/google-calendar/sincronizar`,
+      {},
+    )
+
+    if (respuesta?.success === false || !respuesta?.data) {
+      showToastError(respuesta?.message || 'No fue posible reintentar la sincronización con Google Meet.')
+
+      return
+    }
+
+    entrevistaSeleccionada.value = respuesta.data
+
+    const gc = respuesta.data.google_calendar
+    if (gc?.estado === 'Sincronizada' && esUrlGoogleMeetValida(gc.meet_url))
+      showToastSuccess(respuesta.message || 'Enlace de Google Meet sincronizado correctamente.')
+    else
+      showToastWarning(respuesta.message || gc?.error?.mensaje || 'La sincronización con Google Meet aún requiere atención.')
+
+    recargarRangoActual()
+  }
+  catch (error: any) {
+    const status = error?.response?.status
+
+    const msg = extraerMensajeErrorApi(
+      error,
+      status === 409
+        ? 'Ya hay una sincronización con Google Calendar en curso para esta entrevista.'
+        : 'No fue posible sincronizar el enlace de Google Meet.',
+    )
+
+    if (status === 409 || status === 422)
+      showToastWarning(msg)
+    else
+      showToastError(msg)
+  }
+  finally {
+    reintentandoMeetDetalle.value = false
+  }
+}
+
 const cargarCatalogoEtapas = async () => {
   try {
     const resp = await get<any>('/api/catalogo/etapas-reclutamiento?limit=100')
@@ -484,6 +578,7 @@ const cargarCatalogoEtapas = async () => {
 }
 
 onMounted(() => {
+  procesarCallbackGoogle()
   cargarCatalogoEtapas()
 })
 
@@ -537,6 +632,17 @@ onBeforeUnmount(() => {
         </VChip>
         <VBtn
           size="small"
+          :variant="mostrarPanelGoogle ? 'flat' : 'tonal'"
+          :color="estadoGoogleCalendar ? colorEstadoIntegracionGoogle(estadoGoogleCalendar.estado) : 'secondary'"
+          prepend-icon="tabler-brand-google"
+          @click="mostrarPanelGoogle = !mostrarPanelGoogle"
+        >
+          Google Meet<template v-if="estadoGoogleCalendar">
+            : {{ etiquetaEstadoIntegracionGoogle(estadoGoogleCalendar.estado) }}
+          </template>
+        </VBtn>
+        <VBtn
+          size="small"
           variant="tonal"
           color="secondary"
           prepend-icon="tabler-refresh"
@@ -547,6 +653,21 @@ onBeforeUnmount(() => {
         </VBtn>
       </div>
     </header>
+
+    <!-- Panel de estado y administración de Google Calendar / Meet compartido -->
+    <VExpandTransition>
+      <div
+        v-show="mostrarPanelGoogle"
+        class="mb-4"
+      >
+        <GoogleCalendarIntegracionCard
+          :callback-estado="callbackGoogleEstado"
+          :callback-codigo="callbackGoogleCodigo"
+          @estado-actualizado="estadoGoogleCalendar = $event"
+          @limpiar-callback="limpiarCallbackGoogle"
+        />
+      </div>
+    </VExpandTransition>
 
     <!-- Calendario estilo plantilla Vuexy -->
     <VCard class="calendario-card">
@@ -569,7 +690,7 @@ onBeforeUnmount(() => {
                   {{ etiquetaRangoVisible }}
                 </div>
                 <div class="text-caption text-medium-emphasis mt-1">
-                  Marca visual por hora de inicio (sin duración registrada).
+                  Duración estándar de entrevista: 1 hora (60 min).
                 </div>
               </div>
               <VBtn
@@ -811,6 +932,9 @@ onBeforeUnmount(() => {
               <div class="tt-detail-box">
                 <span>Fecha y hora (Guatemala)</span>
                 <strong>{{ formatearFechaHoraGuatemala(entrevistaSeleccionada.fecha_hora) }} (GT)</strong>
+                <span class="d-block text-caption text-medium-emphasis mt-1">
+                  {{ formatearRangoHorarioGuatemala(entrevistaSeleccionada.fecha_hora, entrevistaSeleccionada.fecha_fin, entrevistaSeleccionada.duracion_minutos) }} · {{ formatearDuracionMinutos(entrevistaSeleccionada.duracion_minutos) }}
+                </span>
               </div>
             </VCol>
 
@@ -867,6 +991,83 @@ onBeforeUnmount(() => {
                 <strong v-else>
                   {{ entrevistaSeleccionada.lugar || 'Sin especificar' }}
                 </strong>
+              </div>
+            </VCol>
+
+            <VCol
+              v-if="entrevistaSeleccionada.google_calendar && entrevistaSeleccionada.google_calendar.estado !== 'NoAplica'"
+              cols="12"
+            >
+              <div class="tt-detail-box">
+                <div class="d-flex flex-wrap align-center justify-space-between gap-2">
+                  <div>
+                    <span>Google Meet compartido</span>
+                    <div class="mt-1">
+                      <VChip
+                        size="x-small"
+                        :color="colorEstadoGoogleCalendar(entrevistaSeleccionada.google_calendar.estado)"
+                        variant="tonal"
+                        :prepend-icon="iconoEstadoGoogleCalendar(entrevistaSeleccionada.google_calendar.estado)"
+                        class="font-weight-bold"
+                      >
+                        {{ etiquetaEstadoGoogleCalendar(entrevistaSeleccionada.google_calendar.estado) }}
+                      </VChip>
+                    </div>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2">
+                    <VBtn
+                      v-if="esUrlGoogleMeetValida(entrevistaSeleccionada.google_calendar.meet_url)"
+                      size="small"
+                      color="success"
+                      variant="flat"
+                      prepend-icon="tabler-video"
+                      append-icon="tabler-external-link"
+                      :href="entrevistaSeleccionada.google_calendar.meet_url!"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Abrir Meet
+                    </VBtn>
+                    <VBtn
+                      v-if="puedeGestionar && puedeReintentarGoogleCalendar(entrevistaSeleccionada)"
+                      size="small"
+                      color="warning"
+                      variant="tonal"
+                      prepend-icon="tabler-refresh"
+                      :loading="reintentandoMeetDetalle"
+                      @click="reintentarGoogleMeetDetalle"
+                    >
+                      Reintentar Meet
+                    </VBtn>
+                  </div>
+                </div>
+
+                <VAlert
+                  v-if="entrevistaSeleccionada.google_calendar.estado === 'Error' || entrevistaSeleccionada.google_calendar.estado === 'MeetPendiente' || entrevistaSeleccionada.google_calendar.estado === 'Pendiente'"
+                  :type="entrevistaSeleccionada.google_calendar.estado === 'Error' ? 'error' : 'warning'"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-2"
+                >
+                  <div class="text-caption">
+                    <template v-if="entrevistaSeleccionada.google_calendar.error?.mensaje">
+                      {{ entrevistaSeleccionada.google_calendar.error.mensaje }}
+                    </template>
+                    <template v-else-if="entrevistaSeleccionada.google_calendar.estado === 'MeetPendiente'">
+                      Google Calendar aceptó el evento, pero el enlace de Google Meet aún está pendiente.
+                    </template>
+                    <template v-else>
+                      La sincronización con Google Calendar está pendiente.
+                    </template>
+                    <span
+                      v-if="entrevistaSeleccionada.google_calendar.proximo_intento_at"
+                      class="d-block mt-1"
+                    >
+                      Próximo reintento automático: {{ formatearFechaHoraGuatemala(entrevistaSeleccionada.google_calendar.proximo_intento_at) }} (GT)
+                    </span>
+                  </div>
+                </VAlert>
               </div>
             </VCol>
 
