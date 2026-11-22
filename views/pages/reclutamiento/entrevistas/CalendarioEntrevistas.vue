@@ -7,7 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import esLocale from '@fullcalendar/core/locales/es'
 import type { CalendarApi, CalendarOptions, DatesSetArg, EventClickArg, EventInput } from '@fullcalendar/core'
 import { useDisplay } from 'vuetify'
-import { can } from '@layouts/plugins/casl'
+import { useAbility } from '@casl/vue'
 import type {
   Entrevista,
   EstadoEntrevista,
@@ -52,6 +52,8 @@ const router = useRouter()
 const { get, post } = useClienteRequest()
 const { showToastError, showToastSuccess, showToastWarning } = useToast()
 const { mdAndUp } = useDisplay()
+const ability = useAbility()
+const can = (action: string, subject: string) => ability.can(action, subject)
 
 const puedeVer = computed(() => can('ver entrevistas', 'Entrevista'))
 const puedeGestionar = computed(() => can('gestionar entrevistas', 'Entrevista'))

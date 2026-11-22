@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { can } from '@layouts/plugins/casl'
+import { useAbility } from '@casl/vue'
 import { requiredValidator } from '@core/utils/validators'
 import type {
   Entrevista,
@@ -48,6 +48,8 @@ const emit = defineEmits<{
 
 const { get, post, put } = useClienteRequest()
 const { showToastError, showToastSuccess, showToastWarning } = useToast()
+const ability = useAbility()
+const can = (action: string, subject: string) => ability.can(action, subject)
 
 const puedeVer = computed(() => can('ver entrevistas', 'Entrevista'))
 const puedeGestionar = computed(() => can('gestionar entrevistas', 'Entrevista'))

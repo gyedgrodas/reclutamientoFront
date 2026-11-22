@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { can } from '@layouts/plugins/casl'
+import { useAbility } from '@casl/vue'
 import type { Entrevista, EstadoPostulacion, EtapaReclutamiento, Postulacion } from '@/types/reclutamiento'
 import EntrevistasPostulacionPanel from '@/views/pages/reclutamiento/entrevistas/EntrevistasPostulacionPanel.vue'
 import HistorialPostulacion from '@/views/pages/reclutamiento/postulaciones/HistorialPostulacion.vue'
@@ -32,6 +32,8 @@ const emit = defineEmits<{
 
 const { get, put } = useClienteRequest()
 const { showToastSuccess } = useToast()
+const ability = useAbility()
+const can = (action: string, subject: string) => ability.can(action, subject)
 
 const abierto = computed({
   get: () => props.modelValue,
