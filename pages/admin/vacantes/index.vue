@@ -48,9 +48,11 @@ const cargandoTarjetas = ref(false)
 const cargarTodasLasVacantes = async () => {
   cargandoTarjetas.value = true
   try {
-    const respuesta = await get<{ data: Vacante[] }>('/api/vacantes?include=puesto,unidad,solicitante&sort=-id&perPage=100')
+    const respuesta = await get<{ data: Vacante[] | { data: Vacante[] } }>('/api/vacantes?include=puesto,unidad,solicitante&sort=-id&page[size]=100')
 
-    todasLasVacantes.value = respuesta.data || []
+    todasLasVacantes.value = Array.isArray(respuesta.data)
+      ? respuesta.data
+      : (respuesta.data?.data || [])
   }
   catch (error) {
     manejaError(error)

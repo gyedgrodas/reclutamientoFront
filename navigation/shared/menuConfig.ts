@@ -34,6 +34,13 @@ const menuConfig = [
     action: 'modulo usuarios',
     subject: 'usuarios',
   },
+  {
+    title: 'Postulaciones',
+    to: { name: 'admin-postulaciones' },
+    icon: { icon: 'tabler-user-check' },
+    action: 'ver postulaciones',
+    subject: 'Postulacion',
+  },
 ]
 
 export default menuConfig

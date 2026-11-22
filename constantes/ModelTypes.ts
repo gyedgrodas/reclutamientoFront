@@ -1,6 +1,8 @@
 
 export const MODEL_TYPE_AGENDA = 'App\\Models\\Agenda'
 export const MODEL_TYPE_BITACORA = 'App\\Models\\Bitacora'
+export const MODEL_TYPE_CANDIDATO = 'App\\Models\\Candidato'
+export const MODEL_TYPE_POSTULACION = 'App\\Models\\Postulacion'
 export const MODEL_TYPE_CATALOGOS__CATEGORIA_AGENDA = 'App\\Models\\Catalogos\\CategoriaAgenda'
 export const MODEL_TYPE_CATALOGOS__ESTADO_AGENDA = 'App\\Models\\Catalogos\\EstadoAgenda'
 export const MODEL_TYPE_CATALOGOS__TIPO_AGENDA = 'App\\Models\\Catalogos\\TipoAgenda'

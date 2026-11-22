@@ -53,9 +53,11 @@ const pasosFlujo = [
 const cargarDatos = async () => {
   cargando.value = true
   try {
-    const respuesta = await get<{ data: Vacante[] }>('/api/vacantes?include=puesto,unidad,solicitante&sort=-id&perPage=50')
+    const respuesta = await get<{ data: Vacante[] | { data: Vacante[] } }>('/api/vacantes?include=puesto,unidad,solicitante&sort=-id&page[size]=50')
 
-    vacantes.value = respuesta.data || []
+    vacantes.value = Array.isArray(respuesta.data)
+      ? respuesta.data
+      : (respuesta.data?.data || [])
   }
   catch (error) {
     manejaError(error)
