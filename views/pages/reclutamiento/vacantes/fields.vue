@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core'
+import { can } from '@layouts/plugins/casl'
 import { requiredValidator } from '@core/utils/validators'
 import type { DatosVacante, PuestoResumen, UnidadResumen, UsuarioResumen, Vacante } from '@/types/reclutamiento'
 import type { SendResponseIndexInterface } from '@/types/sistema/types'
@@ -9,6 +10,7 @@ const emit = defineEmits<{ (e: 'guardar', datos: DatosVacante): void }>()
 const { getCatalogos } = useCatalogo()
 const { get } = useClienteRequest()
 const form = ref<{ validate: () => Promise<{ valid: boolean }> } | null>(null)
+const esVinculadaASolicitud = computed(() => props.vacante?.solicitud_id != null)
 
 const datos = reactive<DatosVacante>({
   puesto_id: props.vacante?.puesto_id ?? null,
@@ -68,6 +70,9 @@ const solicitanteItems = computed(() => solicitantes.value.map(usuario => ({
 })))
 
 const buscarSolicitantes = async (texto: string) => {
+  if (esVinculadaASolicitud.value)
+    return
+
   buscandoSolicitantes.value = true
   try {
     const respuesta = await get<SendResponseIndexInterface<UsuarioResumen[]>>('/api/users', {
@@ -105,6 +110,29 @@ onMounted(cargarCatalogos)
     ref="form"
     @submit.prevent="guardar"
   >
+    <VAlert
+      v-if="esVinculadaASolicitud"
+      type="info"
+      variant="tonal"
+      class="mb-5"
+    >
+      <div class="d-flex flex-wrap align-center justify-space-between gap-2">
+        <span>
+          Esta vacante está vinculada a la solicitud #{{ props.vacante?.solicitud_id }}. El puesto, unidad, solicitante, número de plazas y motivo provienen de la aprobación y no pueden modificarse.
+        </span>
+        <VBtn
+          v-if="can('ver solicitudes vacante', 'SolicitudVacante')"
+          size="small"
+          color="info"
+          variant="outlined"
+          prepend-icon="tabler-external-link"
+          :to="`/admin/solicitudes-vacante/show/${props.vacante?.solicitud_id}`"
+        >
+          Ver solicitud #{{ props.vacante?.solicitud_id }}
+        </VBtn>
+      </div>
+    </VAlert>
+
     <VRow>
       <VCol
         cols="12"
@@ -117,6 +145,7 @@ onMounted(cargarCatalogos)
           item-title="nombre"
           item-value="id"
           :loading="cargandoCatalogos"
+          :disabled="esVinculadaASolicitud"
           :rules="[requiredValidator]"
         />
       </VCol>
@@ -131,6 +160,7 @@ onMounted(cargarCatalogos)
           item-title="nombre"
           item-value="id"
           :loading="cargandoCatalogos"
+          :disabled="esVinculadaASolicitud"
           :rules="[requiredValidator]"
         />
       </VCol>
@@ -144,7 +174,8 @@ onMounted(cargarCatalogos)
           :items="solicitanteItems"
           item-title="label"
           item-value="id"
-          clearable
+          :clearable="!esVinculadaASolicitud"
+          :disabled="esVinculadaASolicitud"
           no-filter
           :loading="buscandoSolicitantes"
           @update:search="buscarSolicitantesDebounced"
@@ -159,6 +190,7 @@ onMounted(cargarCatalogos)
           label="Número de plazas"
           type="number"
           min="1"
+          :disabled="esVinculadaASolicitud"
           :rules="[requiredValidator]"
         />
       </VCol>
@@ -170,6 +202,7 @@ onMounted(cargarCatalogos)
           v-model="datos.motivo"
           label="Motivo"
           :items="motivos"
+          :disabled="esVinculadaASolicitud"
           :rules="[requiredValidator]"
         />
       </VCol>

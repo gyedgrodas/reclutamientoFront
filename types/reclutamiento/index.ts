@@ -1,5 +1,6 @@
 export type MotivoVacante = 'Nueva' | 'Reemplazo'
 export type EstadoVacante = 'Abierta' | 'En Proceso' | 'Cubierta' | 'Cancelada'
+export type EstadoSolicitudVacante = 'Pendiente' | 'Aprobada' | 'Rechazada'
 
 export interface PuestoResumen {
   id: number
@@ -21,6 +22,7 @@ export interface UsuarioResumen {
 
 export interface Vacante {
   id: number
+  solicitud_id?: number | null
   puesto_id: number
   unidad_id: number
   solicitante_id: number | null
@@ -36,6 +38,47 @@ export interface Vacante {
   unidad?: UnidadResumen
   solicitante?: UsuarioResumen
   postulaciones_count?: number
+}
+
+export interface SolicitudVacante {
+  id: number
+  puesto_id: number
+  unidad_id: number
+  solicitante_id: number | null
+  aprobador_id: number | null
+  numero_plazas: number
+  motivo: MotivoVacante
+  justificacion: string
+  estado: EstadoSolicitudVacante
+  observaciones: string | null
+  fecha_resolucion: string | null
+  created_at?: string | null
+  updated_at?: string | null
+  puesto?: PuestoResumen
+  unidad?: UnidadResumen
+  solicitante?: UsuarioResumen
+  aprobador?: UsuarioResumen
+  vacante?: Vacante | null
+}
+
+export interface DatosSolicitudVacante {
+  puesto_id: number | null
+  unidad_id: number | null
+  numero_plazas: number | null
+  motivo: MotivoVacante
+  justificacion: string
+}
+
+export interface DatosResolverSolicitudVacante {
+  estado: 'Aprobada' | 'Rechazada'
+  observaciones: string
+}
+
+export interface DatosCrearVacanteDesdeSolicitud {
+  fecha_apertura: string
+  fecha_cierre_estimada: string | null
+  descripcion: string | null
+  requisitos: string | null
 }
 
 export interface DatosVacante {
@@ -189,4 +232,17 @@ export interface ActividadRecientePostulacion {
   estado_nuevo: string | null
   actor: string | null
   observaciones: string | null
+}
+
+export type EntidadBitacoraReclutamiento = 'SolicitudVacante' | 'Vacante' | 'Postulacion'
+
+export interface RegistroBitacoraReclutamiento {
+  id: number
+  entidad: EntidadBitacoraReclutamiento | string
+  entidad_id: number | string | null
+  accion: string
+  actor: string | null
+  created_at: string | null
+  cambios: Record<string, unknown> | null
+  solicitud_id?: number | null
 }

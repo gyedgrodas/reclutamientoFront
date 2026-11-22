@@ -38,12 +38,52 @@ const currentLayout = computed(() => {
 
 
 
+  const contieneRutaEnMenu = (items: any[], rutaBuscada: string): boolean => {
+    return items.some(item => {
+      if (item?.ruta === rutaBuscada)
+        return true
+      if (Array.isArray(item?.children) && item.children.length > 0)
+        return contieneRutaEnMenu(item.children, rutaBuscada)
+
+      return false
+    })
+  }
+
+  const asegurarOpcionesReclutamiento = (items: any[]): any[] => {
+    if (!Array.isArray(items))
+      return items
+
+    const copia = [...items]
+
+    if (!contieneRutaEnMenu(copia, 'admin-solicitudes-vacante')) {
+      const opcionSolicitudes = {
+        id: -101,
+        titulo: 'Solicitudes de vacante',
+        icono: 'tabler-file-check',
+        ruta: 'admin-solicitudes-vacante',
+        titulo_seccion: null,
+        parent_id: null,
+        action: 'ver solicitudes vacante',
+        subject: 'SolicitudVacante',
+        children: [],
+      }
+
+      const indiceVacantes = copia.findIndex(item => item?.ruta === 'admin-vacantes')
+      if (indiceVacantes !== -1)
+        copia.splice(indiceVacantes, 0, opcionSolicitudes)
+      else
+        copia.push(opcionSolicitudes)
+    }
+
+    return copia
+  }
+
   const getOpcionesMenu = async (): Promise<void> => {
     try {
       const res = await get("api/menu_opciones", {
         params: { per_page: -1 },
       });
-      menu.value = res.data.data;
+      menu.value = asegurarOpcionesReclutamiento(res.data.data);
       return res;
     }
     catch (error) {

@@ -35,6 +35,13 @@ const menuConfig = [
     subject: 'usuarios',
   },
   {
+    title: 'Solicitudes de vacante',
+    to: { name: 'admin-solicitudes-vacante' },
+    icon: { icon: 'tabler-file-check' },
+    action: 'ver solicitudes vacante',
+    subject: 'SolicitudVacante',
+  },
+  {
     title: 'Postulaciones',
     to: { name: 'admin-postulaciones' },
     icon: { icon: 'tabler-user-check' },
