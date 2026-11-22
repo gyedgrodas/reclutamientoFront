@@ -248,7 +248,7 @@ const manejarRuta = (ruta: string): void => {
       >
         <li
           v-for="(item, index) in favoritos"
-          v-show="item.ruta !== 'admin-dashboard' || puedeVerDashboard"
+          v-show="(item.ruta !== 'admin-dashboard' && item.ruta !== 'admin-entrevistas') || puedeVerDashboard"
           :key="item.id"
           class="v-col-3"
         >

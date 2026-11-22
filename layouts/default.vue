@@ -50,12 +50,14 @@ const currentLayout = computed(() => {
     })
   }
 
+  const rutasSoloReclutador = new Set(['admin-dashboard', 'admin-entrevistas'])
+
   const asegurarOpcionesReclutamiento = (items: any[]): any[] => {
     if (!Array.isArray(items))
       return items
 
     const copia = items
-      .filter(item => item?.ruta !== 'admin-dashboard' || puedeVerDashboard.value)
+      .filter(item => !rutasSoloReclutador.has(item?.ruta) || puedeVerDashboard.value)
       .map(item => Array.isArray(item?.children)
         ? { ...item, children: asegurarOpcionesVisibles(item.children) }
         : item)
@@ -84,7 +86,7 @@ const currentLayout = computed(() => {
   }
 
   const asegurarOpcionesVisibles = (items: any[]): any[] => items
-    .filter(item => item?.ruta !== 'admin-dashboard' || puedeVerDashboard.value)
+    .filter(item => !rutasSoloReclutador.has(item?.ruta) || puedeVerDashboard.value)
     .map(item => Array.isArray(item?.children)
       ? { ...item, children: asegurarOpcionesVisibles(item.children) }
       : item)

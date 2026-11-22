@@ -68,6 +68,30 @@ export const necesitaAtencionPostulacion = (postulacion?: Postulacion | null): b
   return diasSinActualizar(postulacion) >= UMBRAL_DIAS_ATENCION
 }
 
+export type GrupoEtapaReclutamiento = 'recibida' | 'revision' | 'entrevista' | 'oferta'
+
+export const clasificarColumnaTablero = (etapaNombre: string): GrupoEtapaReclutamiento => {
+  const n = etapaNombre.toLowerCase()
+  if (n.includes('solicitud') || n.includes('recib'))
+    return 'recibida'
+  if (n.includes('entrevista'))
+    return 'entrevista'
+  if (n.includes('referencia') || n.includes('oferta') || n.includes('contrat'))
+    return 'oferta'
+
+  return 'revision'
+}
+
+export const permiteProgramarEntrevistaEnEtapa = (etapaNombre?: string | null): boolean => {
+  const nombre = (etapaNombre || '').trim()
+  if (!nombre)
+    return false
+
+  const grupo = clasificarColumnaTablero(nombre)
+
+  return grupo === 'entrevista' || grupo === 'oferta'
+}
+
 export const esEtapaEntrevista = (etapaNombre: string): boolean => {
   return etapaNombre.toLowerCase().includes('entrevista')
 }

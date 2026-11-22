@@ -9,6 +9,7 @@ import type {
 import DetalleSeguimientoDialog from '@/views/pages/reclutamiento/postulaciones/DetalleSeguimientoDialog.vue'
 import {
   UMBRAL_DIAS_ATENCION,
+  clasificarColumnaTablero,
   diasSinActualizar,
   esEtapaEntrevista,
   etiquetaDiasSinActualizar,
@@ -34,8 +35,9 @@ const soloAtencion = ref(false)
 
 const modalSeguimiento = ref(false)
 const postulacionActiva = ref<Postulacion | null>(null)
+const seccionInicialSeguimiento = ref<'seguimiento' | 'entrevistas'>('seguimiento')
 
-const desempaquetarLista = <T>(respuesta: any): T[] => {
+function desempaquetarLista<T>(respuesta: any): T[] {
   if (!respuesta)
     return []
 
@@ -126,18 +128,6 @@ const postulacionesTableroFiltradas = computed(() => {
   })
 })
 
-const clasificarColumnaTablero = (etapaNombre: string): 'recibida' | 'revision' | 'entrevista' | 'oferta' => {
-  const n = etapaNombre.toLowerCase()
-  if (n.includes('solicitud') || n.includes('recib'))
-    return 'recibida'
-  if (n.includes('entrevista'))
-    return 'entrevista'
-  if (n.includes('referencia') || n.includes('oferta') || n.includes('contrat'))
-    return 'oferta'
-
-  return 'revision'
-}
-
 const columnasTablero = computed(() => {
   const definiciones = [
     { id: 'recibida', titulo: 'Recibida', color: '#4a90b8' },
@@ -161,9 +151,14 @@ const conteoPostulacionesPorVacante = (vacante: Vacante): number => {
   return postulaciones.value.filter(p => p.vacante_id === vacante.id).length
 }
 
-const abrirSeguimiento = (postulacion: Postulacion) => {
+const abrirSeguimiento = (postulacion: Postulacion, seccion: 'seguimiento' | 'entrevistas' = 'seguimiento') => {
+  seccionInicialSeguimiento.value = seccion
   postulacionActiva.value = postulacion
   modalSeguimiento.value = true
+}
+
+const alActualizarPostulacion = async () => {
+  await cargarDatos()
 }
 
 const abrirDesdeActividad = (item: ActividadRecientePostulacion) => {
@@ -212,6 +207,15 @@ onMounted(cargarDatos)
       </div>
 
       <div class="d-flex flex-wrap gap-2">
+        <VBtn
+          v-if="can('ver entrevistas', 'Entrevista')"
+          color="secondary"
+          variant="tonal"
+          prepend-icon="tabler-calendar-event"
+          to="/admin/entrevistas"
+        >
+          Calendario de entrevistas
+        </VBtn>
         <VBtn
           v-if="can('crear vacantes', 'Vacante')"
           color="secondary"
@@ -740,13 +744,14 @@ onMounted(cargarDatos)
       v-model="modalSeguimiento"
       :postulacion="postulacionActiva"
       :etapas="etapas"
-      @actualizado="cargarDatos"
+      :seccion-inicial="seccionInicialSeguimiento"
+      @actualizado="alActualizarPostulacion"
     />
   </div>
 </template>
 
 <style scoped>
-@import '@/assets/styles/reclutamiento-talent.scss';
+@import '@styles/reclutamiento-talent.scss';
 
 .tablero-controles .control-busqueda {
   min-width: 220px;

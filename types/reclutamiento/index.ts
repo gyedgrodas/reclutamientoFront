@@ -246,3 +246,59 @@ export interface RegistroBitacoraReclutamiento {
   cambios: Record<string, unknown> | null
   solicitud_id?: number | null
 }
+
+export type ModalidadEntrevista = 'Presencial' | 'Virtual' | 'Telefónica'
+export type EstadoEntrevista = 'Programada' | 'Realizada' | 'Cancelada'
+export type RecomendacionEntrevista = 'Avanzar' | 'En revisión' | 'No continuar'
+
+export interface Entrevista {
+  id: number
+  postulacion_id: number
+  fecha_hora: string
+  entrevistador_id: number
+  entrevistador?: UsuarioResumen
+  modalidad: ModalidadEntrevista
+  lugar: string | null
+  estado: EstadoEntrevista
+  recomendacion: RecomendacionEntrevista | null
+  puntuacion: number | null
+  observaciones: string | null
+  motivo_cancelacion: string | null
+  postulacion?: Postulacion
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface AgendaEntrevistas {
+  hoy: Entrevista[]
+  pendientes_resultado: Entrevista[]
+  proximas: Entrevista[]
+}
+
+export interface RespuestaCalendarioEntrevistas {
+  success?: boolean
+  message?: string
+  data?: {
+    data: Entrevista[]
+    current_page: number
+    last_page: number
+    total: number
+  }
+}
+
+export interface PayloadProgramarEntrevista {
+  fecha_hora: string
+  entrevistador_id: number
+  modalidad: ModalidadEntrevista
+  lugar: string | null
+}
+
+export interface PayloadCancelarEntrevista {
+  motivo: string
+}
+
+export interface PayloadResultadoEntrevista {
+  recomendacion: RecomendacionEntrevista
+  puntuacion: number
+  observaciones: string
+}
