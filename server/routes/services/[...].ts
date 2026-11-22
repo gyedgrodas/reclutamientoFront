@@ -88,6 +88,7 @@ export default defineEventHandler(async (event) => {
   // =================================================================
   const isPublicRoute =
     targetPathLower.includes("/login") ||
+    targetPathLower.includes("/portal") ||
     targetPathLower.includes("/publico") ||
     targetPathLower.includes("/sanctum/csrf-cookie") ||
     targetPathLower.includes("/storage");
@@ -112,6 +113,7 @@ export default defineEventHandler(async (event) => {
       'x-real-ip': clientIp,
       'X-Requested-With': 'XMLHttpRequest',
       'Accept': 'application/json',
+      ...(authHeader ? { 'Authorization': authHeader } : {}),
       // Reenviamos el ID a Laravel por si quieres guardar logs allá
       'X-Device-Id': deviceId || 'unknown'
     },

@@ -31,7 +31,11 @@ export const useClienteRequest = () => {
       console.error('Error en respuesta:', error.response || error)
 
       if (error.response?.status === 401) {
-        console.warn('Token expirado, redirigiendo a login...')
+        const enPortalEmpleos = typeof window !== 'undefined' && window.location.pathname.startsWith('/empleos')
+        if (enPortalEmpleos)
+          return Promise.reject(error)
+
+        console.warn('Token expirado o no autorizado...')
 
         // Eliminar usuario si está autenticado
         if (user.value !== null)
@@ -40,7 +44,6 @@ export const useClienteRequest = () => {
         // eliminar token
         tokenCookie.value = null
 
-        // Redirigir a la página de login
         await navigateTo(options.redirect.onAuthOnly || '/login')
       }
 
@@ -66,6 +69,7 @@ export const useClienteRequest = () => {
         responseType: options.responseType ?? "json",
         headers: {
           ...options.headers,
+          ...(tokenCookie.value ? { Authorization: `Bearer ${tokenCookie.value}` } : {}),
           ...(isFormData ? { 'Content-Type': 'multipart/form-data' } : {}), // Axios maneja el boundary automáticamente
           'X-Device-Id': currentId,
         },
