@@ -1,25 +1,40 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import DashboardReclutamiento from '@/views/pages/reclutamiento/dashboard/DashboardReclutamiento.vue'
 
-export default defineComponent({
-  name: 'Index',
-  data() {
-    return {
-      user: null as unknown,
-    }
-  },
-  mounted() {
-    const userRef = useSanctumUser()
-
-    this.user = userRef.value // Acceder al valor del ref
-  },
-})
+const tabActiva = ref('dashboard')
 </script>
 
 <template>
-  <Favoritos />
+  <div>
+    <div class="d-flex justify-space-between align-center mb-4">
+      <VTabs
+        v-model="tabActiva"
+        color="primary"
+      >
+        <VTab value="dashboard">
+          <VIcon
+            icon="tabler-layout-dashboard"
+            class="me-2"
+          />
+          Talento Humano
+        </VTab>
+        <VTab value="favoritos">
+          <VIcon
+            icon="tabler-star"
+            class="me-2"
+          />
+          Accesos Favoritos
+        </VTab>
+      </VTabs>
+    </div>
+
+    <VWindow v-model="tabActiva">
+      <VWindowItem value="dashboard">
+        <DashboardReclutamiento />
+      </VWindowItem>
+      <VWindowItem value="favoritos">
+        <Favoritos />
+      </VWindowItem>
+    </VWindow>
+  </div>
 </template>
-
-<style scoped lang="scss">
-
-</style>
