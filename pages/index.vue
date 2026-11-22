@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import DashboardReclutamiento from '@/views/pages/reclutamiento/dashboard/DashboardReclutamiento.vue'
 
-const tabActiva = ref('dashboard')
+const puedeVerDashboard = useDashboardReclutamiento()
+const tabActiva = ref(puedeVerDashboard.value ? 'dashboard' : 'favoritos')
+
+watch(puedeVerDashboard, puedeVer => {
+  if (!puedeVer && tabActiva.value === 'dashboard')
+    tabActiva.value = 'favoritos'
+})
 </script>
 
 <template>
@@ -11,7 +17,10 @@ const tabActiva = ref('dashboard')
         v-model="tabActiva"
         color="primary"
       >
-        <VTab value="dashboard">
+        <VTab
+          v-if="puedeVerDashboard"
+          value="dashboard"
+        >
           <VIcon
             icon="tabler-layout-dashboard"
             class="me-2"
@@ -29,7 +38,10 @@ const tabActiva = ref('dashboard')
     </div>
 
     <VWindow v-model="tabActiva">
-      <VWindowItem value="dashboard">
+      <VWindowItem
+        v-if="puedeVerDashboard"
+        value="dashboard"
+      >
         <DashboardReclutamiento />
       </VWindowItem>
       <VWindowItem value="favoritos">

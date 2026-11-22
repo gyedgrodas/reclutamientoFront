@@ -9,6 +9,7 @@ const ability = useAbility();
 
 const {get, put} = useClienteRequest();
 const user = useSanctumUser<UsuarioInterface>();
+const puedeVerDashboard = useDashboardReclutamiento();
 const {showToastError, showToastSuccess} = useToast();
 const vuetifyTheme = useTheme()
 
@@ -247,6 +248,7 @@ const manejarRuta = (ruta: string): void => {
       >
         <li
           v-for="(item, index) in favoritos"
+          v-show="item.ruta !== 'admin-dashboard' || puedeVerDashboard"
           :key="item.id"
           class="v-col-3"
         >
@@ -312,5 +314,4 @@ const manejarRuta = (ruta: string): void => {
 <style scoped lang="scss">
 
 </style>
-
 

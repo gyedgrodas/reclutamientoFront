@@ -14,6 +14,7 @@ const { showToastError } = useToast()
 const { cargandoPagina, paginaEspera } = useCargandoPagina()
 import {useIsMobile} from "@/composables/useIsMobile";
 const { isMobile } = useIsMobile()
+const puedeVerDashboard = useDashboardReclutamiento()
 
 const DefaultLayoutWithHorizontalNav = defineAsyncComponent(() => import('./components/DefaultLayoutWithHorizontalNav.vue'));
 const DefaultLayoutWithVerticalNav = defineAsyncComponent(() => import('./components/DefaultLayoutWithVerticalNav.vue'));
@@ -53,7 +54,11 @@ const currentLayout = computed(() => {
     if (!Array.isArray(items))
       return items
 
-    const copia = [...items]
+    const copia = items
+      .filter(item => item?.ruta !== 'admin-dashboard' || puedeVerDashboard.value)
+      .map(item => Array.isArray(item?.children)
+        ? { ...item, children: asegurarOpcionesVisibles(item.children) }
+        : item)
 
     if (!contieneRutaEnMenu(copia, 'admin-solicitudes-vacante')) {
       const opcionSolicitudes = {
@@ -77,6 +82,12 @@ const currentLayout = computed(() => {
 
     return copia
   }
+
+  const asegurarOpcionesVisibles = (items: any[]): any[] => items
+    .filter(item => item?.ruta !== 'admin-dashboard' || puedeVerDashboard.value)
+    .map(item => Array.isArray(item?.children)
+      ? { ...item, children: asegurarOpcionesVisibles(item.children) }
+      : item)
 
   const getOpcionesMenu = async (): Promise<void> => {
     try {

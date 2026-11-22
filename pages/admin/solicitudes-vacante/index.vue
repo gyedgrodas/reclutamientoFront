@@ -21,6 +21,7 @@ definePageMeta({
 
 const { get } = useClienteRequest()
 const { getCatalogos } = useCatalogo()
+const puedeResolverSolicitud = usePuedeResolverSolicitud()
 
 const vistaModo = ref<'bandeja' | 'tabla'>('bandeja')
 const cargando = ref(false)
@@ -811,7 +812,7 @@ onBeforeUnmount(() => {
               </VBtn>
 
               <VBtn
-                v-if="item.estado === 'Pendiente' && can('resolver solicitudes vacante', 'SolicitudVacante')"
+                v-if="puedeResolverSolicitud(item)"
                 size="small"
                 color="primary"
                 prepend-icon="tabler-shield-check"
@@ -938,7 +939,7 @@ onBeforeUnmount(() => {
                     @click="abrirDetalle(item, 'detalle')"
                   />
                   <VBtn
-                    v-if="item.estado === 'Pendiente' && can('resolver solicitudes vacante', 'SolicitudVacante')"
+                    v-if="puedeResolverSolicitud(item)"
                     icon="tabler-shield-check"
                     variant="text"
                     size="small"

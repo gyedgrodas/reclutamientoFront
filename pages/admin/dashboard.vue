@@ -3,7 +3,7 @@ import DashboardReclutamiento from '@/views/pages/reclutamiento/dashboard/Dashbo
 
 definePageMeta({
   navActiveLink: 'admin-dashboard',
-  middleware: 'permissions',
+  middleware: ['permissions', 'dashboard-reclutamiento'],
   action: 'ver vacantes',
   subject: 'Vacante',
 })

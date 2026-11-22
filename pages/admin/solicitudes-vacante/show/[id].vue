@@ -27,6 +27,7 @@ definePageMeta({
 
 const route = useRoute()
 const { get } = useClienteRequest()
+const puedeResolverSolicitud = usePuedeResolverSolicitud()
 
 const registro = ref<SolicitudVacante | null>(null)
 const cargando = ref(true)
@@ -48,10 +49,7 @@ const iconosEstado: Record<string, string> = {
   Rechazada: 'tabler-circle-x',
 }
 
-const puedeResolver = computed(() =>
-  registro.value?.estado === 'Pendiente'
-  && can('resolver solicitudes vacante', 'SolicitudVacante'),
-)
+const puedeResolver = computed(() => puedeResolverSolicitud(registro.value))
 
 const puedeCrearVacante = computed(() =>
   registro.value?.estado === 'Aprobada'

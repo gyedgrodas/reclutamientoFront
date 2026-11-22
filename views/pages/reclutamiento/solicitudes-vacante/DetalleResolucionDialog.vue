@@ -20,6 +20,7 @@ const emit = defineEmits<{
 
 const { post } = useClienteRequest()
 const { showToastSuccess } = useToast()
+const puedeResolverSolicitud = usePuedeResolverSolicitud()
 
 const abierto = computed({
   get: () => props.modelValue,
@@ -44,10 +45,7 @@ const iconosEstado: Record<string, string> = {
   Rechazada: 'tabler-circle-x',
 }
 
-const puedeResolver = computed(() =>
-  props.solicitud?.estado === 'Pendiente'
-  && can('resolver solicitudes vacante', 'SolicitudVacante'),
-)
+const puedeResolver = computed(() => puedeResolverSolicitud(props.solicitud))
 
 const puedeCrearVacante = computed(() =>
   props.solicitud?.estado === 'Aprobada'
