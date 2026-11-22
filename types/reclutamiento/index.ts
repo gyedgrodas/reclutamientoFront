@@ -35,6 +35,7 @@ export interface Vacante {
   puesto?: PuestoResumen
   unidad?: UnidadResumen
   solicitante?: UsuarioResumen
+  postulaciones_count?: number
 }
 
 export interface DatosVacante {
@@ -89,6 +90,8 @@ export interface Candidato {
   observaciones: string | null
   municipio?: MunicipioResumen
   media?: MediaArchivo[]
+  postulaciones_count?: number
+  postulaciones?: Postulacion[]
 }
 
 export interface DatosCandidato {
@@ -171,4 +174,19 @@ export interface RespuestaHistorialPostulacion {
   }
   success: boolean
   message: string
+}
+
+export interface ActividadRecientePostulacion {
+  id: number
+  postulacion_id: number
+  tipo: 'Registro' | 'Actualización'
+  created_at: string | null
+  candidato: string | null
+  puesto: string | null
+  etapa_anterior: string | null
+  etapa_nueva: string | null
+  estado_anterior: string | null
+  estado_nuevo: string | null
+  actor: string | null
+  observaciones: string | null
 }

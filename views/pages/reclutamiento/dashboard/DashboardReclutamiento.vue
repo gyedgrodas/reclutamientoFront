@@ -1,43 +1,187 @@
 <script setup lang="ts">
 import { can } from '@layouts/plugins/casl'
-import type { Vacante } from '@/types/reclutamiento'
+import type {
+  ActividadRecientePostulacion,
+  EtapaReclutamiento,
+  Postulacion,
+  Vacante,
+} from '@/types/reclutamiento'
+import DetalleSeguimientoDialog from '@/views/pages/reclutamiento/postulaciones/DetalleSeguimientoDialog.vue'
+import {
+  UMBRAL_DIAS_ATENCION,
+  diasSinActualizar,
+  esEtapaEntrevista,
+  etiquetaDiasSinActualizar,
+  inicialesPersona,
+  necesitaAtencionPostulacion,
+  nombreCompletoPersona,
+  obtenerEtapaNombre,
+  saludoEquipoTalento,
+  tiempoRelativoCorto,
+} from '@/utils/reclutamientoUx'
 
 const { get } = useClienteRequest()
 
-interface ResumenVacantes {
-  total: number
-  abiertas: number
-  enProceso: number
-  cubiertas: number
-  totalPlazas: number
-  recientes: Vacante[]
-}
-
 const cargando = ref(true)
 const vacantes = ref<Vacante[]>([])
+const postulaciones = ref<Postulacion[]>([])
+const etapas = ref<EtapaReclutamiento[]>([])
+const actividadReciente = ref<ActividadRecientePostulacion[]>([])
 
-const resumen = computed<ResumenVacantes>(() => {
-  const lista = vacantes.value
-  const abiertas = lista.filter(v => v.estado === 'Abierta').length
-  const enProceso = lista.filter(v => v.estado === 'En Proceso').length
-  const cubiertas = lista.filter(v => v.estado === 'Cubierta').length
-  const totalPlazas = lista.reduce((acc, v) => acc + (Number(v.numero_plazas) || 0), 0)
+const busquedaTablero = ref('')
+const filtroVacanteId = ref<number | null>(null)
+const soloAtencion = ref(false)
 
-  return {
-    total: lista.length,
-    abiertas,
-    enProceso,
-    cubiertas,
-    totalPlazas,
-    recientes: lista.slice(0, 5),
+const modalSeguimiento = ref(false)
+const postulacionActiva = ref<Postulacion | null>(null)
+
+const desempaquetarLista = <T>(respuesta: any): T[] => {
+  if (!respuesta)
+    return []
+
+  return Array.isArray(respuesta.data) ? respuesta.data : (respuesta.data?.data || [])
+}
+
+const cargarDatos = async () => {
+  cargando.value = true
+  try {
+    const promesas: Promise<any>[] = [
+      can('ver vacantes', 'Vacante')
+        ? get<any>('/api/vacantes?include=puesto,unidad,solicitante&sort=-id&page[size]=100')
+        : Promise.resolve(null),
+      can('ver postulaciones', 'Postulacion')
+        ? get<any>('/api/postulaciones?include=candidato,vacante.puesto,vacante.unidad,etapaReclutamiento,responsable&sort=-id&page[size]=100')
+        : Promise.resolve(null),
+      get<any>('/api/catalogo/etapas-reclutamiento?limit=100').catch(() => null),
+      can('ver postulaciones', 'Postulacion')
+        ? get<any>('/api/postulaciones-actividad?limit=6').catch(() => null)
+        : Promise.resolve(null),
+    ]
+
+    const [respVacantes, respPostulaciones, respEtapas, respActividad] = await Promise.all(promesas)
+
+    vacantes.value = desempaquetarLista<Vacante>(respVacantes)
+    postulaciones.value = desempaquetarLista<Postulacion>(respPostulaciones)
+    etapas.value = desempaquetarLista<EtapaReclutamiento>(respEtapas)
+    actividadReciente.value = desempaquetarLista<ActividadRecientePostulacion>(respActividad)
+
+    if (postulacionActiva.value) {
+      const actualizada = postulaciones.value.find(p => p.id === postulacionActiva.value?.id)
+      if (actualizada)
+        postulacionActiva.value = actualizada
+    }
   }
+  catch (error) {
+    manejaError(error)
+  }
+  finally {
+    cargando.value = false
+  }
+}
+
+const vacantesActivas = computed(() =>
+  vacantes.value.filter(v => v.estado === 'Abierta' || v.estado === 'En Proceso'),
+)
+
+const postulacionesEnCurso = computed(() =>
+  postulaciones.value.filter(p => p.estado === 'En proceso'),
+)
+
+const postulacionesEnEntrevista = computed(() =>
+  postulacionesEnCurso.value.filter(p => esEtapaEntrevista(obtenerEtapaNombre(p))),
+)
+
+const radarSeguimiento = computed(() =>
+  [...postulacionesEnCurso.value]
+    .filter(p => necesitaAtencionPostulacion(p))
+    .sort((a, b) => diasSinActualizar(b) - diasSinActualizar(a)),
+)
+
+const opcionesVacantesFiltro = computed(() => [
+  { title: 'Todas las vacantes', value: null },
+  ...vacantes.value.map(v => ({
+    title: `${v.puesto?.nombre || `Vacante #${v.id}`}${v.unidad?.nombre ? ` · ${v.unidad.nombre}` : ''}`,
+    value: v.id,
+  })),
+])
+
+const postulacionesTableroFiltradas = computed(() => {
+  const texto = busquedaTablero.value.trim().toLowerCase()
+
+  return postulacionesEnCurso.value.filter(p => {
+    if (filtroVacanteId.value && p.vacante_id !== filtroVacanteId.value)
+      return false
+    if (soloAtencion.value && !necesitaAtencionPostulacion(p))
+      return false
+    if (texto) {
+      const candidato = nombreCompletoPersona(p.candidato).toLowerCase()
+      const puesto = (p.vacante?.puesto?.nombre || '').toLowerCase()
+      const unidad = (p.vacante?.unidad?.nombre || '').toLowerCase()
+
+      if (!candidato.includes(texto) && !puesto.includes(texto) && !unidad.includes(texto))
+        return false
+    }
+
+    return true
+  })
 })
 
-const coloresEstado: Record<string, string> = {
-  'Abierta': 'success',
-  'En Proceso': 'warning',
-  'Cubierta': 'info',
-  'Cancelada': 'secondary',
+const clasificarColumnaTablero = (etapaNombre: string): 'recibida' | 'revision' | 'entrevista' | 'oferta' => {
+  const n = etapaNombre.toLowerCase()
+  if (n.includes('solicitud') || n.includes('recib'))
+    return 'recibida'
+  if (n.includes('entrevista'))
+    return 'entrevista'
+  if (n.includes('referencia') || n.includes('oferta') || n.includes('contrat'))
+    return 'oferta'
+
+  return 'revision'
+}
+
+const columnasTablero = computed(() => {
+  const definiciones = [
+    { id: 'recibida', titulo: 'Recibida', color: '#4a90b8' },
+    { id: 'revision', titulo: 'En revisión', color: '#218268' },
+    { id: 'entrevista', titulo: 'Entrevista', color: '#d08328' },
+    { id: 'oferta', titulo: 'Oferta y cierre', color: '#6a67c9' },
+  ] as const
+
+  return definiciones.map(col => ({
+    ...col,
+    items: postulacionesTableroFiltradas.value.filter(
+      p => clasificarColumnaTablero(obtenerEtapaNombre(p)) === col.id,
+    ),
+  }))
+})
+
+const conteoPostulacionesPorVacante = (vacante: Vacante): number => {
+  if (typeof vacante.postulaciones_count === 'number')
+    return vacante.postulaciones_count
+
+  return postulaciones.value.filter(p => p.vacante_id === vacante.id).length
+}
+
+const abrirSeguimiento = (postulacion: Postulacion) => {
+  postulacionActiva.value = postulacion
+  modalSeguimiento.value = true
+}
+
+const abrirDesdeActividad = (item: ActividadRecientePostulacion) => {
+  const encontrada = postulaciones.value.find(p => p.id === item.postulacion_id)
+  if (encontrada)
+    abrirSeguimiento(encontrada)
+}
+
+const describirActividad = (item: ActividadRecientePostulacion): string => {
+  const sujeto = item.candidato || `Postulación #${item.postulacion_id}`
+  if (item.tipo === 'Registro')
+    return `${sujeto} ingresó a ${item.etapa_nueva || 'Solicitud recibida'}`
+  if (item.etapa_nueva && item.etapa_nueva !== item.etapa_anterior)
+    return `${sujeto} avanzó a ${item.etapa_nueva}`
+  if (item.estado_nuevo && item.estado_nuevo !== item.estado_anterior)
+    return `${sujeto} cambió a estado ${item.estado_nuevo}`
+
+  return `Seguimiento actualizado para ${sujeto}`
 }
 
 const pasosFlujo = [
@@ -50,107 +194,101 @@ const pasosFlujo = [
   { paso: 7, titulo: 'Oferta y cierre', icon: 'tabler-certificate' },
 ]
 
-const cargarDatos = async () => {
-  cargando.value = true
-  try {
-    const respuesta = await get<{ data: Vacante[] | { data: Vacante[] } }>('/api/vacantes?include=puesto,unidad,solicitante&sort=-id&page[size]=50')
-
-    vacantes.value = Array.isArray(respuesta.data)
-      ? respuesta.data
-      : (respuesta.data?.data || [])
-  }
-  catch (error) {
-    manejaError(error)
-  }
-  finally {
-    cargando.value = false
-  }
-}
-
 onMounted(cargarDatos)
 </script>
 
 <template>
   <div class="reclutamiento-dashboard">
-    <!-- Encabezado Hero / Banner inspirado en la maqueta -->
-    <VCard
-      class="mb-6 overflow-hidden hero-card text-white"
-      elevation="2"
-    >
-      <VCardText class="pa-6">
-        <div class="d-flex flex-wrap justify-space-between align-center gap-4">
-          <div>
-            <div class="d-flex align-center gap-2 mb-2">
-              <VChip
-                color="success"
-                variant="elevated"
-                size="small"
-                class="font-weight-bold"
-              >
-                Talento Humano
-              </VChip>
-              <span class="text-caption text-white opacity-80">Cooperativa Guayacán</span>
+    <!-- Encabezado ejecutivo fiel a maqueta-talento-humano.html -->
+    <header class="tt-page-header">
+      <div>
+        <span class="tt-eyebrow">TU ESPACIO DE RECLUTAMIENTO · COOPERATIVA GUAYACÁN</span>
+        <h1 class="tt-page-title">
+          {{ saludoEquipoTalento() }}
+        </h1>
+        <p class="tt-page-subtitle">
+          Una mirada rápida a tus procesos y a las personas que esperan una respuesta.
+        </p>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2">
+        <VBtn
+          v-if="can('crear vacantes', 'Vacante')"
+          color="secondary"
+          variant="tonal"
+          prepend-icon="tabler-plus"
+          to="/admin/vacantes/create"
+        >
+          Nueva vacante
+        </VBtn>
+        <VBtn
+          v-if="can('ver postulaciones', 'Postulacion')"
+          color="primary"
+          append-icon="tabler-arrow-right"
+          to="/admin/postulaciones"
+        >
+          Ver procesos de selección
+        </VBtn>
+      </div>
+    </header>
+
+    <VProgressLinear
+      v-if="cargando"
+      indeterminate
+      color="success"
+      rounded
+      class="mb-5"
+    />
+
+    <!-- 4 KPIs ejecutivos de maqueta-talento-humano.html -->
+    <VRow class="mb-5">
+      <VCol
+        cols="12"
+        sm="6"
+        md="3"
+      >
+        <NuxtLink
+          to="/admin/vacantes"
+          class="text-decoration-none d-block h-100"
+        >
+          <article class="tt-stat-card tt-stat-card--interactive">
+            <div class="tt-stat-top">
+              <span class="tt-stat-label">Vacantes activas</span>
+              <div class="tt-stat-icon">
+                <VIcon
+                  icon="tabler-briefcase"
+                  size="18"
+                />
+              </div>
             </div>
-            <h1 class="text-h4 font-weight-bold mb-1 text-white">
-              Centro de Talento y Reclutamiento
-            </h1>
-            <p class="text-body-1 mb-0 text-white opacity-90">
-              Personas, procesos y próximos pasos: una vista integral para acompañar cada oportunidad de selección.
-            </p>
+            <strong class="tt-stat-value">{{ vacantesActivas.length }}</strong>
+            <small class="tt-stat-foot">Procesos abiertos hoy</small>
+          </article>
+        </NuxtLink>
+      </VCol>
+
+      <VCol
+        cols="12"
+        sm="6"
+        md="3"
+      >
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          :class="{ 'tt-stat-card--active': !soloAtencion && !filtroVacanteId }"
+          @click="soloAtencion = false; filtroVacanteId = null"
+        >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Postulaciones activas</span>
+            <div class="tt-stat-icon tt-stat-icon--info">
+              <VIcon
+                icon="tabler-users"
+                size="18"
+              />
+            </div>
           </div>
-          <div class="d-flex gap-3">
-            <VBtn
-              v-if="can('crear vacantes', 'Vacante')"
-              color="success"
-              variant="elevated"
-              prepend-icon="tabler-plus"
-              to="/admin/vacantes/create"
-            >
-              Nueva vacante
-            </VBtn>
-            <VBtn
-              v-if="can('ver vacantes', 'Vacante')"
-              color="white"
-              variant="outlined"
-              prepend-icon="tabler-briefcase"
-              to="/admin/vacantes"
-            >
-              Ver vacantes
-            </VBtn>
-          </div>
+          <strong class="tt-stat-value">{{ postulacionesEnCurso.length }}</strong>
+          <small class="tt-stat-foot">En las etapas del tablero</small>
         </div>
-      </VCardText>
-    </VCard>
-
-    <!-- Métricas / KPIs -->
-    <VRow class="mb-6">
-      <VCol
-        cols="12"
-        sm="6"
-        md="3"
-      >
-        <VCard elevation="1">
-          <VCardText class="d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis text-uppercase font-weight-medium">Vacantes Abiertas</span>
-              <h2 class="text-h4 font-weight-bold mt-1 text-success">
-                {{ resumen.abiertas }}
-              </h2>
-              <span class="text-caption text-disabled">Recepción activa</span>
-            </div>
-            <VAvatar
-              color="success"
-              variant="tonal"
-              rounded
-              size="48"
-            >
-              <VIcon
-                icon="tabler-briefcase"
-                size="28"
-              />
-            </VAvatar>
-          </VCardText>
-        </VCard>
       </VCol>
 
       <VCol
@@ -158,28 +296,24 @@ onMounted(cargarDatos)
         sm="6"
         md="3"
       >
-        <VCard elevation="1">
-          <VCardText class="d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis text-uppercase font-weight-medium">En Selección</span>
-              <h2 class="text-h4 font-weight-bold mt-1 text-warning">
-                {{ resumen.enProceso }}
-              </h2>
-              <span class="text-caption text-disabled">Entrevistas / filtros</span>
+        <NuxtLink
+          to="/admin/postulaciones"
+          class="text-decoration-none d-block h-100"
+        >
+          <article class="tt-stat-card tt-stat-card--interactive">
+            <div class="tt-stat-top">
+              <span class="tt-stat-label">En entrevista</span>
+              <div class="tt-stat-icon">
+                <VIcon
+                  icon="tabler-messages"
+                  size="18"
+                />
+              </div>
             </div>
-            <VAvatar
-              color="warning"
-              variant="tonal"
-              rounded
-              size="48"
-            >
-              <VIcon
-                icon="tabler-users-group"
-                size="28"
-              />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            <strong class="tt-stat-value">{{ postulacionesEnEntrevista.length }}</strong>
+            <small class="tt-stat-foot">Personas en esta etapa</small>
+          </article>
+        </NuxtLink>
       </VCol>
 
       <VCol
@@ -187,318 +321,511 @@ onMounted(cargarDatos)
         sm="6"
         md="3"
       >
-        <VCard elevation="1">
-          <VCardText class="d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis text-uppercase font-weight-medium">Vacantes Cubiertas</span>
-              <h2 class="text-h4 font-weight-bold mt-1 text-info">
-                {{ resumen.cubiertas }}
-              </h2>
-              <span class="text-caption text-disabled">Candidato contratado</span>
-            </div>
-            <VAvatar
-              color="info"
-              variant="tonal"
-              rounded
-              size="48"
-            >
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          :class="{ 'tt-stat-card--active': soloAtencion }"
+          @click="soloAtencion = !soloAtencion"
+        >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Necesitan atención</span>
+            <div class="tt-stat-icon tt-stat-icon--warn">
               <VIcon
-                icon="tabler-circle-check"
-                size="28"
+                icon="tabler-clock-exclamation"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
-      </VCol>
-
-      <VCol
-        cols="12"
-        sm="6"
-        md="3"
-      >
-        <VCard elevation="1">
-          <VCardText class="d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis text-uppercase font-weight-medium">Plazas Solicitadas</span>
-              <h2 class="text-h4 font-weight-bold mt-1 text-primary">
-                {{ resumen.totalPlazas }}
-              </h2>
-              <span class="text-caption text-disabled">Total acumulado</span>
             </div>
-            <VAvatar
-              color="primary"
-              variant="tonal"
-              rounded
-              size="48"
-            >
-              <VIcon
-                icon="tabler-id-badge-2"
-                size="28"
-              />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+          </div>
+          <strong class="tt-stat-value">{{ radarSeguimiento.length }}</strong>
+          <small
+            class="tt-stat-foot"
+            :class="{ 'tt-stat-foot--warn': radarSeguimiento.length > 0 }"
+          >
+            {{ UMBRAL_DIAS_ATENCION }} días o más sin actualización
+          </small>
+        </div>
       </VCol>
     </VRow>
 
-    <VRow>
-      <!-- Columna Principal: Flujo y Vacantes Recientes -->
+    <!-- Espacio de trabajo principal: Tablero de Procesos en curso + Radar de seguimiento -->
+    <VRow class="mb-5">
       <VCol
         cols="12"
         lg="8"
       >
-        <!-- Proceso de Punta a Punta -->
-        <VCard
-          class="mb-6"
-          elevation="1"
-        >
-          <VCardItem>
-            <template #title>
-              <span class="font-weight-bold text-h6">Un proceso de punta a punta</span>
-            </template>
-            <template #subtitle>
-              Desde la necesidad del área institucional hasta la decisión e incorporación final
-            </template>
-          </VCardItem>
-          <VCardText>
-            <div class="flujo-contenedor d-flex flex-wrap align-center gap-2 py-2">
-              <template
-                v-for="(paso, index) in pasosFlujo"
-                :key="paso.paso"
-              >
-                <div class="flujo-paso pa-2 rounded-lg d-flex align-center gap-2 border">
-                  <VAvatar
-                    size="28"
-                    color="primary"
-                    variant="tonal"
-                  >
-                    <VIcon
-                      :icon="paso.icon"
-                      size="16"
-                    />
-                  </VAvatar>
-                  <span class="text-caption font-weight-bold">{{ paso.titulo }}</span>
-                </div>
-                <VIcon
-                  v-if="index < pasosFlujo.length - 1"
-                  icon="tabler-chevron-right"
-                  size="18"
-                  class="text-medium-emphasis d-none d-sm-inline"
-                />
-              </template>
+        <section class="tt-panel pa-5 h-100">
+          <div class="d-flex flex-wrap justify-space-between align-center gap-3 mb-4">
+            <div>
+              <h2 class="text-h6 font-weight-bold mb-0">
+                Procesos en curso
+              </h2>
+              <p class="text-caption text-medium-emphasis mb-0">
+                Una vista clara del recorrido de cada persona. Haz clic en una tarjeta para gestionar su seguimiento.
+              </p>
             </div>
-            <p class="text-caption text-medium-emphasis mt-3 mb-0">
-              * La gestión integral garantiza transparencia, trazabilidad de candidatos y cumplimiento del perfil por puesto.
-            </p>
-          </VCardText>
-        </VCard>
 
-        <!-- Vacantes en Gestión Recientes -->
-        <VCard elevation="1">
-          <VCardItem>
-            <template #title>
-              <span class="font-weight-bold text-h6">Vacantes en gestión</span>
-            </template>
-            <template #subtitle>
-              Últimos procesos registrados en el sistema
-            </template>
-            <template #append>
-              <VBtn
-                variant="text"
+            <div class="d-flex flex-wrap align-center gap-2 tablero-controles">
+              <AppTextField
+                v-model="busquedaTablero"
+                placeholder="Buscar candidato o vacante..."
+                prepend-inner-icon="tabler-search"
+                density="compact"
+                clearable
+                hide-details
+                class="control-busqueda"
+              />
+              <AppSelect
+                v-model="filtroVacanteId"
+                :items="opcionesVacantesFiltro"
+                density="compact"
+                hide-details
+                class="control-vacante"
+              />
+              <VChip
+                v-if="soloAtencion"
+                color="warning"
                 size="small"
-                color="primary"
-                to="/admin/vacantes"
-                append-icon="tabler-arrow-right"
+                closable
+                @click:close="soloAtencion = false"
               >
-                Ver todas
-              </VBtn>
-            </template>
-          </VCardItem>
-          <VDivider />
-          <VCardText class="pa-0">
-            <VProgressLinear
-              v-if="cargando"
-              indeterminate
-            />
-            <VList
-              v-else-if="resumen.recientes.length"
-              lines="two"
-            >
-              <VListItem
-                v-for="v in resumen.recientes"
-                :key="v.id"
-                :to="`/admin/vacantes/show/${v.id}`"
-                class="py-3"
-              >
-                <template #prepend>
-                  <VAvatar
-                    :color="coloresEstado[v.estado] || 'secondary'"
-                    variant="tonal"
-                    rounded
-                    size="40"
-                    class="me-3"
-                  >
-                    <VIcon
-                      icon="tabler-briefcase"
-                      size="22"
-                    />
-                  </VAvatar>
-                </template>
-
-                <VListItemTitle class="font-weight-bold">
-                  {{ v.puesto?.nombre || `Vacante #${v.id}` }}
-                </VListItemTitle>
-                <VListItemSubtitle class="text-caption">
-                  {{ v.unidad?.nombre || 'Sin unidad' }} · {{ v.numero_plazas }} {{ Number(v.numero_plazas) === 1 ? 'plaza' : 'plazas' }} · Motivo: {{ v.motivo }}
-                </VListItemSubtitle>
-
-                <template #append>
-                  <div class="d-flex align-center gap-2">
-                    <VChip
-                      :color="coloresEstado[v.estado] || 'secondary'"
-                      size="small"
-                      class="font-weight-medium"
-                    >
-                      {{ v.estado }}
-                    </VChip>
-                    <VIcon
-                      icon="tabler-chevron-right"
-                      size="18"
-                      class="text-medium-emphasis"
-                    />
-                  </div>
-                </template>
-              </VListItem>
-            </VList>
-            <div
-              v-else
-              class="text-center pa-6 text-medium-emphasis"
-            >
-              Aún no hay vacantes registradas en el sistema.
+                5+ días sin actualizar
+              </VChip>
             </div>
-          </VCardText>
-        </VCard>
+          </div>
+
+          <div class="tt-board-scroll tt-board-scroll--4">
+            <div
+              v-for="columna in columnasTablero"
+              :key="columna.id"
+              class="tt-stage-col"
+            >
+              <div class="tt-stage-head">
+                <div class="tt-stage-title">
+                  <i
+                    class="tt-dot"
+                    :style="{ backgroundColor: columna.color }"
+                  />
+                  <span>{{ columna.titulo }}</span>
+                </div>
+                <span class="tt-count-pill">{{ columna.items.length }}</span>
+              </div>
+
+              <template v-if="columna.items.length">
+                <button
+                  v-for="item in columna.items"
+                  :key="item.id"
+                  type="button"
+                  class="tt-candidate-card"
+                  :class="{ 'tt-candidate-card--warn': necesitaAtencionPostulacion(item) }"
+                  @click="abrirSeguimiento(item)"
+                >
+                  <div class="d-flex align-center gap-2">
+                    <div class="tt-avatar">
+                      {{ inicialesPersona(item.candidato?.nombres, item.candidato?.apellidos) }}
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-body-2 font-weight-bold text-truncate">
+                        {{ nombreCompletoPersona(item.candidato) }}
+                      </div>
+                      <div class="text-caption text-medium-emphasis text-truncate">
+                        {{ item.vacante?.puesto?.nombre || `Vacante #${item.vacante_id}` }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="d-flex flex-wrap align-center justify-space-between gap-1">
+                    <span
+                      class="tt-tag-days"
+                      :class="{ 'tt-tag-days--warn': necesitaAtencionPostulacion(item) }"
+                    >
+                      {{ etiquetaDiasSinActualizar(diasSinActualizar(item)) }}
+                    </span>
+                    <span class="text-caption text-disabled text-truncate">
+                      {{ obtenerEtapaNombre(item) }}
+                    </span>
+                  </div>
+                </button>
+              </template>
+
+              <div
+                v-else
+                class="tt-empty-col"
+              >
+                Sin candidatos en esta etapa
+              </div>
+            </div>
+          </div>
+        </section>
       </VCol>
 
-      <!-- Columna Lateral: Radar y Catálogos -->
+      <!-- Radar de seguimiento lateral -->
       <VCol
         cols="12"
         lg="4"
       >
-        <!-- Radar de Seguimiento -->
-        <VCard
-          class="mb-6"
-          elevation="1"
-        >
-          <VCardItem>
-            <template #prepend>
-              <VAvatar
-                color="warning"
-                variant="tonal"
-                size="34"
-                class="me-2"
-              >
-                <VIcon
-                  icon="tabler-clock"
-                  size="20"
-                />
-              </VAvatar>
-            </template>
-            <template #title>
-              <span class="font-weight-bold text-subtitle-1">Radar de seguimiento</span>
-            </template>
-            <template #subtitle>
-              Alertas operativas de selección
-            </template>
-          </VCardItem>
-          <VDivider />
-          <VCardText class="pa-4">
-            <VAlert
-              type="info"
-              variant="tonal"
-              density="compact"
-              class="mb-3"
-            >
-              <span class="text-caption font-weight-medium">Vacantes Abiertas pendientes de asignación:</span>
-              <div class="text-body-2 font-weight-bold mt-1">
-                {{ resumen.abiertas }} vacante(s) activas
-              </div>
-            </VAlert>
-
-            <div class="bg-surface pa-3 rounded border text-caption text-medium-emphasis mb-3">
-              <div class="d-flex align-center gap-2 mb-1">
-                <VIcon
-                  icon="tabler-calendar-time"
-                  size="16"
-                  color="warning"
-                />
-                <strong class="text-high-emphasis">Monitoreo de tiempos:</strong>
-              </div>
-              El radar identificará postulaciones que acumulen 5 días o más sin actualización en el pipeline de selección.
+        <aside class="tt-panel pa-5 h-100 d-flex flex-column">
+          <div class="d-flex align-center gap-3 mb-4">
+            <div class="tt-stat-icon tt-stat-icon--warn">
+              <VIcon
+                icon="tabler-clock-exclamation"
+                size="20"
+              />
             </div>
+            <div>
+              <h2 class="text-h6 font-weight-bold mb-0">
+                Radar de seguimiento
+              </h2>
+              <p class="text-caption text-medium-emphasis mb-0">
+                Para que nadie quede esperando
+              </p>
+            </div>
+          </div>
 
-            <VBtn
-              block
-              color="primary"
-              variant="tonal"
-              to="/admin/vacantes"
-              prepend-icon="tabler-list-search"
+          <div
+            v-if="radarSeguimiento.length"
+            class="flex-grow-1"
+          >
+            <div
+              v-for="alerta in radarSeguimiento.slice(0, 5)"
+              :key="alerta.id"
+              class="tt-alert-card"
             >
-              Revisar procesos activos
-            </VBtn>
-          </VCardText>
-        </VCard>
+              <div class="d-flex align-center justify-space-between gap-2">
+                <strong class="text-body-2 font-weight-bold">
+                  {{ nombreCompletoPersona(alerta.candidato) }}
+                </strong>
+                <VChip
+                  size="x-small"
+                  color="warning"
+                  variant="tonal"
+                  class="font-weight-bold"
+                >
+                  {{ diasSinActualizar(alerta) }} días
+                </VChip>
+              </div>
+              <p class="text-caption text-medium-emphasis mb-2 mt-1">
+                {{ alerta.vacante?.puesto?.nombre || `Vacante #${alerta.vacante_id}` }} · {{ obtenerEtapaNombre(alerta) }}
+              </p>
+              <button
+                type="button"
+                class="radar-link"
+                @click="abrirSeguimiento(alerta)"
+              >
+                Revisar seguimiento →
+              </button>
+            </div>
+          </div>
 
-        <!-- Accesos a Catálogos de Soporte -->
-        <VCard elevation="1">
-          <VCardItem>
-            <template #title>
-              <span class="font-weight-bold text-subtitle-1">Estructura y Catálogos</span>
-            </template>
-            <template #subtitle>
-              Configuración de soporte
-            </template>
-          </VCardItem>
-          <VDivider />
-          <VList density="compact">
-            <VListItem
-              to="/admin/catalogos/etapas-reclutamiento"
-              prepend-icon="tabler-git-branch"
-              title="Etapas de Reclutamiento"
-              subtitle="Configurar pipeline"
-            />
-            <VListItem
-              to="/admin/catalogos/departamentos"
-              prepend-icon="tabler-map-2"
-              title="Departamentos y Sedes"
-              subtitle="Catálogo geográfico"
-            />
-            <VListItem
-              to="/admin/catalogos/municipios"
-              prepend-icon="tabler-building-community"
-              title="Municipios de Guatemala"
-              subtitle="Distribución territorial"
-            />
-          </VList>
-        </VCard>
+          <div
+            v-else
+            class="tt-detail-box d-flex flex-column align-center justify-center text-center py-8 flex-grow-1"
+          >
+            <div class="tt-stat-icon mb-2">
+              <VIcon
+                icon="tabler-checks"
+                size="20"
+              />
+            </div>
+            <strong class="mt-0">Seguimiento al día</strong>
+            <p class="text-caption text-medium-emphasis mt-1 mb-0">
+              Ninguna postulación activa supera los {{ UMBRAL_DIAS_ATENCION }} días sin actualización.
+            </p>
+          </div>
+
+          <div class="pt-3 mt-4 border-t text-caption text-medium-emphasis">
+            Sugerencia: revisa el siguiente paso y comunica avances al candidato oportunamente.
+          </div>
+        </aside>
       </VCol>
     </VRow>
+
+    <!-- Sección inferior: Actividad reciente + Vacantes activas -->
+    <VRow class="mb-5">
+      <VCol
+        cols="12"
+        md="6"
+      >
+        <section class="tt-panel pa-5 h-100">
+          <div class="d-flex justify-space-between align-center mb-3">
+            <div>
+              <h2 class="text-h6 font-weight-bold mb-0">
+                Actividad reciente
+              </h2>
+              <p class="text-caption text-medium-emphasis mb-0">
+                Los últimos movimientos registrados por tu equipo
+              </p>
+            </div>
+            <VBtn
+              v-if="can('ver postulaciones', 'Postulacion')"
+              variant="text"
+              size="small"
+              color="primary"
+              to="/admin/postulaciones"
+            >
+              Ver todas
+            </VBtn>
+          </div>
+
+          <div v-if="actividadReciente.length">
+            <div
+              v-for="item in actividadReciente"
+              :key="item.id"
+              class="actividad-row"
+              @click="abrirDesdeActividad(item)"
+            >
+              <div class="actividad-icon">
+                <VIcon
+                  :icon="item.tipo === 'Registro' ? 'tabler-plus' : 'tabler-check'"
+                  size="15"
+                />
+              </div>
+              <div class="flex-grow-1 min-w-0">
+                <div class="text-body-2 font-weight-medium">
+                  {{ describirActividad(item) }}
+                </div>
+                <div class="text-caption text-medium-emphasis text-truncate">
+                  {{ item.puesto || 'Proceso de selección' }}
+                  <template v-if="item.actor">
+                    · por {{ item.actor }}
+                  </template>
+                </div>
+              </div>
+              <span class="text-caption text-disabled flex-shrink-0">
+                {{ tiempoRelativoCorto(item.created_at) }}
+              </span>
+            </div>
+          </div>
+
+          <div
+            v-else
+            class="tt-detail-box text-center py-6"
+          >
+            <p class="text-body-2 text-medium-emphasis mb-2">
+              Aún no hay movimientos recientes registrados.
+            </p>
+            <VBtn
+              v-if="can('crear postulaciones', 'Postulacion')"
+              size="small"
+              color="primary"
+              variant="tonal"
+              prepend-icon="tabler-plus"
+              to="/admin/postulaciones/create"
+            >
+              Registrar primera postulación
+            </VBtn>
+          </div>
+        </section>
+      </VCol>
+
+      <VCol
+        cols="12"
+        md="6"
+      >
+        <section class="tt-panel pa-5 h-100">
+          <div class="d-flex justify-space-between align-center mb-3">
+            <div>
+              <h2 class="text-h6 font-weight-bold mb-0">
+                Vacantes activas
+              </h2>
+              <p class="text-caption text-medium-emphasis mb-0">
+                Oportunidades abiertas hoy y volumen de candidatos
+              </p>
+            </div>
+            <VBtn
+              v-if="can('ver vacantes', 'Vacante')"
+              variant="text"
+              size="small"
+              color="primary"
+              to="/admin/vacantes"
+            >
+              Gestionar
+            </VBtn>
+          </div>
+
+          <div v-if="vacantesActivas.length">
+            <div
+              v-for="vacante in vacantesActivas.slice(0, 5)"
+              :key="vacante.id"
+              class="vacante-row"
+              @click="filtroVacanteId = filtroVacanteId === vacante.id ? null : vacante.id"
+            >
+              <div class="min-w-0">
+                <div class="text-body-2 font-weight-bold text-truncate">
+                  {{ vacante.puesto?.nombre || `Vacante #${vacante.id}` }}
+                </div>
+                <div class="text-caption text-medium-emphasis text-truncate">
+                  {{ vacante.unidad?.nombre || 'Sin unidad' }} · {{ conteoPostulacionesPorVacante(vacante) }}
+                  {{ conteoPostulacionesPorVacante(vacante) === 1 ? 'postulación' : 'postulaciones' }}
+                </div>
+              </div>
+
+              <div class="d-flex align-center gap-2 flex-shrink-0">
+                <VChip
+                  size="x-small"
+                  :color="vacante.estado === 'Abierta' ? 'success' : 'warning'"
+                  variant="tonal"
+                  class="font-weight-bold"
+                >
+                  {{ vacante.estado === 'Abierta' ? 'Activa' : vacante.estado }}
+                </VChip>
+                <VBtn
+                  icon="tabler-chevron-right"
+                  size="x-small"
+                  variant="text"
+                  color="secondary"
+                  :to="`/admin/vacantes/show/${vacante.id}`"
+                  @click.stop
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-else
+            class="tt-detail-box text-center py-6"
+          >
+            <p class="text-body-2 text-medium-emphasis mb-2">
+              No hay vacantes abiertas en este momento.
+            </p>
+            <VBtn
+              v-if="can('crear vacantes', 'Vacante')"
+              size="small"
+              color="success"
+              variant="tonal"
+              prepend-icon="tabler-plus"
+              to="/admin/vacantes/create"
+            >
+              Crear vacante
+            </VBtn>
+          </div>
+        </section>
+      </VCol>
+    </VRow>
+
+    <!-- Flujo institucional de punta a punta -->
+    <section class="tt-panel pa-5">
+      <div class="d-flex flex-wrap justify-space-between align-center gap-2 mb-3">
+        <div>
+          <span class="tt-eyebrow">FLUJO ORDENADO</span>
+          <h3 class="text-subtitle-1 font-weight-bold mb-0">
+            Un proceso de punta a punta
+          </h3>
+        </div>
+        <span class="text-caption text-medium-emphasis">
+          Cada etapa tiene responsable, evidencia y trazabilidad automática
+        </span>
+      </div>
+
+      <div class="flujo-grid">
+        <div
+          v-for="item in pasosFlujo"
+          :key="item.paso"
+          class="flujo-item"
+        >
+          <div class="tt-stat-icon">
+            <VIcon
+              :icon="item.icon"
+              size="17"
+            />
+          </div>
+          <div>
+            <span class="text-caption text-disabled d-block">Paso {{ item.paso }}</span>
+            <strong class="text-body-2 font-weight-bold">{{ item.titulo }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal ejecutivo de seguimiento -->
+    <DetalleSeguimientoDialog
+      v-model="modalSeguimiento"
+      :postulacion="postulacionActiva"
+      :etapas="etapas"
+      @actualizado="cargarDatos"
+    />
   </div>
 </template>
 
-<style scoped lang="scss">
-.hero-card {
-  background: linear-gradient(135deg, #113f36 0%, #175a4d 60%, #1e7565 100%);
-  border-radius: 12px;
+<style scoped>
+@import '@/assets/styles/reclutamiento-talent.scss';
+
+.tablero-controles .control-busqueda {
+  min-width: 220px;
 }
 
-.flujo-paso {
-  background: rgba(var(--v-theme-surface), 0.8);
-  transition: all 0.2s ease;
+.tablero-controles .control-vacante {
+  min-width: 215px;
+}
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  }
+.radar-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: #1c775f;
+  cursor: pointer;
+}
+
+.radar-link:hover {
+  text-decoration: underline;
+}
+
+.v-theme--dark .radar-link {
+  color: #6ee7b7;
+}
+
+.actividad-row,
+.vacante-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 6px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.07);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.14s ease;
+}
+
+.actividad-row:last-child,
+.vacante-row:last-child {
+  border-bottom: 0;
+}
+
+.actividad-row:hover,
+.vacante-row:hover {
+  background: rgba(var(--v-theme-on-surface), 0.03);
+}
+
+.actividad-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #edf7f2;
+  color: #218268;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.v-theme--dark .actividad-icon {
+  background: rgba(33, 130, 104, 0.22);
+  color: #6ee7b7;
+}
+
+.flujo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 10px;
+}
+
+.flujo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  background: rgba(var(--v-theme-on-surface), 0.015);
 }
 </style>

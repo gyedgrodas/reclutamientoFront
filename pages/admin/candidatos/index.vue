@@ -4,6 +4,7 @@ import type { ColumnaInterface } from '@/types/sistema/DataTableTypes'
 import type DataTableComponent from '@/components/DataTableComponent.vue'
 import type { Candidato } from '@/types/reclutamiento'
 import { MODEL_TYPE_CANDIDATO } from '@/constantes/ModelTypes'
+import { inicialesPersona } from '@/utils/reclutamientoUx'
 
 definePageMeta({
   navActiveLink: 'admin-candidatos',
@@ -49,11 +50,13 @@ const cargandoTarjetas = ref(false)
 const cargarTodosLosCandidatos = async () => {
   cargandoTarjetas.value = true
   try {
-    const respuesta = await get<{ data: { data: Candidato[] } }>('/api/candidatos', {
+    const respuesta = await get<{ data: Candidato[] | { data: Candidato[] } }>('/api/candidatos', {
       params: { 'include': 'municipio', 'sort': '-id', 'page[size]': 100 },
     })
 
-    todosLosCandidatos.value = respuesta.data?.data || []
+    todosLosCandidatos.value = Array.isArray(respuesta.data)
+      ? respuesta.data
+      : (respuesta.data?.data || [])
   }
   catch (error) {
     manejaError(error)
@@ -141,20 +144,27 @@ onMounted(cargarTodosLosCandidatos)
 
 <template>
   <div class="candidatos-modulo">
-    <!-- Encabezado de la página -->
-    <div class="d-flex flex-wrap justify-space-between align-center mb-6 gap-3">
+    <!-- Encabezado ejecutivo -->
+    <header class="tt-page-header">
       <div>
-        <div class="d-flex align-center gap-2">
-          <span class="text-caption text-primary font-weight-bold text-uppercase tracking-wider">Gestión de Talento</span>
-        </div>
-        <h1 class="text-h4 font-weight-bold">
+        <span class="tt-eyebrow">BANCO DE TALENTO</span>
+        <h1 class="tt-page-title">
           Candidatos y Postulantes
         </h1>
-        <p class="text-caption text-medium-emphasis mb-0">
-          Administre el banco de candidatos, su información de contacto y documentos de postulación.
+        <p class="tt-page-subtitle">
+          Gestione perfiles, formación académica, expedientes documentales y su vinculación a vacantes.
         </p>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex flex-wrap gap-2">
+        <VBtn
+          v-if="can('ver postulaciones', 'Postulacion')"
+          color="secondary"
+          variant="tonal"
+          prepend-icon="tabler-layout-kanban"
+          to="/admin/postulaciones"
+        >
+          Procesos activos
+        </VBtn>
         <VBtn
           v-if="can('crear candidatos', 'Candidato')"
           color="primary"
@@ -164,190 +174,167 @@ onMounted(cargarTodosLosCandidatos)
           Nuevo candidato
         </VBtn>
       </div>
-    </div>
+    </header>
 
-    <!-- Mini KPIs superiores -->
+    <!-- KPIs ejecutivos -->
     <VRow class="mb-5">
       <VCol
         cols="6"
         sm="4"
       >
-        <VCard
-          class="cursor-pointer"
-          elevation="1"
-          @click="filtros.estado = 'Activo'; filtrarTodo()"
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          :class="{ 'tt-stat-card--active': filtros.estado === 'Activo' }"
+          @click="filtros.estado = filtros.estado === 'Activo' ? null : 'Activo'; filtrarTodo()"
         >
-          <VCardText class="pa-4 d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis">Activos</span>
-              <h3 class="text-h5 font-weight-bold text-success mt-1">
-                {{ metricas.activos }}
-              </h3>
-            </div>
-            <VAvatar
-              color="success"
-              variant="tonal"
-              size="40"
-              rounded
-            >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Candidatos activos</span>
+            <div class="tt-stat-icon">
               <VIcon
                 icon="tabler-users-group"
-                size="22"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            </div>
+          </div>
+          <strong class="tt-stat-value">{{ metricas.activos }}</strong>
+          <small class="tt-stat-foot">Disponibles para selección</small>
+        </div>
       </VCol>
 
       <VCol
         cols="6"
         sm="4"
       >
-        <VCard
-          class="cursor-pointer"
-          elevation="1"
-          @click="filtros.estado = 'Descartado'; filtrarTodo()"
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          :class="{ 'tt-stat-card--active': filtros.estado === 'Descartado' }"
+          @click="filtros.estado = filtros.estado === 'Descartado' ? null : 'Descartado'; filtrarTodo()"
         >
-          <VCardText class="pa-4 d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis">Descartados</span>
-              <h3 class="text-h5 font-weight-bold text-error mt-1">
-                {{ metricas.descartados }}
-              </h3>
-            </div>
-            <VAvatar
-              color="error"
-              variant="tonal"
-              size="40"
-              rounded
-            >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Descartados</span>
+            <div class="tt-stat-icon tt-stat-icon--warn">
               <VIcon
                 icon="tabler-user-x"
-                size="22"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            </div>
+          </div>
+          <strong class="tt-stat-value">{{ metricas.descartados }}</strong>
+          <small class="tt-stat-foot">Historial cerrado</small>
+        </div>
       </VCol>
 
       <VCol
         cols="12"
         sm="4"
       >
-        <VCard elevation="1">
-          <VCardText class="pa-4 d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis">Total Candidatos</span>
-              <h3 class="text-h5 font-weight-bold text-primary mt-1">
-                {{ metricas.total }}
-              </h3>
-            </div>
-            <VAvatar
-              color="primary"
-              variant="tonal"
-              size="40"
-              rounded
-            >
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          @click="limpiar"
+        >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Total en banco</span>
+            <div class="tt-stat-icon tt-stat-icon--info">
               <VIcon
                 icon="tabler-id-badge-2"
-                size="22"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            </div>
+          </div>
+          <strong class="tt-stat-value">{{ metricas.total }}</strong>
+          <small class="tt-stat-foot">Expedientes registrados</small>
+        </div>
       </VCol>
     </VRow>
 
-    <!-- Barra de Filtros y Control de Vista (Tarjetas vs Tabla) -->
-    <VCard
-      class="mb-6"
-      elevation="1"
-    >
-      <VCardText class="pa-4">
-        <VRow
-          align="center"
-          dense
+    <!-- Barra de Filtros y Vista -->
+    <section class="tt-panel pa-4 mb-5">
+      <VRow
+        align="center"
+        dense
+      >
+        <VCol
+          cols="12"
+          md="4"
         >
-          <VCol
-            cols="12"
-            md="4"
-          >
-            <AppTextField
-              v-model="busquedaTexto"
-              prepend-inner-icon="tabler-search"
-              placeholder="Buscar por nombre, correo..."
-              clearable
-            />
-          </VCol>
-          <VCol
-            cols="12"
-            sm="6"
-            md="3"
-          >
-            <VAutocomplete
-              v-model="filtros.estado"
-              :items="estados"
-              label="Estado"
-              clearable
-              chips
-              @update:model-value="filtrarTodo"
-            />
-          </VCol>
-          <VCol
-            cols="12"
-            sm="6"
-            md="3"
-          >
-            <VAutocomplete
-              v-model="filtros.nivel_academico"
-              :items="nivelesAcademicos"
-              label="Nivel académico"
-              clearable
-              chips
-              @update:model-value="filtrarTodo"
-            />
-          </VCol>
-          <VCol
-            cols="12"
-            md="2"
-            class="d-flex justify-end align-center gap-2"
+          <AppTextField
+            v-model="busquedaTexto"
+            label="Buscar persona"
+            prepend-inner-icon="tabler-search"
+            placeholder="Nombre, apellido o correo..."
+            clearable
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <AppSelect
+            v-model="filtros.estado"
+            :items="estados"
+            label="Estado"
+            placeholder="Todos"
+            clearable
+            @update:model-value="filtrarTodo"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <AppSelect
+            v-model="filtros.nivel_academico"
+            :items="nivelesAcademicos"
+            label="Nivel académico"
+            placeholder="Todos"
+            clearable
+            @update:model-value="filtrarTodo"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="2"
+          class="d-flex justify-end align-center gap-2 pt-md-6"
+        >
+          <VBtn
+            icon="tabler-filter-off"
+            color="secondary"
+            variant="tonal"
+            title="Limpiar filtros"
+            @click="limpiar"
+          />
+
+          <VBtnToggle
+            v-model="vistaModo"
+            mandatory
+            density="compact"
+            color="primary"
+            variant="outlined"
           >
             <VBtn
-              color="secondary"
-              variant="tonal"
-              @click="limpiar"
-            >
-              <VIcon>tabler-refresh</VIcon>
-            </VBtn>
+              value="tarjetas"
+              icon="tabler-layout-grid"
+              size="small"
+            />
+            <VBtn
+              value="tabla"
+              icon="tabler-table"
+              size="small"
+            />
+          </VBtnToggle>
+        </VCol>
+      </VRow>
+    </section>
 
-            <!-- Botones toggle Cards / Tabla -->
-            <VBtnToggle
-              v-model="vistaModo"
-              mandatory
-              density="compact"
-              color="primary"
-            >
-              <VBtn
-                value="tarjetas"
-                icon="tabler-layout-grid"
-                size="small"
-              />
-              <VBtn
-                value="tabla"
-                icon="tabler-table"
-                size="small"
-              />
-            </VBtnToggle>
-          </VCol>
-        </VRow>
-      </VCardText>
-    </VCard>
-
-    <!-- MODO 1: Vista de Tarjetas -->
+    <!-- MODO 1: Vista de Tarjetas Ejecutiva -->
     <div v-if="vistaModo === 'tarjetas'">
       <VProgressLinear
         v-if="cargandoTarjetas"
         indeterminate
+        color="success"
+        rounded
         class="mb-4"
       />
 
@@ -359,67 +346,83 @@ onMounted(cargarTodosLosCandidatos)
           md="6"
           lg="4"
         >
-          <VCard
-            class="h-100 d-flex flex-column transition-all"
-            elevation="1"
-            hover
-          >
-            <VCardItem>
-              <div class="d-flex justify-space-between align-start mb-2">
-                <VChip
-                  :color="coloresEstado[c.estado] || 'secondary'"
-                  size="small"
-                  class="font-weight-bold"
-                >
-                  {{ c.estado }}
-                </VChip>
-                <span class="text-caption text-medium-emphasis">#{{ c.id }}</span>
-              </div>
-              <h2 class="text-h6 font-weight-bold mb-1">
-                {{ c.nombres }} {{ c.apellidos }}
-              </h2>
-              <div class="d-flex align-center gap-1 text-caption text-medium-emphasis">
-                <VIcon
-                  icon="tabler-mail"
-                  size="14"
-                />
-                <span>{{ c.correo }}</span>
-              </div>
-            </VCardItem>
-
-            <VCardText class="flex-grow-1 pt-1">
-              <div class="d-flex flex-column gap-1 text-caption bg-surface pa-3 rounded border">
-                <div>
-                  <strong>Municipio:</strong> {{ c.municipio?.nombre || 'Sin registrar' }}
+          <article class="tt-panel pa-5 h-100 d-flex flex-column candidato-card">
+            <div class="d-flex justify-space-between align-start gap-2 mb-3">
+              <div class="d-flex align-center gap-3 min-w-0">
+                <div class="tt-avatar tt-avatar--lg">
+                  {{ inicialesPersona(c.nombres, c.apellidos) }}
                 </div>
-                <div>
-                  <strong>Nivel académico:</strong> {{ c.nivel_academico || 'Sin registrar' }}
-                </div>
-                <div v-if="c.telefono">
-                  <strong>Teléfono:</strong> {{ c.telefono }}
+                <div class="min-w-0">
+                  <h2 class="text-subtitle-1 font-weight-bold mb-0 text-truncate">
+                    {{ c.nombres }} {{ c.apellidos }}
+                  </h2>
+                  <div class="text-caption text-medium-emphasis text-truncate">
+                    {{ c.correo }}
+                  </div>
                 </div>
               </div>
-            </VCardText>
-
-            <VDivider />
-
-            <VCardActions class="pa-3 d-flex justify-space-between">
-              <VBtn
+              <VChip
+                :color="coloresEstado[c.estado] || 'secondary'"
                 variant="tonal"
-                size="small"
-                color="primary"
-                prepend-icon="tabler-eye"
-                :to="`/admin/candidatos/show/${c.id}`"
+                size="x-small"
+                class="font-weight-bold flex-shrink-0"
               >
-                Expediente
-              </VBtn>
+                {{ c.estado }}
+              </VChip>
+            </div>
+
+            <div class="tt-detail-box mb-4 flex-grow-1">
+              <div class="d-flex justify-space-between align-center mb-2">
+                <div>
+                  <span>Nivel académico</span>
+                  <strong>{{ c.nivel_academico || 'Sin registrar' }}</strong>
+                </div>
+                <span class="tt-tag-days mt-0">
+                  {{ c.postulaciones_count ?? 0 }} {{ (c.postulaciones_count ?? 0) === 1 ? 'proceso' : 'procesos' }}
+                </span>
+              </div>
+              <div class="text-caption text-medium-emphasis">
+                <VIcon
+                  icon="tabler-map-pin"
+                  size="13"
+                  class="mr-1"
+                />
+                {{ c.municipio?.nombre || 'Municipio sin registrar' }}
+                <template v-if="c.telefono">
+                  · {{ c.telefono }}
+                </template>
+              </div>
+            </div>
+
+            <div class="d-flex justify-space-between align-center pt-2 border-t">
+              <div class="d-flex gap-2">
+                <VBtn
+                  variant="tonal"
+                  size="small"
+                  color="primary"
+                  prepend-icon="tabler-id"
+                  :to="`/admin/candidatos/show/${c.id}`"
+                >
+                  Expediente
+                </VBtn>
+                <VBtn
+                  v-if="can('crear postulaciones', 'Postulacion') && c.estado === 'Activo'"
+                  variant="text"
+                  size="small"
+                  color="success"
+                  prepend-icon="tabler-briefcase-2"
+                  :to="`/admin/postulaciones/create?candidato_id=${c.id}`"
+                >
+                  Postular
+                </VBtn>
+              </div>
+
               <div class="d-flex gap-1">
                 <VBtn
                   v-if="can('editar candidatos', 'Candidato')"
                   icon="tabler-edit"
                   variant="text"
                   size="small"
-                  color="warning"
                   :to="`/admin/candidatos/edit/${c.id}`"
                   title="Editar"
                 />
@@ -433,19 +436,18 @@ onMounted(cargarTodosLosCandidatos)
                   @click="eliminar(c.id)"
                 />
               </div>
-            </VCardActions>
-          </VCard>
+            </div>
+          </article>
         </VCol>
       </VRow>
 
-      <VCard
+      <section
         v-else
-        class="text-center pa-10"
-        elevation="0"
+        class="tt-panel text-center pa-10"
       >
         <VIcon
           icon="tabler-users-group"
-          size="48"
+          size="44"
           class="text-disabled mb-2"
         />
         <h3 class="text-h6 text-medium-emphasis">
@@ -461,11 +463,14 @@ onMounted(cargarTodosLosCandidatos)
         >
           Restablecer filtros
         </VBtn>
-      </VCard>
+      </section>
     </div>
 
-    <!-- MODO 2: Vista de Tabla Tradicional (DataTableComponent) -->
-    <div v-else>
+    <!-- MODO 2: Vista de Tabla -->
+    <div
+      v-else
+      class="tt-panel overflow-hidden"
+    >
       <DataTableComponent
         ref="dataTable"
         :model="MODEL_TYPE_CANDIDATO"
@@ -476,12 +481,21 @@ onMounted(cargarTodosLosCandidatos)
         endpoint="/api/candidatos"
         placeholder="No se encontraron candidatos"
       >
+        <template #item.nombres="{ item }">
+          <div class="d-flex align-center gap-2 py-1">
+            <div class="tt-avatar">
+              {{ inicialesPersona(item.nombres, item.apellidos) }}
+            </div>
+            <span class="font-weight-bold text-body-2">{{ item.nombres }}</span>
+          </div>
+        </template>
         <template #item.municipio="{ item }">
-          {{ item.municipio?.nombre }}
+          {{ item.municipio?.nombre || '—' }}
         </template>
         <template #item.estado="{ item }">
           <VChip
             :color="coloresEstado[item.estado] || 'secondary'"
+            variant="tonal"
             size="small"
             class="font-weight-bold"
           >
@@ -494,7 +508,8 @@ onMounted(cargarTodosLosCandidatos)
             icon="tabler-eye"
             variant="text"
             size="small"
-            title="Ver expediente"
+            color="primary"
+            title="Vista rápida"
             @click="verDetalleRapido(item)"
           />
           <VBtn
@@ -518,40 +533,49 @@ onMounted(cargarTodosLosCandidatos)
       </DataTableComponent>
     </div>
 
-    <!-- Modal Dinámico de Detalle Rápido -->
+    <!-- Modal Ejecutivo de Vista Rápida -->
     <VDialog
       v-model="modalDetalle"
-      max-width="650px"
+      max-width="640px"
     >
-      <VCard v-if="candidatoSeleccionado">
-        <VCardItem class="bg-primary text-white py-4">
-          <div class="d-flex justify-space-between align-center">
+      <VCard
+        v-if="candidatoSeleccionado"
+        class="tt-panel"
+      >
+        <div class="d-flex justify-space-between align-start pa-5 pb-4">
+          <div class="d-flex align-center gap-3">
+            <div class="tt-avatar tt-avatar--lg">
+              {{ inicialesPersona(candidatoSeleccionado.nombres, candidatoSeleccionado.apellidos) }}
+            </div>
             <div>
-              <span class="text-caption text-white opacity-80 text-uppercase">Candidato #{{ candidatoSeleccionado.id }}</span>
-              <h3 class="text-h6 text-white font-weight-bold mb-0">
+              <span class="tt-eyebrow">CANDIDATO #{{ candidatoSeleccionado.id }}</span>
+              <h3 class="text-h5 font-weight-bold mb-0">
                 {{ candidatoSeleccionado.nombres }} {{ candidatoSeleccionado.apellidos }}
               </h3>
             </div>
-            <VBtn
-              icon="tabler-x"
-              variant="text"
-              color="white"
-              size="small"
-              @click="modalDetalle = false"
-            />
           </div>
-        </VCardItem>
+          <VBtn
+            icon="tabler-x"
+            variant="tonal"
+            color="secondary"
+            size="small"
+            @click="modalDetalle = false"
+          />
+        </div>
 
-        <VCardText class="pa-6">
+        <VDivider />
+
+        <VCardText class="pa-5">
           <div class="d-flex flex-wrap align-center gap-2 mb-4">
             <VChip
               :color="coloresEstado[candidatoSeleccionado.estado] || 'secondary'"
+              variant="tonal"
               size="small"
               class="font-weight-bold"
             >
               {{ candidatoSeleccionado.estado }}
             </VChip>
-            <span class="text-caption text-medium-emphasis">
+            <span class="text-body-2 text-medium-emphasis">
               {{ candidatoSeleccionado.correo }}
             </span>
           </div>
@@ -559,42 +583,88 @@ onMounted(cargarTodosLosCandidatos)
           <VRow dense>
             <VCol
               cols="12"
-              md="6"
+              sm="6"
             >
-              <strong>Teléfono:</strong> {{ candidatoSeleccionado.telefono || 'Sin registrar' }}
+              <div class="tt-detail-box">
+                <span>Teléfono</span>
+                <strong>{{ candidatoSeleccionado.telefono || 'Sin registrar' }}</strong>
+              </div>
             </VCol>
             <VCol
               cols="12"
-              md="6"
+              sm="6"
             >
-              <strong>Municipio:</strong> {{ candidatoSeleccionado.municipio?.nombre || 'Sin registrar' }}
+              <div class="tt-detail-box">
+                <span>Municipio</span>
+                <strong>{{ candidatoSeleccionado.municipio?.nombre || 'Sin registrar' }}</strong>
+              </div>
             </VCol>
             <VCol
               cols="12"
-              md="6"
+              sm="6"
             >
-              <strong>Nivel académico:</strong> {{ candidatoSeleccionado.nivel_academico || 'Sin registrar' }}
+              <div class="tt-detail-box">
+                <span>Nivel académico</span>
+                <strong>{{ candidatoSeleccionado.nivel_academico || 'Sin registrar' }}</strong>
+              </div>
             </VCol>
             <VCol
               cols="12"
-              md="6"
+              sm="6"
             >
-              <strong>Fuente:</strong> {{ candidatoSeleccionado.fuente_reclutamiento || 'Sin registrar' }}
+              <div class="tt-detail-box">
+                <span>Fuente de reclutamiento</span>
+                <strong>{{ candidatoSeleccionado.fuente_reclutamiento || 'Sin registrar' }}</strong>
+              </div>
             </VCol>
           </VRow>
         </VCardText>
 
-        <VCardActions class="pa-4 pt-0">
-          <VSpacer />
+        <VDivider />
+
+        <VCardActions class="pa-4 d-flex justify-space-between">
           <VBtn
             variant="tonal"
-            color="primary"
-            :to="`/admin/candidatos/show/${candidatoSeleccionado.id}`"
+            color="secondary"
+            @click="modalDetalle = false"
           >
-            Ver expediente completo
+            Cerrar
           </VBtn>
+          <div class="d-flex gap-2">
+            <VBtn
+              v-if="can('crear postulaciones', 'Postulacion') && candidatoSeleccionado.estado === 'Activo'"
+              variant="tonal"
+              color="success"
+              prepend-icon="tabler-briefcase-2"
+              :to="`/admin/postulaciones/create?candidato_id=${candidatoSeleccionado.id}`"
+            >
+              Postular
+            </VBtn>
+            <VBtn
+              variant="elevated"
+              color="primary"
+              prepend-icon="tabler-id"
+              :to="`/admin/candidatos/show/${candidatoSeleccionado.id}`"
+            >
+              Ver expediente completo
+            </VBtn>
+          </div>
         </VCardActions>
       </VCard>
     </VDialog>
   </div>
 </template>
+
+<style scoped lang="scss">
+@import '@/assets/styles/reclutamiento-talent.scss';
+
+.candidato-card {
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(33, 130, 104, 0.38);
+    box-shadow: 0 10px 26px rgba(27, 65, 52, 0.08);
+  }
+}
+</style>

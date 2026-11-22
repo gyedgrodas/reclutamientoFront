@@ -1,23 +1,32 @@
 <script setup lang="ts">
 import { requiredValidator } from '@core/utils/validators'
-import type { DatosPostulacion, EtapaReclutamiento, Postulacion } from '@/types/reclutamiento'
+import type { Candidato, DatosPostulacion, EtapaReclutamiento, Postulacion, UsuarioResumen, Vacante } from '@/types/reclutamiento'
+
 const props = defineProps<{ postulacion?: Postulacion; guardando: boolean }>()
 const emit = defineEmits<{ (e: 'guardar', datos: DatosPostulacion): void }>()
+const route = useRoute()
 const { get } = useClienteRequest()
+
 const form = ref<any>(null)
-const candidatos = ref<any[]>([])
-const vacantes = ref<any[]>([])
+const candidatos = ref<Candidato[]>([])
+const vacantes = ref<Vacante[]>([])
 const etapas = ref<EtapaReclutamiento[]>([])
-const responsables = ref<any[]>([])
+const responsables = ref<UsuarioResumen[]>([])
 
 const etapaOriginal = props.postulacion?.etapa_reclutamiento_id
   ?? props.postulacion?.etapaReclutamiento?.id
   ?? props.postulacion?.etapa_reclutamiento?.id
   ?? null
 
+const candidatoInicial = props.postulacion?.candidato_id
+  ?? (route.query.candidato_id ? Number(route.query.candidato_id) : null)
+
+const vacanteInicial = props.postulacion?.vacante_id
+  ?? (route.query.vacante_id ? Number(route.query.vacante_id) : null)
+
 const datos = reactive<DatosPostulacion>({
-  candidato_id: props.postulacion?.candidato_id ?? null,
-  vacante_id: props.postulacion?.vacante_id ?? null,
+  candidato_id: candidatoInicial,
+  vacante_id: vacanteInicial,
   etapa_reclutamiento_id: etapaOriginal,
   responsable_id: props.postulacion?.responsable_id ?? null,
   fecha_postulacion: props.postulacion?.fecha_postulacion?.slice(0, 10) || new Date().toISOString().slice(0, 10),
@@ -45,17 +54,28 @@ watch(hayMovimiento, aplica => {
     observacionMovimiento.value = ''
 })
 
-const lista = (response: any) => Array.isArray(response.data) ? response.data : (response.data?.data || [])
+const lista = <T>(response: any): T[] => Array.isArray(response?.data) ? response.data : (response?.data?.data || [])
+
 const cargar = async () => {
   try {
     const [c, v, e, r] = await Promise.all([
       get<any>('/api/candidatos?page[size]=100'),
       get<any>('/api/vacantes?include=puesto,unidad&page[size]=100'),
       get<any>('/api/catalogo/etapas-reclutamiento?limit=100'),
-      get<any>('/api/usuarios?page[size]=100'),
+      get<any>('/api/users?page[size]=100'),
     ])
-    candidatos.value = lista(c); vacantes.value = lista(v); etapas.value = lista(e); responsables.value = lista(r)
-  } catch (error) { manejaError(error) }
+
+    candidatos.value = lista<Candidato>(c)
+    vacantes.value = lista<Vacante>(v)
+    etapas.value = lista<EtapaReclutamiento>(e).sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
+    responsables.value = lista<UsuarioResumen>(r)
+
+    if (!props.postulacion && !datos.etapa_reclutamiento_id && etapas.value.length)
+      datos.etapa_reclutamiento_id = etapas.value[0].id
+  }
+  catch (error) {
+    manejaError(error)
+  }
 }
 
 const guardar = async () => {
@@ -72,28 +92,198 @@ const guardar = async () => {
 
 onMounted(cargar)
 </script>
+
 <template>
-  <VForm ref="form" @submit.prevent="guardar">
+  <VForm
+    ref="form"
+    @submit.prevent="guardar"
+  >
     <VRow>
-      <VCol cols="12" md="6"><AppAutocomplete v-model="datos.candidato_id" label="Candidato" :items="candidatos" item-title="nombres" item-value="id" :rules="[requiredValidator]" clearable><template #item="{ props: itemProps, item }"><VListItem v-bind="itemProps" :title="`${item.raw.nombres} ${item.raw.apellidos}`" :subtitle="item.raw.correo" /></template></AppAutocomplete></VCol>
-      <VCol cols="12" md="6"><AppAutocomplete v-model="datos.vacante_id" label="Vacante" :items="vacantes" item-title="id" item-value="id" :rules="[requiredValidator]" clearable><template #item="{ props: itemProps, item }"><VListItem v-bind="itemProps" :title="`#${item.raw.id} · ${item.raw.puesto?.nombre || 'Vacante'}`" :subtitle="item.raw.unidad?.nombre" /></template></AppAutocomplete></VCol>
-      <VCol cols="12" md="4"><AppAutocomplete v-model="datos.etapa_reclutamiento_id" label="Etapa" :items="etapas" item-title="nombre" item-value="id" :rules="[requiredValidator]" clearable /></VCol>
-      <VCol cols="12" md="4"><AppAutocomplete v-model="datos.responsable_id" label="Responsable" :items="responsables" item-title="nombres" item-value="id" clearable /></VCol>
-      <VCol cols="12" md="4"><AppTextField v-model="datos.fecha_postulacion" label="Fecha de postulación" type="date" :rules="[requiredValidator]" /></VCol>
-      <VCol cols="12" md="4"><AppSelect v-model="datos.estado" label="Estado" :items="['En proceso', 'Descartada', 'Contratada', 'Retirada']" :rules="[requiredValidator]" /></VCol>
-      <VCol cols="12"><AppTextarea v-model="datos.observaciones" label="Observaciones generales" /></VCol>
-      <VCol v-if="hayMovimiento" cols="12">
-        <AppTextarea
-          v-model="observacionMovimiento"
-          label="Observación del movimiento (opcional)"
-          hint="Se guardará en el historial, no en las observaciones generales."
-          persistent-hint
-          :counter="2000"
-          :counter-value="contarCaracteres"
-          :rules="[validarObservacionMovimiento]"
+      <VCol cols="12">
+        <span class="tt-eyebrow">VINCULACIÓN</span>
+        <h3 class="text-subtitle-1 font-weight-bold mb-1">
+          Candidato y oportunidad laboral
+        </h3>
+        <p class="text-caption text-medium-emphasis mb-2">
+          Seleccione la persona postulante y la vacante institucional a la cual aplica.
+        </p>
+      </VCol>
+
+      <VCol
+        cols="12"
+        md="6"
+      >
+        <AppAutocomplete
+          v-model="datos.candidato_id"
+          label="Candidato *"
+          placeholder="Buscar por nombre o correo..."
+          :items="candidatos"
+          :item-title="(c: Candidato) => `${c.nombres} ${c.apellidos}`"
+          item-value="id"
+          :rules="[requiredValidator]"
+          :disabled="!!props.postulacion"
+          clearable
+        >
+          <template #item="{ props: itemProps, item }">
+            <VListItem
+              v-bind="itemProps"
+              :title="`${item.raw.nombres} ${item.raw.apellidos}`"
+              :subtitle="item.raw.correo"
+            />
+          </template>
+        </AppAutocomplete>
+      </VCol>
+
+      <VCol
+        cols="12"
+        md="6"
+      >
+        <AppAutocomplete
+          v-model="datos.vacante_id"
+          label="Vacante *"
+          placeholder="Seleccionar puesto y unidad..."
+          :items="vacantes"
+          :item-title="(v: Vacante) => `#${v.id} · ${v.puesto?.nombre || 'Vacante'}`"
+          item-value="id"
+          :rules="[requiredValidator]"
+          :disabled="!!props.postulacion"
+          clearable
+        >
+          <template #item="{ props: itemProps, item }">
+            <VListItem
+              v-bind="itemProps"
+              :title="`#${item.raw.id} · ${item.raw.puesto?.nombre || 'Vacante'}`"
+              :subtitle="`${item.raw.unidad?.nombre || 'Sin unidad'} · ${item.raw.estado}`"
+            />
+          </template>
+        </AppAutocomplete>
+      </VCol>
+
+      <VCol
+        cols="12"
+        class="mt-2"
+      >
+        <VDivider class="mb-4" />
+        <span class="tt-eyebrow">SEGUIMIENTO DEL PROCESO</span>
+        <h3 class="text-subtitle-1 font-weight-bold mb-1">
+          Etapa actual, estado y responsable
+        </h3>
+      </VCol>
+
+      <VCol
+        cols="12"
+        md="4"
+      >
+        <AppAutocomplete
+          v-model="datos.etapa_reclutamiento_id"
+          label="Etapa de selección *"
+          :items="etapas"
+          item-title="nombre"
+          item-value="id"
+          :rules="[requiredValidator]"
+          clearable
         />
       </VCol>
-      <VCol cols="12" class="d-flex gap-2"><VBtn type="submit" :loading="guardando">Guardar</VBtn><VBtn to="/admin/postulaciones" color="secondary" variant="tonal">Cancelar</VBtn></VCol>
+
+      <VCol
+        cols="12"
+        md="4"
+      >
+        <AppAutocomplete
+          v-model="datos.responsable_id"
+          label="Responsable de seguimiento"
+          placeholder="Asignar reclutador o líder..."
+          :items="responsables"
+          :item-title="(u: UsuarioResumen) => `${u.nombres} ${u.apellidos} (${u.usuario_dominio})`"
+          item-value="id"
+          clearable
+        />
+      </VCol>
+
+      <VCol
+        cols="12"
+        md="4"
+      >
+        <AppSelect
+          v-model="datos.estado"
+          label="Estado de la postulación *"
+          :items="['En proceso', 'Contratada', 'Descartada', 'Retirada']"
+          :rules="[requiredValidator]"
+        />
+      </VCol>
+
+      <VCol
+        cols="12"
+        md="4"
+      >
+        <AppTextField
+          v-model="datos.fecha_postulacion"
+          label="Fecha de postulación *"
+          type="date"
+          :rules="[requiredValidator]"
+        />
+      </VCol>
+
+      <VCol cols="12">
+        <AppTextarea
+          v-model="datos.observaciones"
+          label="Observaciones generales del expediente"
+          placeholder="Resumen ejecutivo del candidato frente al perfil del puesto..."
+          rows="3"
+        />
+      </VCol>
+
+      <VCol
+        v-if="hayMovimiento"
+        cols="12"
+      >
+        <div class="tt-alert-card">
+          <div class="d-flex align-center gap-2 mb-2">
+            <VIcon
+              icon="tabler-history"
+              color="warning"
+              size="18"
+            />
+            <strong class="text-body-2">Se detectó un cambio de etapa, estado o responsable</strong>
+          </div>
+          <AppTextarea
+            v-model="observacionMovimiento"
+            label="Nota para el historial del movimiento (opcional)"
+            placeholder="Ej. Pasa a entrevista técnica con gerencia de área tras aprobar evaluación."
+            hint="Esta nota quedará registrada de forma permanente en la línea de tiempo de seguimiento."
+            persistent-hint
+            rows="2"
+            :counter="2000"
+            :counter-value="contarCaracteres"
+            :rules="[validarObservacionMovimiento]"
+          />
+        </div>
+      </VCol>
+
+      <VCol
+        cols="12"
+        class="d-flex justify-end gap-3 mt-2"
+      >
+        <VBtn
+          to="/admin/postulaciones"
+          color="secondary"
+          variant="tonal"
+        >
+          Cancelar
+        </VBtn>
+        <VBtn
+          type="submit"
+          color="primary"
+          prepend-icon="tabler-device-floppy"
+          :loading="guardando"
+        >
+          {{ props.postulacion ? 'Guardar cambios' : 'Registrar postulación' }}
+        </VBtn>
+      </VCol>
     </VRow>
   </VForm>
 </template>
+
+<style scoped>
+@import '@/assets/styles/reclutamiento-talent.scss';
+</style>

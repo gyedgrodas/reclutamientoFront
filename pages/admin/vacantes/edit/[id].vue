@@ -48,11 +48,32 @@ onMounted(cargar)
 </script>
 
 <template>
-  <VCard title="Editar vacante">
-    <VCardText>
+  <div>
+    <header class="tt-page-header">
+      <div>
+        <span class="tt-eyebrow">EDICIÓN · VACANTE #{{ route.params.id }}</span>
+        <h1 class="tt-page-title">
+          {{ registro?.puesto?.nombre || 'Editar vacante' }}
+        </h1>
+        <p class="tt-page-subtitle">
+          Actualice las condiciones, plazas, estado o fechas estimadas del proceso.
+        </p>
+      </div>
+      <VBtn
+        color="secondary"
+        variant="tonal"
+        prepend-icon="tabler-arrow-left"
+        to="/admin/vacantes"
+      >
+        Volver a vacantes
+      </VBtn>
+    </header>
+
+    <section class="tt-panel pa-6">
       <VProgressLinear
         v-if="cargando"
         indeterminate
+        color="success"
       />
       <Fields
         v-else-if="registro"
@@ -61,13 +82,18 @@ onMounted(cargar)
         @guardar="guardar"
       />
       <div v-else>
-        No fue posible cargar la vacante. <VBtn
+        No fue posible cargar la vacante.
+        <VBtn
           variant="text"
           @click="cargar"
         >
           Reintentar
         </VBtn>
       </div>
-    </VCardText>
-  </VCard>
+    </section>
+  </div>
 </template>
+
+<style scoped>
+@import '@/assets/styles/reclutamiento-talent.scss';
+</style>

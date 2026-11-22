@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MovimientoPostulacion, RespuestaHistorialPostulacion } from '@/types/reclutamiento'
 
-const props = defineProps<{ postulacionId: number }>()
+const props = defineProps<{ postulacionId: number; refreshKey?: number }>()
 const { get } = useClienteRequest()
 const historial = ref<RespuestaHistorialPostulacion['data'] | null>(null)
 const pagina = ref(1)
@@ -18,10 +18,12 @@ const formatearFecha = (iso: string) => {
 }
 
 const cambiosDe = (movimiento: MovimientoPostulacion) => [
-  { campo: 'Etapa', anterior: movimiento.etapa_anterior, nuevo: movimiento.etapa_nueva },
-  { campo: 'Estado', anterior: movimiento.estado_anterior, nuevo: movimiento.estado_nuevo },
-  { campo: 'Responsable', anterior: movimiento.responsable_anterior, nuevo: movimiento.responsable_nuevo },
-].filter(cambio => movimiento.tipo === 'Registro' || cambio.anterior !== cambio.nuevo)
+  { campo: 'Etapa', icono: 'tabler-git-Merge', anterior: movimiento.etapa_anterior, nuevo: movimiento.etapa_nueva },
+  { campo: 'Estado', icono: 'tabler-flag', anterior: movimiento.estado_anterior, nuevo: movimiento.estado_nuevo },
+  { campo: 'Responsable', icono: 'tabler-user-check', anterior: movimiento.responsable_anterior, nuevo: movimiento.responsable_nuevo },
+].filter(cambio => movimiento.tipo === 'Registro'
+  ? Boolean(cambio.nuevo)
+  : cambio.anterior !== cambio.nuevo)
 
 const cargar = async (numero: number) => {
   solicitud?.abort()
@@ -36,7 +38,7 @@ const cargar = async (numero: number) => {
 
   try {
     const respuesta = await get<RespuestaHistorialPostulacion>(`/api/postulaciones/${props.postulacionId}/historial`, {
-      params: { 'page[number]': numero, 'page[size]': 10 },
+      params: { 'page[number]': numero, 'page[size]': 8 },
       signal,
     })
 
@@ -62,55 +64,90 @@ const cargar = async (numero: number) => {
   }
 }
 
+watch(() => [props.postulacionId, props.refreshKey], () => {
+  cargar(1)
+})
+
 onMounted(() => cargar(1))
 onBeforeUnmount(() => solicitud?.abort())
 </script>
 
 <template>
   <section class="mt-5">
-    <VDivider class="mb-4" />
-    <h2 class="text-h6 mb-3">
-      Historial de movimientos
-    </h2>
+    <div class="d-flex align-center justify-space-between mb-3">
+      <div>
+        <span class="tt-eyebrow">TRAZABILIDAD</span>
+        <h3 class="text-subtitle-1 font-weight-bold mb-0">
+          Historial de seguimiento
+        </h3>
+      </div>
+      <VChip
+        v-if="historial?.total"
+        size="x-small"
+        color="success"
+        variant="tonal"
+        class="font-weight-bold"
+      >
+        {{ historial.total }} {{ historial.total === 1 ? 'movimiento' : 'movimientos' }}
+      </VChip>
+    </div>
 
     <div
       v-if="cargando"
       role="status"
+      class="py-3"
     >
-      <p class="text-body-2 mb-2">
-        Cargando historial…
+      <p class="text-caption text-medium-emphasis mb-2">
+        Cargando movimientos del proceso…
       </p>
       <VProgressLinear
         indeterminate
+        color="success"
+        rounded
         aria-label="Cargando historial"
       />
     </div>
+
     <VAlert
       v-else-if="error"
       type="error"
       variant="tonal"
+      density="compact"
     >
-      No fue posible cargar el historial.
-      <VBtn
-        size="small"
-        variant="text"
-        @click="cargar(pagina)"
-      >
-        Reintentar
-      </VBtn>
+      <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+        <span>No fue posible cargar el historial de movimientos.</span>
+        <VBtn
+          size="small"
+          variant="text"
+          @click="cargar(pagina)"
+        >
+          Reintentar
+        </VBtn>
+      </div>
     </VAlert>
-    <p
+
+    <div
       v-else-if="!historial?.data.length"
-      class="text-medium-emphasis"
+      class="tt-detail-box text-center py-5"
       role="status"
     >
-      {{ historial?.total ? 'No hay movimientos en esta página.' : 'Aún no hay movimientos registrados para esta postulación.' }}
-    </p>
+      <VIcon
+        icon="tabler-history"
+        size="26"
+        class="text-disabled mb-1"
+      />
+      <p class="text-body-2 text-medium-emphasis mb-0">
+        {{ historial?.total ? 'No hay movimientos en esta página.' : 'Aún no hay movimientos registrados para esta postulación.' }}
+      </p>
+    </div>
+
     <VTimeline
       v-else
       side="end"
       align="start"
       density="compact"
+      line-inset="4"
+      class="historial-timeline"
     >
       <VTimelineItem
         v-for="movimiento in historial.data"
@@ -118,29 +155,60 @@ onBeforeUnmount(() => solicitud?.abort())
         :dot-color="movimiento.tipo === 'Registro' ? 'success' : 'primary'"
         size="x-small"
       >
-        <div class="text-subtitle-2">
-          {{ movimiento.tipo }}
+        <div class="movimiento-card">
+          <div class="d-flex flex-wrap align-center justify-space-between gap-2 mb-1">
+            <div class="d-flex align-center gap-2">
+              <VChip
+                size="x-small"
+                :color="movimiento.tipo === 'Registro' ? 'success' : 'primary'"
+                variant="tonal"
+                class="font-weight-bold"
+              >
+                {{ movimiento.tipo === 'Registro' ? 'Postulación registrada' : 'Cambio de seguimiento' }}
+              </VChip>
+              <span class="text-caption text-medium-emphasis">
+                por <strong>{{ movimiento.actor || 'Sistema' }}</strong>
+              </span>
+            </div>
+            <time
+              :datetime="movimiento.created_at"
+              class="text-caption text-disabled"
+            >
+              {{ formatearFecha(movimiento.created_at) }}
+            </time>
+          </div>
+
+          <div class="d-flex flex-column gap-1 mt-2">
+            <div
+              v-for="cambio in cambiosDe(movimiento)"
+              :key="cambio.campo"
+              class="text-body-2 d-flex flex-wrap align-center gap-1"
+            >
+              <span class="text-caption font-weight-bold text-medium-emphasis mr-1">{{ cambio.campo }}:</span>
+              <template v-if="movimiento.tipo === 'Actualización'">
+                <span class="cambio-pill cambio-pill--old">{{ cambio.anterior ?? 'Sin asignar' }}</span>
+                <VIcon
+                  icon="tabler-arrow-right"
+                  size="14"
+                  class="text-disabled"
+                />
+              </template>
+              <span class="cambio-pill cambio-pill--new">{{ cambio.nuevo ?? 'Sin asignar' }}</span>
+            </div>
+          </div>
+
+          <div
+            v-if="movimiento.observaciones"
+            class="observacion-box mt-2"
+          >
+            <VIcon
+              icon="tabler-message-2"
+              size="14"
+              class="mr-1 text-medium-emphasis"
+            />
+            <span class="observacion">{{ movimiento.observaciones }}</span>
+          </div>
         </div>
-        <div class="text-caption text-medium-emphasis mb-1">
-          <time :datetime="movimiento.created_at">{{ formatearFecha(movimiento.created_at) }}</time>
-          · Por: {{ movimiento.actor || 'Sin identificar' }}
-        </div>
-        <div
-          v-for="cambio in cambiosDe(movimiento)"
-          :key="cambio.campo"
-        >
-          <strong>{{ cambio.campo }}:</strong>
-          <template v-if="movimiento.tipo === 'Actualización'">
-            {{ cambio.anterior ?? 'Sin asignar' }} →
-          </template>
-          {{ cambio.nuevo ?? 'Sin asignar' }}
-        </div>
-        <p
-          v-if="movimiento.observaciones"
-          class="observacion mt-2 mb-0"
-        >
-          <strong>Observación del movimiento:</strong> {{ movimiento.observaciones }}
-        </p>
       </VTimelineItem>
     </VTimeline>
 
@@ -159,6 +227,46 @@ onBeforeUnmount(() => solicitud?.abort())
 </template>
 
 <style scoped>
+@import '@/assets/styles/reclutamiento-talent.scss';
+
+.movimiento-card {
+  background: rgba(var(--v-theme-on-surface), 0.025);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.cambio-pill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+
+.cambio-pill--old {
+  background: rgba(var(--v-theme-on-surface), 0.07);
+  color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+.cambio-pill--new {
+  background: #e8f4ef;
+  color: #16654f;
+}
+
+.v-theme--dark .cambio-pill--new {
+  background: rgba(33, 130, 104, 0.25);
+  color: #6ee7b7;
+}
+
+.observacion-box {
+  font-size: 12.5px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: rgba(var(--v-theme-surface), 0.9);
+  border-left: 3px solid #218268;
+}
+
 .observacion {
   overflow-wrap: anywhere;
   white-space: pre-wrap;

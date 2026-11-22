@@ -97,6 +97,7 @@ const columnas = computed<ColumnaInterface[]>(() => [
   { title: 'Puesto', key: 'puesto', sortable: false },
   { title: 'Unidad', key: 'unidad', sortable: false },
   { title: 'Plazas', key: 'numero_plazas' },
+  { title: 'Postulaciones', key: 'postulaciones_count', sortable: false },
   { title: 'Motivo', key: 'motivo', OpcionesFiltro: { operador: '=', valor: filtros.value.motivo } },
   { title: 'Estado', key: 'estado', OpcionesFiltro: { operador: '=', valor: filtros.value.estado } },
   { title: 'Fecha apertura', key: 'fecha_apertura' },
@@ -142,20 +143,27 @@ onMounted(cargarTodasLasVacantes)
 
 <template>
   <div class="vacantes-modulo">
-    <!-- Encabezado de la página -->
-    <div class="d-flex flex-wrap justify-space-between align-center mb-6 gap-3">
+    <!-- Encabezado ejecutivo estilo maqueta-talento-humano.html -->
+    <header class="tt-page-header">
       <div>
-        <div class="d-flex align-center gap-2">
-          <span class="text-caption text-primary font-weight-bold text-uppercase tracking-wider">Gestión de Talento</span>
-        </div>
-        <h1 class="text-h4 font-weight-bold">
+        <span class="tt-eyebrow">OPORTUNIDADES ABIERTAS</span>
+        <h1 class="tt-page-title">
           Vacantes y Procesos
         </h1>
-        <p class="text-caption text-medium-emphasis mb-0">
-          Administre las vacantes activas, requerimientos de personal y avance del proceso de selección.
+        <p class="tt-page-subtitle">
+          Administre las vacantes institucionales, plazas requeridas y el acceso directo a sus candidatos.
         </p>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex flex-wrap gap-2">
+        <VBtn
+          v-if="can('ver postulaciones', 'Postulacion')"
+          color="secondary"
+          variant="tonal"
+          prepend-icon="tabler-layout-kanban"
+          to="/admin/postulaciones"
+        >
+          Ver tablero de postulaciones
+        </VBtn>
         <VBtn
           v-if="can('crear vacantes', 'Vacante')"
           color="primary"
@@ -165,223 +173,186 @@ onMounted(cargarTodasLasVacantes)
           Nueva vacante
         </VBtn>
       </div>
-    </div>
+    </header>
 
-    <!-- Mini KPIs superiores inspirados en la maqueta -->
+    <!-- KPIs ejecutivos -->
     <VRow class="mb-5">
       <VCol
         cols="6"
         sm="3"
       >
-        <VCard
-          class="cursor-pointer"
-          elevation="1"
-          @click="filtros.estado = 'Abierta'; filtrarTodo()"
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          :class="{ 'tt-stat-card--active': filtros.estado === 'Abierta' }"
+          @click="filtros.estado = filtros.estado === 'Abierta' ? null : 'Abierta'; filtrarTodo()"
         >
-          <VCardText class="pa-4 d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis">Abiertas</span>
-              <h3 class="text-h5 font-weight-bold text-success mt-1">
-                {{ metricas.abiertas }}
-              </h3>
-            </div>
-            <VAvatar
-              color="success"
-              variant="tonal"
-              size="40"
-              rounded
-            >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Abiertas</span>
+            <div class="tt-stat-icon">
               <VIcon
                 icon="tabler-briefcase"
-                size="22"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            </div>
+          </div>
+          <strong class="tt-stat-value">{{ metricas.abiertas }}</strong>
+          <small class="tt-stat-foot">Recepción activa</small>
+        </div>
       </VCol>
 
       <VCol
         cols="6"
         sm="3"
       >
-        <VCard
-          class="cursor-pointer"
-          elevation="1"
-          @click="filtros.estado = 'En Proceso'; filtrarTodo()"
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          :class="{ 'tt-stat-card--active': filtros.estado === 'En Proceso' }"
+          @click="filtros.estado = filtros.estado === 'En Proceso' ? null : 'En Proceso'; filtrarTodo()"
         >
-          <VCardText class="pa-4 d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis">En Proceso</span>
-              <h3 class="text-h5 font-weight-bold text-warning mt-1">
-                {{ metricas.enProceso }}
-              </h3>
-            </div>
-            <VAvatar
-              color="warning"
-              variant="tonal"
-              size="40"
-              rounded
-            >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">En proceso</span>
+            <div class="tt-stat-icon tt-stat-icon--warn">
               <VIcon
                 icon="tabler-users-group"
-                size="22"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            </div>
+          </div>
+          <strong class="tt-stat-value">{{ metricas.enProceso }}</strong>
+          <small class="tt-stat-foot">Evaluación y entrevistas</small>
+        </div>
       </VCol>
 
       <VCol
         cols="6"
         sm="3"
       >
-        <VCard
-          class="cursor-pointer"
-          elevation="1"
-          @click="filtros.estado = 'Cubierta'; filtrarTodo()"
+        <div
+          class="tt-stat-card tt-stat-card--interactive"
+          :class="{ 'tt-stat-card--active': filtros.estado === 'Cubierta' }"
+          @click="filtros.estado = filtros.estado === 'Cubierta' ? null : 'Cubierta'; filtrarTodo()"
         >
-          <VCardText class="pa-4 d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis">Cubiertas</span>
-              <h3 class="text-h5 font-weight-bold text-info mt-1">
-                {{ metricas.cubiertas }}
-              </h3>
-            </div>
-            <VAvatar
-              color="info"
-              variant="tonal"
-              size="40"
-              rounded
-            >
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Cubiertas</span>
+            <div class="tt-stat-icon tt-stat-icon--info">
               <VIcon
                 icon="tabler-circle-check"
-                size="22"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            </div>
+          </div>
+          <strong class="tt-stat-value">{{ metricas.cubiertas }}</strong>
+          <small class="tt-stat-foot">Plazas incorporadas</small>
+        </div>
       </VCol>
 
       <VCol
         cols="6"
         sm="3"
       >
-        <VCard elevation="1">
-          <VCardText class="pa-4 d-flex align-center justify-space-between">
-            <div>
-              <span class="text-caption text-medium-emphasis">Total Plazas</span>
-              <h3 class="text-h5 font-weight-bold text-primary mt-1">
-                {{ metricas.totalPlazas }}
-              </h3>
-            </div>
-            <VAvatar
-              color="primary"
-              variant="tonal"
-              size="40"
-              rounded
-            >
+        <div class="tt-stat-card">
+          <div class="tt-stat-top">
+            <span class="tt-stat-label">Plazas requeridas</span>
+            <div class="tt-stat-icon">
               <VIcon
                 icon="tabler-id-badge-2"
-                size="22"
+                size="18"
               />
-            </VAvatar>
-          </VCardText>
-        </VCard>
+            </div>
+          </div>
+          <strong class="tt-stat-value">{{ metricas.totalPlazas }}</strong>
+          <small class="tt-stat-foot">Total acumulado</small>
+        </div>
       </VCol>
     </VRow>
 
-    <!-- Barra de Filtros y Control de Vista (Tarjetas vs Tabla) -->
-    <VCard
-      class="mb-6"
-      elevation="1"
-    >
-      <VCardText class="pa-4">
-        <VRow
-          align="center"
-          dense
+    <!-- Barra de Filtros y Control de Vista -->
+    <section class="tt-panel pa-4 mb-5">
+      <VRow
+        align="center"
+        dense
+      >
+        <VCol
+          cols="12"
+          md="4"
         >
-          <VCol
-            cols="12"
-            md="4"
-          >
-            <AppTextField
-              v-model="busquedaTexto"
-              prepend-inner-icon="tabler-search"
-              placeholder="Buscar por puesto, unidad..."
-              clearable
-              density="compact"
-            />
-          </VCol>
-          <VCol
-            cols="12"
-            sm="6"
-            md="3"
-          >
-            <AppSelect
-              v-model="filtros.estado"
-              :items="estados"
-              label="Estado"
-              clearable
-              density="compact"
-              @update:model-value="filtrarTodo"
-            />
-          </VCol>
-          <VCol
-            cols="12"
-            sm="6"
-            md="3"
-          >
-            <AppSelect
-              v-model="filtros.motivo"
-              :items="motivos"
-              label="Motivo"
-              clearable
-              density="compact"
-              @update:model-value="filtrarTodo"
-            />
-          </VCol>
-          <VCol
-            cols="12"
-            md="2"
-            class="d-flex justify-end align-center gap-2"
+          <AppTextField
+            v-model="busquedaTexto"
+            label="Buscar vacante"
+            prepend-inner-icon="tabler-search"
+            placeholder="Puesto, unidad o descripción..."
+            clearable
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <AppSelect
+            v-model="filtros.estado"
+            :items="estados"
+            label="Estado"
+            placeholder="Todos"
+            clearable
+            @update:model-value="filtrarTodo"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <AppSelect
+            v-model="filtros.motivo"
+            :items="motivos"
+            label="Motivo"
+            placeholder="Todos"
+            clearable
+            @update:model-value="filtrarTodo"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="2"
+          class="d-flex justify-end align-center gap-2 pt-md-6"
+        >
+          <VBtn
+            icon="tabler-filter-off"
+            color="secondary"
+            variant="tonal"
+            title="Limpiar filtros"
+            @click="limpiar"
+          />
+          <VBtnToggle
+            v-model="vistaModo"
+            mandatory
+            density="compact"
+            color="primary"
+            variant="outlined"
           >
             <VBtn
-              color="secondary"
-              variant="tonal"
+              value="tarjetas"
+              icon="tabler-layout-grid"
               size="small"
-              @click="limpiar"
-            >
-              Limpiar
-            </VBtn>
+            />
+            <VBtn
+              value="tabla"
+              icon="tabler-table"
+              size="small"
+            />
+          </VBtnToggle>
+        </VCol>
+      </VRow>
+    </section>
 
-            <!-- Botones toggle Cards / Tabla -->
-            <VBtnToggle
-              v-model="vistaModo"
-              mandatory
-              density="compact"
-              color="primary"
-            >
-              <VBtn
-                value="tarjetas"
-                icon="tabler-layout-grid"
-                size="small"
-              />
-              <VBtn
-                value="tabla"
-                icon="tabler-table"
-                size="small"
-              />
-            </VBtnToggle>
-          </VCol>
-        </VRow>
-      </VCardText>
-    </VCard>
-
-    <!-- MODO 1: Vista de Tarjetas Dinámica (Estilo Maqueta UX) -->
+    <!-- MODO 1: Vista de Tarjetas Ejecutiva -->
     <div v-if="vistaModo === 'tarjetas'">
       <VProgressLinear
         v-if="cargandoTarjetas"
         indeterminate
+        color="success"
+        rounded
         class="mb-4"
       />
 
@@ -393,71 +364,85 @@ onMounted(cargarTodasLasVacantes)
           md="6"
           lg="4"
         >
-          <VCard
-            class="h-100 d-flex flex-column transition-all"
-            elevation="1"
-            hover
-          >
-            <VCardItem>
-              <div class="d-flex justify-space-between align-start mb-2">
-                <VChip
-                  :color="coloresEstado[v.estado] || 'secondary'"
-                  size="small"
-                  class="font-weight-bold"
-                >
-                  {{ v.estado }}
-                </VChip>
-                <span class="text-caption text-medium-emphasis">#{{ v.id }} · Plazas: <strong>{{ v.numero_plazas }}</strong></span>
-              </div>
-              <h2 class="text-h6 font-weight-bold mb-1">
-                {{ v.puesto?.nombre || `Vacante #${v.id}` }}
-              </h2>
-              <div class="d-flex align-center gap-1 text-caption text-medium-emphasis">
-                <VIcon
-                  icon="tabler-building-bank"
-                  size="14"
-                />
-                <span>{{ v.unidad?.nombre || 'Sede no asignada' }}</span>
-              </div>
-            </VCardItem>
-
-            <VCardText class="flex-grow-1 pt-1">
-              <p class="text-body-2 text-medium-emphasis mb-3 line-clamp-3">
-                {{ v.descripcion || 'Sin descripción detallada registrada para esta vacante.' }}
-              </p>
-
-              <div class="d-flex flex-column gap-1 text-caption bg-surface pa-3 rounded border">
-                <div>
-                  <strong>Motivo:</strong> {{ v.motivo }}
-                </div>
-                <div>
-                  <strong>Apertura:</strong> {{ formatearFecha(v.fecha_apertura) }}
-                </div>
-                <div v-if="v.solicitante">
-                  <strong>Solicita:</strong> {{ v.solicitante.nombres }} {{ v.solicitante.apellidos }}
-                </div>
-              </div>
-            </VCardText>
-
-            <VDivider />
-
-            <VCardActions class="pa-3 d-flex justify-space-between">
-              <VBtn
+          <article class="tt-panel pa-5 h-100 d-flex flex-column vacante-card">
+            <div class="d-flex justify-space-between align-center mb-3">
+              <VChip
+                :color="coloresEstado[v.estado] || 'secondary'"
                 variant="tonal"
-                size="small"
-                color="primary"
-                prepend-icon="tabler-eye"
-                @click="verDetalleRapido(v)"
+                size="x-small"
+                class="font-weight-bold"
               >
-                Detalle
-              </VBtn>
+                {{ v.estado === 'Abierta' ? 'Activa' : v.estado }}
+              </VChip>
+              <span class="text-caption text-medium-emphasis">
+                #{{ v.id }} · <strong>{{ v.numero_plazas }}</strong> {{ Number(v.numero_plazas) === 1 ? 'plaza' : 'plazas' }}
+              </span>
+            </div>
+
+            <h2 class="text-h6 font-weight-bold mb-1">
+              {{ v.puesto?.nombre || `Vacante #${v.id}` }}
+            </h2>
+
+            <div class="d-flex align-center gap-1 text-caption text-medium-emphasis mb-3">
+              <VIcon
+                icon="tabler-building-bank"
+                size="14"
+              />
+              <span>{{ v.unidad?.nombre || 'Sede no asignada' }}</span>
+            </div>
+
+            <p class="text-body-2 text-medium-emphasis mb-4 line-clamp-3 flex-grow-1">
+              {{ v.descripcion || 'Sin descripción detallada registrada para esta vacante.' }}
+            </p>
+
+            <div class="tt-detail-box mb-4">
+              <div class="d-flex justify-space-between align-center flex-wrap gap-2">
+                <div>
+                  <span>Apertura · {{ v.motivo }}</span>
+                  <strong>{{ formatearFecha(v.fecha_apertura) }}</strong>
+                </div>
+                <NuxtLink
+                  v-if="can('ver postulaciones', 'Postulacion')"
+                  :to="`/admin/postulaciones?vacante_id=${v.id}`"
+                  class="tt-tag-days mt-0 text-decoration-none"
+                >
+                  <VIcon
+                    icon="tabler-users"
+                    size="13"
+                  />
+                  {{ v.postulaciones_count ?? 0 }} {{ (v.postulaciones_count ?? 0) === 1 ? 'postulación' : 'postulaciones' }}
+                </NuxtLink>
+              </div>
+            </div>
+
+            <div class="d-flex justify-space-between align-center pt-2 border-t">
+              <div class="d-flex gap-2">
+                <VBtn
+                  variant="tonal"
+                  size="small"
+                  color="primary"
+                  prepend-icon="tabler-eye"
+                  @click="verDetalleRapido(v)"
+                >
+                  Detalle
+                </VBtn>
+                <VBtn
+                  v-if="can('crear postulaciones', 'Postulacion') && (v.estado === 'Abierta' || v.estado === 'En Proceso')"
+                  variant="text"
+                  size="small"
+                  color="success"
+                  prepend-icon="tabler-user-plus"
+                  :to="`/admin/postulaciones/create?vacante_id=${v.id}`"
+                >
+                  Postular
+                </VBtn>
+              </div>
               <div class="d-flex gap-1">
                 <VBtn
                   v-if="can('editar vacantes', 'Vacante')"
                   icon="tabler-edit"
                   variant="text"
                   size="small"
-                  color="warning"
                   :to="`/admin/vacantes/edit/${v.id}`"
                   title="Editar"
                 />
@@ -471,19 +456,18 @@ onMounted(cargarTodasLasVacantes)
                   @click="eliminar(v.id)"
                 />
               </div>
-            </VCardActions>
-          </VCard>
+            </div>
+          </article>
         </VCol>
       </VRow>
 
-      <VCard
+      <section
         v-else
-        class="text-center pa-10"
-        elevation="0"
+        class="tt-panel text-center pa-10"
       >
         <VIcon
           icon="tabler-briefcase-off"
-          size="48"
+          size="44"
           class="text-disabled mb-2"
         />
         <h3 class="text-h6 text-medium-emphasis">
@@ -499,11 +483,14 @@ onMounted(cargarTodasLasVacantes)
         >
           Restablecer filtros
         </VBtn>
-      </VCard>
+      </section>
     </div>
 
-    <!-- MODO 2: Vista de Tabla Tradicional (DataTableComponent) -->
-    <div v-else>
+    <!-- MODO 2: Vista de Tabla -->
+    <div
+      v-else
+      class="tt-panel overflow-hidden"
+    >
       <DataTableComponent
         ref="dataTable"
         :model="MODEL_TYPE_VACANTE"
@@ -515,16 +502,27 @@ onMounted(cargarTodasLasVacantes)
         placeholder="No se encontraron vacantes"
       >
         <template #item.puesto="{ item }">
-          <div class="font-weight-medium">
+          <div class="font-weight-bold text-body-2">
             {{ item.puesto?.nombre }}
           </div>
         </template>
         <template #item.unidad="{ item }">
-          {{ item.unidad?.nombre }}
+          <span class="text-body-2">{{ item.unidad?.nombre }}</span>
+        </template>
+        <template #item.postulaciones_count="{ item }">
+          <NuxtLink
+            v-if="can('ver postulaciones', 'Postulacion')"
+            :to="`/admin/postulaciones?vacante_id=${item.id}`"
+            class="tt-tag-days mt-0 text-decoration-none"
+          >
+            {{ item.postulaciones_count ?? 0 }} en proceso
+          </NuxtLink>
+          <span v-else>{{ item.postulaciones_count ?? 0 }}</span>
         </template>
         <template #item.estado="{ item }">
           <VChip
             :color="coloresEstado[item.estado] || 'secondary'"
+            variant="tonal"
             size="small"
             class="font-weight-bold"
           >
@@ -540,6 +538,7 @@ onMounted(cargarTodasLasVacantes)
             icon="tabler-eye"
             variant="text"
             size="small"
+            color="primary"
             title="Ver detalle rápido"
             @click="verDetalleRapido(item)"
           />
@@ -564,102 +563,108 @@ onMounted(cargarTodasLasVacantes)
       </DataTableComponent>
     </div>
 
-    <!-- Modal Dinámico de Detalle Rápido (Estilo Maqueta UX) -->
+    <!-- Modal Ejecutivo de Detalle Rápido -->
     <VDialog
       v-model="modalDetalle"
-      max-width="650px"
+      max-width="660px"
     >
-      <VCard v-if="vacanteSeleccionada">
-        <VCardItem class="bg-primary text-white py-4">
-          <div class="d-flex justify-space-between align-center">
-            <div>
-              <span class="text-caption text-white opacity-80 text-uppercase">Vacante #{{ vacanteSeleccionada.id }}</span>
-              <h3 class="text-h6 text-white font-weight-bold mb-0">
-                {{ vacanteSeleccionada.puesto?.nombre || 'Detalle de la vacante' }}
-              </h3>
-            </div>
-            <VBtn
-              icon="tabler-x"
-              variant="text"
-              color="white"
-              size="small"
-              @click="modalDetalle = false"
-            />
+      <VCard
+        v-if="vacanteSeleccionada"
+        class="tt-panel"
+      >
+        <div class="d-flex justify-space-between align-start pa-5 pb-4">
+          <div>
+            <span class="tt-eyebrow">VACANTE #{{ vacanteSeleccionada.id }} · {{ vacanteSeleccionada.motivo }}</span>
+            <h3 class="text-h5 font-weight-bold mt-1 mb-0">
+              {{ vacanteSeleccionada.puesto?.nombre || 'Detalle de la vacante' }}
+            </h3>
           </div>
-        </VCardItem>
+          <VBtn
+            icon="tabler-x"
+            variant="tonal"
+            color="secondary"
+            size="small"
+            @click="modalDetalle = false"
+          />
+        </div>
 
-        <VCardText class="pa-6">
+        <VDivider />
+
+        <VCardText class="pa-5">
           <div class="d-flex flex-wrap align-center gap-2 mb-4">
             <VChip
               :color="coloresEstado[vacanteSeleccionada.estado] || 'secondary'"
+              variant="tonal"
               size="small"
               class="font-weight-bold"
             >
               {{ vacanteSeleccionada.estado }}
             </VChip>
-            <span class="text-caption text-medium-emphasis">
+            <span class="text-body-2 text-medium-emphasis">
               {{ vacanteSeleccionada.unidad?.nombre || 'Sin unidad' }} · {{ vacanteSeleccionada.numero_plazas }} {{ Number(vacanteSeleccionada.numero_plazas) === 1 ? 'plaza' : 'plazas' }}
             </span>
           </div>
 
-          <h4 class="text-subtitle-1 font-weight-bold mb-1">
-            Acerca del puesto
-          </h4>
-          <p class="text-body-2 text-medium-emphasis mb-4">
-            {{ vacanteSeleccionada.descripcion || 'Sin descripción detallada.' }}
-          </p>
-
-          <h4 class="text-subtitle-1 font-weight-bold mb-1">
-            Perfil y requisitos
-          </h4>
-          <p class="text-body-2 text-medium-emphasis mb-4">
-            {{ vacanteSeleccionada.requisitos || 'Sin requisitos específicos registrados.' }}
-          </p>
-
-          <VDivider class="my-4" />
-
           <VRow
             dense
-            class="text-caption"
+            class="mb-3"
           >
-            <VCol cols="6">
-              <strong>Motivo:</strong> {{ vacanteSeleccionada.motivo }}
-            </VCol>
-            <VCol cols="6">
-              <strong>Fecha Apertura:</strong> {{ formatearFecha(vacanteSeleccionada.fecha_apertura) }}
+            <VCol
+              cols="12"
+              sm="6"
+            >
+              <div class="tt-detail-box">
+                <span>Fecha de apertura</span>
+                <strong>{{ formatearFecha(vacanteSeleccionada.fecha_apertura) }}</strong>
+              </div>
             </VCol>
             <VCol
-              v-if="vacanteSeleccionada.fecha_cierre_estimada"
-              cols="6"
+              cols="12"
+              sm="6"
             >
-              <strong>Cierre Estimado:</strong> {{ formatearFecha(vacanteSeleccionada.fecha_cierre_estimada) }}
+              <div class="tt-detail-box">
+                <span>Postulaciones registradas</span>
+                <strong>{{ vacanteSeleccionada.postulaciones_count ?? 0 }} candidatos</strong>
+              </div>
             </VCol>
-            <VCol
-              v-if="vacanteSeleccionada.solicitante"
-              cols="6"
-            >
-              <strong>Solicitado por:</strong> {{ vacanteSeleccionada.solicitante.nombres }} {{ vacanteSeleccionada.solicitante.apellidos }}
+            <VCol cols="12">
+              <div class="tt-detail-box">
+                <span>Acerca del puesto</span>
+                <p class="text-body-2 mt-1 mb-0">
+                  {{ vacanteSeleccionada.descripcion || 'Sin descripción detallada.' }}
+                </p>
+              </div>
+            </VCol>
+            <VCol cols="12">
+              <div class="tt-detail-box">
+                <span>Perfil y requisitos</span>
+                <p class="text-body-2 mt-1 mb-0">
+                  {{ vacanteSeleccionada.requisitos || 'Sin requisitos específicos registrados.' }}
+                </p>
+              </div>
             </VCol>
           </VRow>
         </VCardText>
 
-        <VCardActions class="pa-4 bg-surface d-flex justify-space-between border-t">
+        <VDivider />
+
+        <VCardActions class="pa-4 d-flex flex-wrap justify-space-between gap-2">
           <VBtn
-            variant="text"
+            variant="tonal"
             color="secondary"
             @click="modalDetalle = false"
           >
             Cerrar
           </VBtn>
-          <div class="d-flex gap-2">
+          <div class="d-flex flex-wrap gap-2">
             <VBtn
-              v-if="can('editar vacantes', 'Vacante')"
+              v-if="can('ver postulaciones', 'Postulacion')"
               variant="tonal"
-              color="warning"
-              prepend-icon="tabler-edit"
-              :to="`/admin/vacantes/edit/${vacanteSeleccionada.id}`"
+              color="success"
+              prepend-icon="tabler-layout-kanban"
+              :to="`/admin/postulaciones?vacante_id=${vacanteSeleccionada.id}`"
             >
-              Editar vacante
+              Ver candidatos
             </VBtn>
             <VBtn
               variant="elevated"
@@ -667,7 +672,7 @@ onMounted(cargarTodasLasVacantes)
               prepend-icon="tabler-file-text"
               :to="`/admin/vacantes/show/${vacanteSeleccionada.id}`"
             >
-              Expediente completo
+              Ficha completa
             </VBtn>
           </div>
         </VCardActions>
@@ -677,6 +682,8 @@ onMounted(cargarTodasLasVacantes)
 </template>
 
 <style scoped lang="scss">
+@import '@/assets/styles/reclutamiento-talent.scss';
+
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -684,12 +691,13 @@ onMounted(cargarTodasLasVacantes)
   overflow: hidden;
 }
 
-.transition-all {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.vacante-card {
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-2px);
+    border-color: rgba(33, 130, 104, 0.38);
+    box-shadow: 0 10px 26px rgba(27, 65, 52, 0.08);
   }
 }
 </style>

@@ -28,12 +28,36 @@ const guardar = async (datos: DatosVacante) => {
 </script>
 
 <template>
-  <VCard title="Crear vacante">
-    <VCardText>
+  <div>
+    <header class="tt-page-header">
+      <div>
+        <span class="tt-eyebrow">OPORTUNIDADES ABIERTAS</span>
+        <h1 class="tt-page-title">
+          Nueva vacante
+        </h1>
+        <p class="tt-page-subtitle">
+          Defina el puesto, unidad solicitante, plazas y perfil requerido para abrir el proceso.
+        </p>
+      </div>
+      <VBtn
+        color="secondary"
+        variant="tonal"
+        prepend-icon="tabler-arrow-left"
+        to="/admin/vacantes"
+      >
+        Volver a vacantes
+      </VBtn>
+    </header>
+
+    <section class="tt-panel pa-6">
       <Fields
         :guardando="guardando"
         @guardar="guardar"
       />
-    </VCardText>
-  </VCard>
+    </section>
+  </div>
 </template>
+
+<style scoped>
+@import '@/assets/styles/reclutamiento-talent.scss';
+</style>
