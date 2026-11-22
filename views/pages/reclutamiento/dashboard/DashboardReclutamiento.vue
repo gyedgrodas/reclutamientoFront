@@ -157,7 +157,16 @@ const abrirSeguimiento = (postulacion: Postulacion, seccion: 'seguimiento' | 'en
   modalSeguimiento.value = true
 }
 
-const alActualizarPostulacion = async () => {
+const alActualizarPostulacion = async (postulacionActualizada?: Postulacion) => {
+  if (postulacionActualizada?.id) {
+    if (postulacionActiva.value?.id === postulacionActualizada.id)
+      postulacionActiva.value = { ...postulacionActiva.value, ...postulacionActualizada }
+
+    const indice = postulaciones.value.findIndex(p => p.id === postulacionActualizada.id)
+    if (indice !== -1)
+      postulaciones.value.splice(indice, 1, { ...postulaciones.value[indice], ...postulacionActualizada })
+  }
+
   await cargarDatos()
 }
 

@@ -449,7 +449,7 @@ const irAHoy = () => {
 
 const alActualizarDesdeDialogo = async (postulacionActualizada?: Postulacion) => {
   if (postulacionActualizada && postulacionActiva.value?.id === postulacionActualizada.id)
-    postulacionActiva.value = postulacionActualizada
+    postulacionActiva.value = { ...postulacionActiva.value, ...postulacionActualizada }
 
   recargarRangoActual()
 }

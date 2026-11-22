@@ -159,7 +159,16 @@ const abrirDetalle = (item: Postulacion) => {
   detalle.value = true
 }
 
-const alActualizarMovimiento = async () => {
+const alActualizarMovimiento = async (postulacionActualizada?: Postulacion) => {
+  if (postulacionActualizada?.id) {
+    if (seleccionada.value?.id === postulacionActualizada.id)
+      seleccionada.value = { ...seleccionada.value, ...postulacionActualizada }
+
+    const indice = todasLasPostulaciones.value.findIndex(p => p.id === postulacionActualizada.id)
+    if (indice !== -1)
+      todasLasPostulaciones.value.splice(indice, 1, { ...todasLasPostulaciones.value[indice], ...postulacionActualizada })
+  }
+
   await cargarDatos()
   if (vistaModo.value === 'tabla')
     await dataTable.value?.filtrar()

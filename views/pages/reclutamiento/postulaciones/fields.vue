@@ -13,6 +13,11 @@ const candidatos = ref<Candidato[]>([])
 const vacantes = ref<Vacante[]>([])
 const etapas = ref<EtapaReclutamiento[]>([])
 const responsables = ref<UsuarioResumen[]>([])
+const procesoContratado = computed(() => props.postulacion?.estado === 'Contratada' || !!props.postulacion?.contratada_at)
+
+const estadosDisponibles = computed(() => procesoContratado.value
+  ? ['Contratada']
+  : ['En proceso', 'Descartada', 'Retirada'])
 
 const etapaOriginal = props.postulacion?.etapa_reclutamiento_id
   ?? props.postulacion?.etapaReclutamiento?.id
@@ -75,7 +80,9 @@ const cargar = async () => {
 
     candidatos.value = lista<Candidato>(c)
     vacantes.value = lista<Vacante>(v)
-    etapas.value = lista<EtapaReclutamiento>(e).filter(etapa => etapa.estado !== 'Inactivo').sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
+    etapas.value = lista<EtapaReclutamiento>(e)
+      .filter(etapa => etapa.estado !== 'Inactivo' && (procesoContratado.value || etapa.nombre.toLowerCase() !== 'contratado'))
+      .sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
     responsables.value = lista<UsuarioResumen>(r)
 
     if (!props.postulacion && !datos.etapa_reclutamiento_id && etapas.value.length)
@@ -106,6 +113,10 @@ onMounted(cargar)
     ref="form"
     @submit.prevent="guardar"
   >
+    <VAlert type="info" variant="tonal" class="mb-4">
+      La contratación se confirma desde Seguimiento → Contratación, con oferta aceptada y control de plazas.
+      <span v-if="procesoContratado">Esta postulación está finalizada; solo puede actualizar sus notas y responsable.</span>
+    </VAlert>
     <VRow>
       <VCol cols="12">
         <span class="tt-eyebrow">VINCULACIÓN</span>
@@ -189,6 +200,7 @@ onMounted(cargar)
           item-title="nombre"
           item-value="id"
           :rules="[requiredValidator]"
+          :disabled="procesoContratado"
           clearable
         />
       </VCol>
@@ -215,7 +227,8 @@ onMounted(cargar)
         <AppSelect
           v-model="datos.estado"
           label="Estado de la postulación *"
-          :items="['En proceso', 'Contratada', 'Descartada', 'Retirada']"
+          :items="estadosDisponibles"
+          :disabled="procesoContratado"
           :rules="[requiredValidator]"
         />
       </VCol>

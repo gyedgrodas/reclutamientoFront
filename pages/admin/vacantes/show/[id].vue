@@ -152,6 +152,7 @@ onMounted(cargar)
             <div class="tt-detail-box">
               <span>Plazas y motivo</span>
               <strong>{{ registro.numero_plazas }} {{ Number(registro.numero_plazas) === 1 ? 'plaza' : 'plazas' }} · {{ registro.motivo }}</strong>
+              <span v-if="registro.contratadas_count !== undefined">{{ registro.contratadas_count }} ocupadas · {{ registro.plazas_disponibles }} disponibles</span>
             </div>
 
             <div class="tt-detail-box">

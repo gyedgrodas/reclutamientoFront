@@ -38,6 +38,8 @@ export interface Vacante {
   unidad?: UnidadResumen
   solicitante?: UsuarioResumen
   postulaciones_count?: number
+  contratadas_count?: number
+  plazas_disponibles?: number
 }
 
 export interface SolicitudVacante {
@@ -177,11 +179,30 @@ export interface Postulacion {
   observaciones: string | null
   evaluacion_url?: string | null
   evaluacion_limite_at?: string | null
+  fecha_ingreso_confirmada?: string | null
+  contratada_at?: string | null
+  contratada_por_id?: number | null
   candidato?: Candidato
   vacante?: Vacante
   etapa_reclutamiento?: EtapaReclutamiento
   etapaReclutamiento?: EtapaReclutamiento
   responsable?: UsuarioResumen
+}
+
+export interface ChecklistContratacion {
+  oferta_aceptada: boolean
+  fecha_ingreso_propuesta: string | null
+  plazas_total: number
+  plazas_ocupadas: number
+  plazas_disponibles: number
+  vacante_estado: EstadoVacante
+  puede_confirmar: boolean
+  bloqueos: string[]
+  contratacion: {
+    fecha_ingreso: string | null
+    confirmada_at: string | null
+    confirmada_por: Pick<UsuarioResumen, 'id' | 'nombres' | 'apellidos'> | null
+  } | null
 }
 
 export interface DatosPostulacion {

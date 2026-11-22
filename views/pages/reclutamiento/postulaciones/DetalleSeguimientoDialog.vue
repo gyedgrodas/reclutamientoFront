@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useAbility } from '@casl/vue'
-import type { Entrevista, EstadoPostulacion, EtapaReclutamiento, Postulacion } from '@/types/reclutamiento'
+import type { Entrevista, EstadoPostulacion, EtapaReclutamiento, OfertaLaboral, Postulacion } from '@/types/reclutamiento'
 import EntrevistasPostulacionPanel from '@/views/pages/reclutamiento/entrevistas/EntrevistasPostulacionPanel.vue'
 import HistorialPostulacion from '@/views/pages/reclutamiento/postulaciones/HistorialPostulacion.vue'
 import OfertaComunicacionesPanel from '@/views/pages/reclutamiento/postulaciones/OfertaComunicacionesPanel.vue'
 import EvaluacionCorreoFields from '@/views/pages/reclutamiento/postulaciones/EvaluacionCorreoFields.vue'
+import ContratacionPanel from '@/views/pages/reclutamiento/postulaciones/ContratacionPanel.vue'
 import {
   UMBRAL_DIAS_ATENCION,
   colorPuntoEtapa,
@@ -43,13 +44,16 @@ const abierto = computed({
 })
 
 const puedeVerEntrevistas = computed(() => can('ver entrevistas', 'Entrevista'))
-const tabActiva = ref<'seguimiento' | 'entrevistas' | 'historial' | 'oferta'>('seguimiento')
+const tabActiva = ref<'seguimiento' | 'entrevistas' | 'historial' | 'oferta' | 'contratacion'>('seguimiento')
+const procesoContratado = computed(() => props.postulacion?.estado === 'Contratada' || !!props.postulacion?.contratada_at)
+const ofertaEstado = ref<OfertaLaboral['estado'] | null>(null)
 
 const catalogoEtapas = ref<EtapaReclutamiento[]>([])
 const mostrarCambioRapido = ref(false)
 const guardando = ref(false)
 const refreshHistorial = ref(0)
 const refreshEntrevistas = ref(0)
+const refreshContratacion = ref(0)
 
 const resolverTabInicial = () => {
   if (props.seccionInicial === 'entrevistas' && puedeVerEntrevistas.value)
@@ -78,6 +82,8 @@ const etapasDisponibles = computed(() => {
   return fuente.filter(etapa => etapa.estado !== 'Inactivo').sort((a, b) => (a.orden ?? a.id) - (b.orden ?? b.id))
 })
 
+const etapasMovimiento = computed(() => etapasDisponibles.value.filter(etapa => etapa.nombre.toLowerCase() !== 'contratado'))
+
 const seleccionEsEvaluacion = computed(() => etapasDisponibles.value
   .find(etapa => etapa.id === formMovimiento.etapa_reclutamiento_id)?.nombre.toLowerCase().includes('psicom'))
 
@@ -96,6 +102,8 @@ const sincronizarFormulario = () => {
 }
 
 watch(() => props.postulacion?.id, () => {
+  ofertaEstado.value = null
+  refreshContratacion.value = 0
   sincronizarFormulario()
   tabActiva.value = resolverTabInicial()
 })
@@ -109,6 +117,7 @@ watch(abierto, async valor => {
   sincronizarFormulario()
   tabActiva.value = resolverTabInicial()
   refreshEntrevistas.value += 1
+  refreshContratacion.value += 1
   if (!props.etapas?.length && !catalogoEtapas.value.length) {
     try {
       const resp = await get<any>('/api/catalogo/etapas-reclutamiento?limit=100')
@@ -128,6 +137,31 @@ const alActualizarEntrevista = (entrevista: Entrevista) => {
 const dias = computed(() => diasSinActualizar(props.postulacion))
 const etapaNombre = computed(() => obtenerEtapaNombre(props.postulacion))
 const alertaSeguimiento = computed(() => props.postulacion?.estado === 'En proceso' && dias.value >= UMBRAL_DIAS_ATENCION)
+
+const etapaActualTexto = computed(() => (etapaNombre.value || '').toLowerCase())
+const esEtapaOferta = computed(() => etapaActualTexto.value.includes('oferta'))
+const esEtapaContratado = computed(() => etapaActualTexto.value.includes('contrat'))
+
+const mostrarTabOferta = computed(() => {
+  if (!can('ver postulaciones', 'Postulacion'))
+    return false
+
+  return esEtapaOferta.value || esEtapaContratado.value || procesoContratado.value || ofertaEstado.value !== null
+})
+
+const mostrarTabContratacion = computed(() => {
+  if (!can('ver postulaciones', 'Postulacion'))
+    return false
+
+  return esEtapaContratado.value || procesoContratado.value || esEtapaOferta.value
+})
+
+watch([mostrarTabOferta, mostrarTabContratacion], ([ofertaVis, contratacionVis]) => {
+  if (tabActiva.value === 'oferta' && !ofertaVis)
+    tabActiva.value = 'seguimiento'
+  if (tabActiva.value === 'contratacion' && !contratacionVis)
+    tabActiva.value = 'seguimiento'
+})
 
 const siguienteEtapa = computed(() => {
   if (!props.postulacion || props.postulacion.estado !== 'En proceso')
@@ -158,9 +192,13 @@ const prepararAvanceRapido = () => {
   if (!siguienteEtapa.value)
     return
 
+  if (siguienteEtapa.value.nombre.toLowerCase() === 'contratado') {
+    tabActiva.value = 'contratacion'
+
+    return
+  }
+
   formMovimiento.etapa_reclutamiento_id = siguienteEtapa.value.id
-  if (siguienteEtapa.value.nombre.toLowerCase().includes('contrat'))
-    formMovimiento.estado = 'Contratada'
 
   mostrarCambioRapido.value = true
 }
@@ -181,6 +219,7 @@ const aplicarActualizacion = async () => {
             evaluacion_url: formMovimiento.evaluacion_url,
             evaluacion_limite_at: formMovimiento.evaluacion_limite_at,
           }
+
         : {}),
       ...(nota ? { observacion_movimiento: nota } : {}),
     }
@@ -189,6 +228,7 @@ const aplicarActualizacion = async () => {
 
     showToastSuccess(respuesta.message || 'Seguimiento actualizado con éxito.')
     refreshHistorial.value += 1
+    refreshContratacion.value += 1
     mostrarCambioRapido.value = false
     formMovimiento.observacion_movimiento = ''
     emit('actualizado', respuesta.data)
@@ -199,6 +239,23 @@ const aplicarActualizacion = async () => {
   finally {
     guardando.value = false
   }
+}
+
+const alActualizarOferta = (oferta: OfertaLaboral | null) => {
+  ofertaEstado.value = oferta?.estado ?? null
+  refreshContratacion.value += 1
+  refreshHistorial.value += 1
+}
+
+const abrirContratacion = () => {
+  refreshContratacion.value += 1
+  tabActiva.value = 'contratacion'
+}
+
+const alContratar = (postulacion: Postulacion) => {
+  refreshHistorial.value += 1
+  refreshContratacion.value += 1
+  emit('actualizado', postulacion)
 }
 
 const coloresEstado: Record<string, string> = {
@@ -306,6 +363,7 @@ const coloresEstado: Record<string, string> = {
           v-model="tabActiva"
           density="compact"
           color="primary"
+          show-arrows
           class="mb-4 seguimiento-tabs"
         >
           <VTab
@@ -322,11 +380,36 @@ const coloresEstado: Record<string, string> = {
             Entrevistas
           </VTab>
           <VTab
-            v-if="can('ver postulaciones', 'Postulacion')"
+            v-if="mostrarTabOferta"
             value="oferta"
             prepend-icon="tabler-mail"
           >
             Oferta y correos
+          </VTab>
+          <VTab
+            v-if="mostrarTabContratacion"
+            value="contratacion"
+            prepend-icon="tabler-user-check"
+          >
+            <span>Contratación</span>
+            <VChip
+              v-if="procesoContratado"
+              size="x-small"
+              color="info"
+              variant="tonal"
+              class="ms-2"
+            >
+              Finalizada
+            </VChip>
+            <VChip
+              v-else-if="ofertaEstado === 'Aceptada'"
+              size="x-small"
+              color="success"
+              variant="tonal"
+              class="ms-2"
+            >
+              Lista
+            </VChip>
           </VTab>
           <VTab
             v-if="can('ver postulaciones', 'Postulacion')"
@@ -438,7 +521,7 @@ const coloresEstado: Record<string, string> = {
 
           <!-- Barra de acción rápida de seguimiento -->
           <div
-            v-if="can('editar postulaciones', 'Postulacion')"
+            v-if="can('editar postulaciones', 'Postulacion') && !procesoContratado"
             class="mt-3"
           >
             <div
@@ -452,7 +535,7 @@ const coloresEstado: Record<string, string> = {
                 prepend-icon="tabler-arrow-right"
                 @click="prepararAvanceRapido"
               >
-                Avanzar a {{ siguienteEtapa.nombre }}
+                {{ siguienteEtapa.nombre.toLowerCase() === 'contratado' ? 'Revisar cierre de contratación' : `Avanzar a ${siguienteEtapa.nombre}` }}
               </VBtn>
               <VBtn
                 color="primary"
@@ -489,7 +572,7 @@ const coloresEstado: Record<string, string> = {
                     <AppSelect
                       v-model="formMovimiento.etapa_reclutamiento_id"
                       label="Nueva etapa"
-                      :items="etapasDisponibles"
+                      :items="etapasMovimiento"
                       item-title="nombre"
                       item-value="id"
                     />
@@ -501,7 +584,7 @@ const coloresEstado: Record<string, string> = {
                     <AppSelect
                       v-model="formMovimiento.estado"
                       label="Estado"
-                      :items="['En proceso', 'Contratada', 'Descartada', 'Retirada']"
+                      :items="['En proceso', 'Descartada', 'Retirada']"
                     />
                   </VCol>
                   <VCol cols="12">
@@ -554,10 +637,19 @@ const coloresEstado: Record<string, string> = {
           @entrevista-actualizada="alActualizarEntrevista"
         />
 
-        <!-- Pestaña 3: Historial de movimientos integrado -->
+        <!-- Pestaña 3: Oferta y correos -->
         <OfertaComunicacionesPanel
-          v-else-if="tabActiva === 'oferta' && abierto && can('ver postulaciones', 'Postulacion')"
+          v-else-if="tabActiva === 'oferta' && abierto && mostrarTabOferta"
           :postulacion="postulacion"
+          @oferta-actualizada="alActualizarOferta"
+          @abrir-contratacion="abrirContratacion"
+        />
+        <!-- Pestaña 4: Cierre de contratación -->
+        <ContratacionPanel
+          v-else-if="tabActiva === 'contratacion' && abierto && mostrarTabContratacion"
+          :postulacion="postulacion"
+          :refresh-key="refreshContratacion"
+          @actualizado="alContratar"
         />
         <HistorialPostulacion
           v-else-if="tabActiva === 'historial' && abierto && can('ver postulaciones', 'Postulacion')"

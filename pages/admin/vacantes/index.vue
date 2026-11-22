@@ -400,6 +400,7 @@ onMounted(cargarTodasLasVacantes)
                 <div>
                   <span>Apertura · {{ v.motivo }}</span>
                   <strong>{{ formatearFecha(v.fecha_apertura) }}</strong>
+                  <span v-if="v.contratadas_count !== undefined">{{ v.contratadas_count }} plazas ocupadas · {{ v.plazas_disponibles }} disponibles</span>
                 </div>
                 <NuxtLink
                   v-if="can('ver postulaciones', 'Postulacion')"

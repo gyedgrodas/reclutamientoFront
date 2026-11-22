@@ -47,7 +47,20 @@ de Meet válido antes de preparar el correo. La cuenta compartida necesita
 autorizar `gmail.send` además de Calendar; el backend procesa los correos
 mediante su tarea programada, no desde el navegador.
 
-Pruebas de los componentes de oferta y comunicaciones (sin correos reales):
+### Cierre de contratación
+
+En **Seguimiento → Contratación**, revise la oferta aceptada y las plazas disponibles,
+confirme la fecha de ingreso y pulse **Confirmar contratación**. La confirmación
+finaliza la selección, registra usuario/fecha y prepara el correo de contratación.
+No se puede contratar desde los selectores genéricos de etapa o estado.
+
+La vacante se marca **Cubierta** solamente cuando se ocupan todas sus plazas.
+Las demás postulaciones no se descartan automáticamente. Los documentos del
+expediente se muestran informativamente, sin imponer requisitos obligatorios
+no definidos. Los registros contratados anteriores sin datos de confirmación
+se identifican como históricos; no se inventa una fecha de ingreso.
+
+Pruebas de los componentes de oferta, contratación y comunicaciones (sin correos reales):
 
 ```powershell
 node --test tests\reclutamiento-comunicaciones.test.cjs
